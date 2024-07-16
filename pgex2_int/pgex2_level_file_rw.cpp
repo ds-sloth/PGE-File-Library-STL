@@ -1,0 +1,302 @@
+/*
+ * PGE File Library - a library to process file formats, part of Moondust project
+ *
+ * Copyright (c) 2014-2024 Vitaly Novichkov <admin@wohlnet.ru>
+ *
+ * The MIT License (MIT)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+/*! \file pgex2_level_file_rw.cpp
+ *
+ *  \brief Implements defines PGE-X2 functions for loading a level object
+ *
+ * This is a new implementation but supports precisely the same format as PGE-X
+ *
+ */
+
+#include <cstdio>
+
+#include "pgex2_level_file.h"
+#include "../file_formats.h"
+#include "../pge_file_lib_private.h"
+#include "../pge_file_lib_globs.h"
+
+static bool s_load_head(void* _FileData, PGEX2_LevelHead& dest)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+
+    FileData.LevelName = std::move(dest.LevelName);
+    FileData.stars = dest.stars;
+    FileData.open_level_on_fail = std::move(dest.open_level_on_fail);
+    FileData.open_level_on_fail_warpID = dest.open_level_on_fail_warpID;
+    FileData.player_names_overrides = std::move(dest.player_names_overrides);
+    FileData.custom_params = std::move(dest.custom_params);
+    FileData.meta.configPackId = std::move(dest.configPackId);
+    FileData.music_files = std::move(dest.music_files);
+
+    return false;
+}
+
+static bool s_load_bookmark(void* _FileData, Bookmark& dest)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+    FileData.metaData.bookmarks.push_back(std::move(dest));
+
+    return true;
+}
+
+static bool s_load_crash_data(void* _FileData, CrashData& dest)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+    FileData.metaData.crash = std::move(dest);
+    FileData.metaData.crash.used = true;
+
+    return true;
+}
+
+static bool s_load_section(void* _FileData, LevelSection& dest)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+
+    dest.PositionX = dest.size_left - 10;
+    dest.PositionY = dest.size_top - 10;
+
+    //add captured value into array
+    pge_size_t sections_count = FileData.sections.size();
+
+    if(dest.id >= static_cast<int>(sections_count))
+    {
+        pge_size_t needToAdd = static_cast<pge_size_t>(dest.id) - (FileData.sections.size() - 1);
+        while(needToAdd > 0)
+        {
+            LevelSection dummySct = FileFormats::CreateLvlSection();
+            dummySct.id = (int)FileData.sections.size();
+            FileData.sections.push_back(std::move(dummySct));
+            needToAdd--;
+        }
+    }
+
+    FileData.sections[static_cast<pge_size_t>(dest.id)] = std::move(dest);
+
+    return true;
+}
+
+static bool s_load_startpoint(void* _FileData, PlayerPoint& player)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+
+    //add captured value into array
+    bool found = false;
+    pge_size_t q = 0;
+    pge_size_t playersCount = FileData.players.size();
+    for(q = 0; q < playersCount; q++)
+    {
+        if(FileData.players[q].id == player.id)
+        {
+            found = true;
+            break;
+        }
+    }
+
+    PlayerPoint sz = FileFormats::CreateLvlPlayerPoint(player.id);
+    player.w = sz.w;
+    player.h = sz.h;
+
+    if(found)
+        FileData.players[q] = std::move(player);
+    else
+        FileData.players.push_back(std::move(player));
+
+    return true;
+}
+
+static bool s_load_block(void* _FileData, LevelBlock& block)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+
+    block.meta.array_id = FileData.blocks_array_id++;
+    block.meta.index = static_cast<unsigned int>(FileData.blocks.size());
+    FileData.blocks.push_back(std::move(block));
+
+    return true;
+}
+
+static bool s_load_bgo(void* _FileData, LevelBGO& bgodata)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+
+    bgodata.meta.array_id = FileData.bgo_array_id++;
+    bgodata.meta.index = static_cast<unsigned int>(FileData.bgo.size());
+    FileData.bgo.push_back(std::move(bgodata));
+
+    return true;
+}
+
+static bool s_load_npc(void* _FileData, LevelNPC& npcdata)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+
+    npcdata.meta.array_id = FileData.npc_array_id++;
+    npcdata.meta.index = static_cast<unsigned int>(FileData.npc.size());
+    FileData.npc.push_back(std::move(npcdata));
+
+    return true;
+}
+
+static bool s_load_phys(void* _FileData, LevelPhysEnv& physiczone)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+
+    physiczone.meta.array_id = FileData.physenv_array_id++;
+    physiczone.meta.index = static_cast<unsigned int>(FileData.physez.size());
+    FileData.physez.push_back(std::move(physiczone));
+
+    return true;
+}
+
+static bool s_load_warp(void* _FileData, LevelDoor& door)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+
+    door.isSetIn = (!door.lvl_i);
+    door.isSetOut = (!door.lvl_o || (door.lvl_i));
+
+    if(!door.isSetIn && door.isSetOut)
+    {
+        door.ix = door.ox;
+        door.iy = door.oy;
+    }
+
+    if(!door.isSetOut && door.isSetIn)
+    {
+        door.ox = door.ix;
+        door.oy = door.iy;
+    }
+
+    door.meta.array_id = FileData.doors_array_id++;
+    door.meta.index = static_cast<unsigned int>(FileData.doors.size());
+    FileData.doors.push_back(std::move(door));
+
+    return true;
+}
+
+static bool s_load_layer(void* _FileData, LevelLayer& layer)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+
+    //add captured value into array
+    bool found = false;
+    pge_size_t q = 0;
+    for(q = 0; q < FileData.layers.size(); q++)
+    {
+        if(FileData.layers[q].name == layer.name)
+        {
+            found = true;
+            break;
+        }
+    }
+
+    if(found)
+    {
+        layer.meta.array_id = FileData.layers[q].meta.array_id;
+        FileData.layers[q] = std::move(layer);
+    }
+    else
+    {
+        layer.meta.array_id = FileData.layers_array_id++;
+        FileData.layers.push_back(std::move(layer));
+    }
+
+    return true;
+}
+
+static bool s_load_event(void* _FileData, LevelSMBX64Event& event)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+
+    // FIXME: do something to add padding to event.sets based on the IDs of the section settings
+
+    //add captured value into array
+    bool found = false;
+    pge_size_t q = 0;
+
+    for(q = 0; q < FileData.events.size(); q++)
+    {
+        if(FileData.events[q].name == event.name)
+        {
+            found = true;
+            break;
+        }
+    }
+
+    if(found)
+    {
+        event.meta.array_id = FileData.events[q].meta.array_id;
+        FileData.events[q] = std::move(event);
+    }
+    else
+    {
+        event.meta.array_id = FileData.events_array_id++;
+        FileData.events.push_back(std::move(event));
+    }
+
+    return true;
+}
+
+#include <SDL2/SDL_rwops.h>
+
+int main(int argc, char** argv)
+{
+    LevelData FileData;
+    FileFormats::CreateLevelData(FileData);
+    FileData.meta.RecentFormat = LevelData::PGEX;
+
+    PGEX2_LevelCallbacks callbacks;
+
+    callbacks.load_head = s_load_head;
+    callbacks.load_bookmark = s_load_bookmark;
+    callbacks.load_crash_data = s_load_crash_data;
+    callbacks.load_section = s_load_section;
+    callbacks.load_startpoint = s_load_startpoint;
+    callbacks.load_block = s_load_block;
+    callbacks.load_bgo = s_load_bgo;
+    callbacks.load_npc = s_load_npc;
+    callbacks.load_phys = s_load_phys;
+    callbacks.load_warp = s_load_warp;
+    callbacks.load_layer = s_load_layer;
+    callbacks.load_event = s_load_event;
+
+    callbacks.userdata = reinterpret_cast<void*>(&FileData);
+
+    PGE_FileFormats_misc::RWopsTextInput input(SDL_RWFromFile(argv[1], "rb"), argv[1]);
+    PGEX2_load_level(input, callbacks);
+
+    std::string arg2 = argv[2];
+    auto out_format = (arg2.back() == 'x') ? FileFormats::LVL_PGEX : FileFormats::LVL_SMBX64;
+
+    FileFormats::SaveLevelFile(FileData, arg2, out_format);
+
+    PGE_FileFormats_misc::RWopsTextInput input2(SDL_RWFromFile(argv[2], "rb"), arg2);
+
+    FileFormats::OpenLevelFileT(input2, FileData);
+
+    return 0;
+}

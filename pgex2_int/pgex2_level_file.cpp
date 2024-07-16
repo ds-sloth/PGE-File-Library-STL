@@ -24,112 +24,20 @@
  * SOFTWARE.
  */
 
-/*! \file pgex2_level_file.hpp
+/*! \file pgex2_level_file.cpp
  *
- *  \brief Implements a PGE-X2 level loader
+ *  \brief Implements defines PGE-X2 structures for the level objects and file
  *
  * This is a new implementation but supports precisely the same format as PGE-X
  *
  */
 
 #include "../lvl_filedata.h"
+#include "../pge_file_lib_private.h"
+
 #include "pgex2_base_file.hpp"
 #include "pgex2_macros.hpp"
-
-struct PGEX2_LevelHead
-{
-    PGESTRING LevelName;
-    unsigned stars = 0;
-    PGESTRING open_level_on_fail;
-    unsigned open_level_on_fail_warpID = 0;
-    PGELIST<PGESTRING> player_names_overrides;
-    PGESTRING custom_params;
-    PGESTRING configPackId;
-    PGELIST<PGESTRING> music_files;
-};
-
-struct PGEX2_LevelCallbacks : PGEX2_BaseCallbacks
-{
-    load_callback<PGEX2_LevelHead> load_head = nullptr;
-    save_callback<PGEX2_LevelHead> save_head = nullptr;
-
-    load_callback<Bookmark> load_bookmark = nullptr;
-    save_callback<Bookmark> save_bookmark = nullptr;
-
-    load_callback<CrashData> load_crash_data = nullptr;
-    save_callback<CrashData> save_crash_data = nullptr;
-
-    load_callback<LevelSection> load_section = nullptr;
-    save_callback<LevelSection> save_section = nullptr;
-
-    load_callback<PlayerPoint> load_startpoint = nullptr;
-    save_callback<PlayerPoint> save_startpoint = nullptr;
-
-    load_callback<LevelBlock> load_block = nullptr;
-    save_callback<LevelBlock> save_block = nullptr;
-
-    load_callback<LevelBGO> load_bgo = nullptr;
-    save_callback<LevelBGO> save_bgo = nullptr;
-
-    load_callback<LevelNPC> load_npc = nullptr;
-    save_callback<LevelNPC> save_npc = nullptr;
-
-    load_callback<LevelPhysEnv> load_phys = nullptr;
-    save_callback<LevelPhysEnv> save_phys = nullptr;
-
-    load_callback<LevelDoor> load_warp = nullptr;
-    save_callback<LevelDoor> save_warp = nullptr;
-
-    load_callback<LevelLayer> load_layer = nullptr;
-    save_callback<LevelLayer> save_layer = nullptr;
-
-    load_callback<LevelSMBX64Event> load_event = nullptr;
-    save_callback<LevelSMBX64Event> save_event = nullptr;
-
-    load_callback<LevelVariable> load_var = nullptr;
-    save_callback<LevelVariable> save_var = nullptr;
-
-    load_callback<LevelArray> load_arr = nullptr;
-    save_callback<LevelArray> save_arr = nullptr;
-
-    load_callback<LevelScript> load_script = nullptr;
-    save_callback<LevelScript> save_script = nullptr;
-
-    load_callback<LevelItemSetup38A> load_levelitem38a = nullptr;
-    save_callback<LevelItemSetup38A> save_levelitem38a = nullptr;
-};
-
-PGEX2_SETUP_OBJECT(LevelEvent_Sets,
-    PGEX2_FIELD("ID", id);
-    PGEX2_FIELD("SL", position_left);
-    PGEX2_FIELD("ST", position_top);
-    PGEX2_FIELD("SB", position_bottom);
-    PGEX2_FIELD("SR", position_right);
-    PGEX2_FIELD("SXX", expression_pos_x);
-    PGEX2_FIELD("SYX", expression_pos_y);
-    PGEX2_FIELD("SWX", expression_pos_w);
-    PGEX2_FIELD("SHX", expression_pos_h);
-    PGEX2_FIELD("MI", music_id);
-    PGEX2_FIELD("MF", music_file);
-    PGEX2_FIELD("ME", music_file_idx);
-    PGEX2_FIELD("BG", background_id);
-    PGEX2_FIELD("AS", autoscrol);
-    PGEX2_FIELD("AST", autoscroll_style);
-    // PGEX2_UNIQUE_FIELD("ASP", autoscroll_path);
-    PGEX2_FIELD("AX", autoscrol_x);
-    PGEX2_FIELD("AY", autoscrol_y);
-    PGEX2_FIELD("AXX", expression_autoscrool_x);
-    PGEX2_FIELD("AYX", expression_autoscrool_y);
-);
-
-PGEX2_SETUP_OBJECT(LevelEvent_MoveLayer,
-    PGEX2_FIELD("LN", name);
-    PGEX2_FIELD("SX", speed_x);
-    PGEX2_FIELD("SXX", expression_x);
-    PGEX2_FIELD("SY", speed_y);
-    PGEX2_FIELD("SYX", expression_y);
-    PGEX2_FIELD("MW", way);
-);
+#include "pgex2_level_file.h"
 
 PGEX2_SETUP_OBJECT(PGEX2_LevelHead,
     PGEX2_FIELD("TL", LevelName); //Level Title
@@ -349,6 +257,96 @@ const char* PGEX2_LevelEvent_load_controls(LevelSMBX64Event& event, const char* 
     return next;
 }
 
+const char* PGEX2_LevelEvent_load_autoscroll_path(LevelEvent_Sets& set, const char* field_data)
+{
+    PGELIST<long> arr;
+
+    const char* next = PGEX2_find_next_term(PGEX2_FieldType<PGELIST<long>>::load(arr, field_data));
+
+    if(arr.size() % 4)
+    {
+        // errorString = "Invalid Section Autoscroll path data contains non-multiple 4 entries";
+        // goto badfile;
+    }
+
+    for(pge_size_t pe = 0; pe < arr.size(); pe += 4)
+    {
+        LevelEvent_Sets::AutoScrollStopPoint stop;
+        stop.x =     arr[pe + 0];
+        stop.y =     arr[pe + 1];
+        stop.type =  (int)arr[pe + 2];
+        stop.speed = arr[pe + 3];
+        set.autoscroll_path.push_back(stop);
+    }
+
+    return next;
+}
+
+PGEX2_SETUP_OBJECT(LevelEvent_Sets,
+    PGEX2_FIELD("ID", id);
+    PGEX2_FIELD("SL", position_left);
+    PGEX2_FIELD("ST", position_top);
+    PGEX2_FIELD("SB", position_bottom);
+    PGEX2_FIELD("SR", position_right);
+    PGEX2_FIELD("SXX", expression_pos_x);
+    PGEX2_FIELD("SYX", expression_pos_y);
+    PGEX2_FIELD("SWX", expression_pos_w);
+    PGEX2_FIELD("SHX", expression_pos_h);
+    PGEX2_FIELD("MI", music_id);
+    PGEX2_FIELD("MF", music_file);
+    PGEX2_FIELD("ME", music_file_idx);
+    PGEX2_FIELD("BG", background_id);
+    PGEX2_FIELD("AS", autoscrol);
+    PGEX2_FIELD("AST", autoscroll_style);
+    PGEX2_UNIQUE_FIELD("ASP", PGEX2_LevelEvent_load_autoscroll_path);
+    PGEX2_FIELD("AX", autoscrol_x);
+    PGEX2_FIELD("AY", autoscrol_y);
+    PGEX2_FIELD("AXX", expression_autoscrool_x);
+    PGEX2_FIELD("AYX", expression_autoscrool_y);
+);
+
+PGEX2_SETUP_OBJECT(LevelEvent_MoveLayer,
+    PGEX2_FIELD("LN", name);
+    PGEX2_FIELD("SX", speed_x);
+    PGEX2_FIELD("SXX", expression_x);
+    PGEX2_FIELD("SY", speed_y);
+    PGEX2_FIELD("SYX", expression_y);
+    PGEX2_FIELD("MW", way);
+);
+
+PGEX2_SETUP_OBJECT(LevelEvent_SpawnNPC,
+    PGEX2_FIELD("ID", id);
+    PGEX2_FIELD("SX", x);
+    PGEX2_FIELD("SXX", expression_x);
+    PGEX2_FIELD("SY", y);
+    PGEX2_FIELD("SYX", expression_y);
+    PGEX2_FIELD("SSX", speed_x);
+    PGEX2_FIELD("SSXX", expression_sx);
+    PGEX2_FIELD("SSY", speed_y);
+    PGEX2_FIELD("SSYX", expression_sy);
+    PGEX2_FIELD("SSS", special);
+);
+
+PGEX2_SETUP_OBJECT(LevelEvent_SpawnEffect,
+    PGEX2_FIELD("ID", id);
+    PGEX2_FIELD("SX", x);
+    PGEX2_FIELD("SXX", expression_x);
+    PGEX2_FIELD("SY", y);
+    PGEX2_FIELD("SYX", expression_y);
+    PGEX2_FIELD("SSX", speed_x);
+    PGEX2_FIELD("SSXX", expression_sx);
+    PGEX2_FIELD("SSY", speed_y);
+    PGEX2_FIELD("SSYX", expression_sy);
+    PGEX2_FIELD("FP", fps);
+    PGEX2_FIELD("TTL", max_life_time);
+    PGEX2_FIELD("GT", gravity);
+);
+
+PGEX2_SETUP_OBJECT(LevelEvent_UpdateVariable,
+    PGEX2_FIELD("N", name);
+    PGEX2_FIELD("V", newval);
+);
+
 PGEX2_SETUP_OBJECT(LevelSMBX64Event,
     PGEX2_FIELD("ET", name);  //Event Title
     PGEX2_FIELD("MG", msg);  //Event Message
@@ -367,9 +365,9 @@ PGEX2_SETUP_OBJECT(LevelSMBX64Event,
     //-------------------
     //---SMBX-38A entries-----
     PGEX2_FIELD("MLA",  moving_layers);       //NPC's to spawn
-    // PGEX2_FIELD("SNPC", spawnNPCs)       //NPC's to spawn
-    // PGEX2_FIELD("SEF",  spawnEffectss)    //Effects to spawn
-    // PGEX2_FIELD("UV",   variablesToUpdate) //Variables to update
+    PGEX2_FIELD("SNPC", spawn_npc);       //NPC's to spawn
+    PGEX2_FIELD("SEF",  spawn_effects);    //Effects to spawn
+    PGEX2_FIELD("UV",   update_variable); //Variables to update
     PGEX2_FIELD("TSCR", trigger_script); //Trigger script
     PGEX2_FIELD("TAPI", trigger_api_id); //Trigger script
     // PGEX2_FIELD("TMR", timer_def.enable); //Enable timer
@@ -408,12 +406,6 @@ PGEX2_SETUP_OBJECT(LevelScript,
     PGEX2_FIELD("S", script); //Script text
 );
 
-PGEX2_SETUP_OBJECT(LevelItemSetup38A,
-    PGEX2_FIELD("T",  type); //Type of item
-    PGEX2_FIELD("ID", id);
-    // PGEX2_FIELD("D", data); //Variable value
-);
-
 template<>
 const char* PGEX2_FieldType<LevelItemSetup38A::ItemType>::load(LevelItemSetup38A::ItemType& dest, const char* field_data)
 {
@@ -425,6 +417,12 @@ const char* PGEX2_FieldType<LevelItemSetup38A::ItemType>::load(LevelItemSetup38A
         dest = (LevelItemSetup38A::ItemType)got;
     return str_end;
 }
+
+PGEX2_SETUP_OBJECT(LevelItemSetup38A,
+    PGEX2_FIELD("T",  type); //Type of item
+    PGEX2_FIELD("ID", id);
+    // PGEX2_FIELD("D", data); //Variable value
+);
 
 struct PGEX2_LevelFile : PGEX2_File<PGEX2_LevelCallbacks>
 {
@@ -461,63 +459,8 @@ struct PGEX2_LevelFile : PGEX2_File<PGEX2_LevelCallbacks>
     PGEX2_SECTION("CUSTOM_ITEMS_38A", LevelItemSetup38A, levelitem38a);
 };
 
-bool block_callback(void*, LevelBlock& dest)
+void PGEX2_load_level(PGE_FileFormats_misc::TextInput& input, PGEX2_LevelCallbacks& callbacks)
 {
-    printf("LevelBlock(\n");
-    printf(" %s = %lu,\n", "ID", dest.id);
-    printf(" %s = %ld,\n", "X", dest.x);
-    printf(" %s = %ld,\n", "Y", dest.y);
-    printf(" %s = %ld,\n", "W", dest.w);
-    printf(" %s = %ld,\n", "H", dest.h);
-    printf(" %s = \"%s\",\n", "LR", dest.layer.c_str());
-    printf(" %s = \"%s\",\n", "EH", dest.event_hit.c_str());
-    printf(")\n");
-
-    return true;
-}
-
-bool npc_callback(void*, LevelNPC& dest)
-{
-    printf("LevelNPC(\n");
-    printf(" %s = %lu,\n", "ID", dest.id);
-    printf(" %s = %ld,\n", "X", dest.x);
-    printf(" %s = %ld,\n", "Y", dest.y);
-    printf(" %s = %ld,\n", "W", dest.override_width);
-    printf(" %s = %ld,\n", "H", dest.override_height);
-    printf(" %s = \"%s\",\n", "LR", dest.layer.c_str());
-    printf(" %s = \"%s\",\n", "EA", dest.event_activate.c_str());
-    printf(")\n");
-
-    return true;
-}
-
-bool event_callback(void*, LevelSMBX64Event& dest)
-{
-    printf("LevelSMBX64Event(\n");
-    printf(" %s = \"%s\",\n", "ET", dest.name.c_str());
-    for(const auto& s : dest.sets)
-    {
-        printf(" %s = %ld,\n", "ID", s.id);
-        printf(" %s = \"%s\",\n", "MF", s.music_file.c_str());
-    }
-    printf(" %s = %ld,\n", "RT", (long)dest.ctrl_right);
-    printf(")\n");
-
-    return true;
-}
-
-#include <cstdio>
-
-int main(int argc, char** argv)
-{
-    PGEX2_LevelCallbacks callbacks;
-    callbacks.load_block = block_callback;
-    callbacks.load_npc = npc_callback;
-    callbacks.load_event = event_callback;
-
-    PGE_FileFormats_misc::TextFileInput input(argv[1]);
     PGEX2_LevelFile f;
     f.load_file(input, callbacks);
-    return 0;
 }
-

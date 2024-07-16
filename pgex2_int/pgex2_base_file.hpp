@@ -78,12 +78,4 @@ struct PGEX2_File
     }
 };
 
-struct PGEX2_BaseCallbacks
-{
-    template<class obj_t> using load_callback = bool (*)(void* userdata, obj_t& obj);
-    template<class obj_t> using save_callback = bool (*)(void* userdata, obj_t& obj, size_t index);
-
-    void* userdata = nullptr;
-};
-
 #endif // #ifndef PGEX2_BASE_FILE_HPP

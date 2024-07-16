@@ -147,10 +147,7 @@ inline void PGEX2_skip_section(PGE_FileFormats_misc::TextInput& inf, PGESTRING& 
         inf.readLine(cur_line);
 
         if(PGEX2_line_is_section_end(cur_line))
-        {
-            printf("Skipped until [%s]\n", cur_line.c_str());
             break;
-        }
     }
 }
 
