@@ -103,4 +103,6 @@ struct PGEX2_LevelCallbacks : PGEX2_BaseCallbacks
 
 void PGEX2_load_level(PGE_FileFormats_misc::TextInput& input, PGEX2_LevelCallbacks& callbacks);
 
+bool PGEX2_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData);
+
 #endif // #ifndef PGEX2_LEVEL_FILE_H

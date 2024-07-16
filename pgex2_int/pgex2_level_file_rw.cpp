@@ -261,6 +261,34 @@ static bool s_load_event(void* _FileData, LevelSMBX64Event& event)
     return true;
 }
 
+bool PGEX2_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
+{
+    FileFormats::CreateLevelData(FileData);
+    FileData.meta.RecentFormat = LevelData::PGEX;
+
+    PGEX2_LevelCallbacks callbacks;
+
+    callbacks.load_head = s_load_head;
+    callbacks.load_bookmark = s_load_bookmark;
+    callbacks.load_crash_data = s_load_crash_data;
+    callbacks.load_section = s_load_section;
+    callbacks.load_startpoint = s_load_startpoint;
+    callbacks.load_block = s_load_block;
+    callbacks.load_bgo = s_load_bgo;
+    callbacks.load_npc = s_load_npc;
+    callbacks.load_phys = s_load_phys;
+    callbacks.load_warp = s_load_warp;
+    callbacks.load_layer = s_load_layer;
+    callbacks.load_event = s_load_event;
+
+    callbacks.userdata = reinterpret_cast<void*>(&FileData);
+
+    PGEX2_load_level(file, callbacks);
+
+    return true;
+}
+
+#if 0
 #include <SDL2/SDL_rwops.h>
 
 int main(int argc, char** argv)
@@ -300,3 +328,4 @@ int main(int argc, char** argv)
 
     return 0;
 }
+#endif
