@@ -153,6 +153,22 @@ const char* PGEX2_FieldType<unsigned long>::load(unsigned long& dest, const char
 }
 
 template<>
+const char* PGEX2_FieldType<long long>::load(long long& dest, const char* field_data)
+{
+    char* str_end;
+    dest = strtoll(field_data, &str_end, 10);
+    return str_end;
+}
+
+template<>
+const char* PGEX2_FieldType<unsigned long long>::load(unsigned long long& dest, const char* field_data)
+{
+    char* str_end;
+    dest = strtoull(field_data, &str_end, 10);
+    return str_end;
+}
+
+template<>
 const char* PGEX2_FieldType<float>::load(float& dest, const char* field_data)
 {
     char* str_end;
