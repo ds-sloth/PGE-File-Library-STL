@@ -36,13 +36,13 @@
  *
  */
 
-#include <vector>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
 
 #include "../pge_file_lib_globs.h"
 #include "pgex2_base_field.hpp"
+#include "pgex2_base_object.hpp"
 
 inline void PGEX2_skip_section(PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line);
 
@@ -50,42 +50,6 @@ inline bool PGEX2_line_is_section_end(const PGESTRING& cur_line)
 {
     return cur_line.size() > 4 && strncmp(cur_line.c_str() + cur_line.size() - 4, "_END", 4) == 0;
 }
-
-template<class _obj_t>
-struct PGEX2_Object
-{
-    template<class obj_loader_t> friend struct PGEX2_FieldType_ObjectList;
-
-    using obj_t = _obj_t;
-
-    template<class field_t> using field = PGEX2_Field<obj_t, field_t>;
-    std::vector<PGEX2_BaseField<obj_t>*> m_fields;
-
-protected:
-    void load_object(obj_t& dest, const char* line) const
-    {
-        const char* cur_data = line;
-        size_t next_field = 0;
-
-        while(*cur_data != '\0')
-        {
-            size_t try_field = next_field;
-            for(; try_field < m_fields.size(); try_field++)
-            {
-                if(m_fields[try_field]->try_load(dest, cur_data))
-                {
-                    if(try_field == next_field)
-                        next_field++;
-
-                    break;
-                }
-            }
-
-            if(try_field >= m_fields.size())
-                cur_data = PGEX2_find_next_term(cur_data);
-        }
-    }
-};
 
 template<class callback_table_t>
 struct PGEX2_BaseSection

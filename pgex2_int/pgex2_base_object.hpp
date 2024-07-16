@@ -25,38 +25,57 @@
  */
 
 #pragma once
-#ifndef PGEX2_MACROS_HPP
-#define PGEX2_MACROS_HPP
+#ifndef PGEX2_BASE_OBJECT_HPP
+#define PGEX2_BASE_OBJECT_HPP
 
-/*! \file pgex2_macros.hpp
+#include <vector>
+#include "pgex2_base_field.hpp"
+
+/*! \file pgex2_base_object.hpp
  *
- *  \brief Unpleasant macros used for declarative syntax
+ *  \brief Contains templates for objects
  *
  * This is a new implementation but supports precisely the same format as PGE-X
  *
  */
 
-#define PGEX2_FIELD_NAME(MEMBER_NAME) field_ ## MEMBER_NAME
-#define PGEX2_FIELD(NAME, MEMBER_NAME) field<decltype(obj_t::MEMBER_NAME)> PGEX2_FIELD_NAME(MEMBER_NAME){this, NAME, &obj_t::MEMBER_NAME}
+template<class _obj_t>
+struct PGEX2_BaseObject
+{
+    template<class obj_loader_t> friend struct PGEX2_FieldType_ObjectList;
 
-#define PGEX2_UNIQUE_FIELD_NAME(LOAD_FUNC) unique_field_ ## LOAD_FUNC
-#define PGEX2_UNIQUE_FIELD(NAME, LOAD_FUNC) PGEX2_UniqueField<obj_t> PGEX2_UNIQUE_FIELD_NAME(LOAD_FUNC){this, NAME, LOAD_FUNC}
+    using obj_t = _obj_t;
 
-#define PGEX2_CALLBACK_LOAD(CALLBACK_NAME) load_ ## CALLBACK_NAME
-#define PGEX2_CALLBACK_SAVE(CALLBACK_NAME) save_ ## CALLBACK_NAME
-#define PGEX2_SECTION_NAME(OBJ_T) section_ ## OBJ_T
-#define PGEX2_SECTION(NAME, OBJ_T, CALLBACK_NAME) section<OBJ_T> PGEX2_SECTION_NAME(OBJ_T){this, NAME, &callback_table_t::PGEX2_CALLBACK_LOAD(CALLBACK_NAME), &callback_table_t::PGEX2_CALLBACK_SAVE(CALLBACK_NAME)}
+    template<class field_t> using field = PGEX2_Field<obj_t, field_t>;
+    std::vector<PGEX2_BaseField<obj_t>*> m_fields;
 
-#define PGEX2_SETUP_OBJECT(OBJ_T, BODY) template<> \
-struct PGEX2_Object<OBJ_T> : PGEX2_BaseObject<OBJ_T> \
-{ \
-    BODY \
-}; \
-\
-template<> \
-struct PGEX2_FieldType<PGELIST<OBJ_T>> : public PGEX2_FieldType_ObjectList<PGEX2_Object<OBJ_T>> {}; \
-\
-template<> \
-const PGEX2_Object<OBJ_T> PGEX2_FieldType_ObjectList<PGEX2_Object<OBJ_T>>::s_obj_loader{}
+protected:
+    void load_object(obj_t& dest, const char* line) const
+    {
+        const char* cur_data = line;
+        size_t next_field = 0;
 
-#endif // #ifndef PGEX2_MACROS_HPP
+        while(*cur_data != '\0')
+        {
+            size_t try_field = next_field;
+            for(; try_field < m_fields.size(); try_field++)
+            {
+                if(m_fields[try_field]->try_load(dest, cur_data))
+                {
+                    if(try_field == next_field)
+                        next_field++;
+
+                    break;
+                }
+            }
+
+            if(try_field >= m_fields.size())
+                cur_data = PGEX2_find_next_term(cur_data);
+        }
+    }
+};
+
+template<class _obj_t>
+struct PGEX2_Object;
+
+#endif // #ifndef PGEX2_BASE_OBJECT_HPP
