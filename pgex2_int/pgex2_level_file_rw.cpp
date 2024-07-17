@@ -266,6 +266,15 @@ bool PGEX2_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData
     FileFormats::CreateLevelData(FileData);
     FileData.meta.RecentFormat = LevelData::PGEX;
 
+    //Add path data
+    PGESTRING filePath = file.getFilePath();
+    if(!IsEmpty(filePath))
+    {
+        PGE_FileFormats_misc::FileInfo  in_1(filePath);
+        FileData.meta.filename = in_1.basename();
+        FileData.meta.path = in_1.dirpath();
+    }
+
     PGEX2_LevelCallbacks callbacks;
 
     callbacks.load_head = s_load_head;
