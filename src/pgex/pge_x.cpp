@@ -271,7 +271,7 @@ PGEFile::PGEX_Entry PGEFile::buildTree(PGESTRINGList &src_data, bool *_valid)
                 STATE_VALUE = 1,
                 STATE_ERROR = 2
             };
-            pge_size_t state = 0, size = srcData_nc.size(), tail = srcData_nc.size() - 1;
+            pge_size_t state = 0, size = strlen(srcData_nc.c_str()), tail = size - 1;
             PGEX_Val dataValue;
             int escape = 0;
             for(pge_size_t i = 0; i < size; i++)
@@ -761,7 +761,7 @@ PGELIST<PGESTRINGList > PGEFile::splitDataLine(const PGESTRING &src_data, bool *
         STATE_ERROR = 2
     };
 
-    pge_size_t state = 0, size = src_data.size(), tail = src_data.size() - 1;
+    pge_size_t state = 0, size = strlen(src_data.c_str()), tail = size - 1;
     PGESTRING marker;
     PGESTRING value;
     int escape = 0;
@@ -909,7 +909,7 @@ void PGEFile::restoreString(PGESTRING &input, bool removeQuotes)
 {
     PGESTRING &output = input;
     const pge_size_t first = 0;//For convenience to understand
-    pge_size_t j = 0, size = input.size(), tail = input.size() - 1;
+    pge_size_t j = 0, size = strlen(input.c_str()), tail = size - 1;
     for(pge_size_t i = 0; i < size; i++, j++)
     {
         if(removeQuotes && ((i == first) || (i == tail)))
