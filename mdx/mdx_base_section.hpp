@@ -40,7 +40,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "../pge_file_lib_globs.h"
+#include "pge_file_lib_globs.h"
 #include "mdx/mdx_base_field.hpp"
 #include "mdx/mdx_base_object.hpp"
 

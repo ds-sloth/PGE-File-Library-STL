@@ -33,9 +33,9 @@
  */
 
 #include "mdx/mdx_level_file.h"
-#include "../file_formats.h"
-#include "../pge_file_lib_private.h"
-#include "../pge_file_lib_globs.h"
+#include "file_formats.h"
+#include "pge_file_lib_private.h"
+#include "pge_file_lib_globs.h"
 
 static bool s_load_head(void* _FileData, MDX_LevelHead& dest)
 {

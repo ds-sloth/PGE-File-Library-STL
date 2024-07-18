@@ -35,8 +35,8 @@
 
 #include "mdx/mdx_globals.h"
 
-#include "../pge_file_lib_globs.h"
-#include "../lvl_filedata.h"
+#include "pge_file_lib_globs.h"
+#include "lvl_filedata.h"
 
 struct MDX_LevelHead
 {
