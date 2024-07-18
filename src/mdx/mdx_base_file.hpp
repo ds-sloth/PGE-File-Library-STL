@@ -53,29 +53,52 @@ struct MDX_File
 
     std::vector<MDX_BaseSection<load_callbacks_t, save_callbacks_t>*> m_sections;
 
-    void load_file(PGE_FileFormats_misc::TextInput& inf, const load_callbacks_t& cb)
+    bool load_file(PGE_FileFormats_misc::TextInput& inf, const load_callbacks_t& cb)
     {
-        inf.seek(0, PGE_FileFormats_misc::TextFileInput::begin);
-
         PGESTRING cur_line;
 
-        while(!inf.eof())
+        try
         {
-            inf.readLine(cur_line);
+            inf.seek(0, PGE_FileFormats_misc::TextFileInput::begin);
 
-            bool handled = false;
-            for(auto* section : m_sections)
+            while(!inf.eof())
             {
-                if(section->try_load(cb, inf, cur_line))
-                {
-                    handled = true;
-                    break;
-                }
-            }
+                inf.readLine(cur_line);
 
-            if(!handled)
-                MDX_skip_section(inf, cur_line);
+                bool handled = false;
+                for(auto* section : m_sections)
+                {
+                    if(section->try_load(cb, inf, cur_line))
+                    {
+                        handled = true;
+                        break;
+                    }
+                }
+
+                if(!handled)
+                    MDX_skip_section(inf, cur_line);
+            }
         }
+        catch(const std::exception& e)
+        {
+            if(!cb.on_error)
+                return false;
+
+            FileFormatsError err;
+            err.ERROR_info = "Failed to parse PGEX file (line ";
+#ifdef PGE_FILES_QT
+            err.ERROR_info += QString::number(inf.getCurrentLineNumber());
+#else
+            err.ERROR_info += std::to_string(inf.getCurrentLineNumber());
+#endif
+            err.ERROR_info += ")\n";
+            err.add_exc_info(e, inf.getCurrentLineNumber(), std::move(cur_line));
+
+            cb.on_error(cb.userdata, err);
+            return false;
+        }
+
+        return true;
     }
 };
 

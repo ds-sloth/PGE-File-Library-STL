@@ -36,7 +36,7 @@
  *
  */
 
-const char* MDX_find_next_term(const char* line)
+const char* MDX_skip_term(const char* line)
 {
     bool escape = false;
     while(true)
@@ -49,37 +49,7 @@ const char* MDX_find_next_term(const char* line)
             escape = false;
         }
         else if(*line == '\0')
-            return line;
-        else if(*line == '\\')
-            escape = true;
-        else
-            escape = false;
-
-        line++;
-    }
-}
-
-const char* MDX_find_next_list_item(const char* line)
-{
-    bool escape = false;
-    while(true)
-    {
-        if(*line == ',')
-        {
-            if(!escape)
-                return line + 1;
-
-            escape = false;
-        }
-        else if(*line == ']')
-        {
-            if(!escape)
-                return line;
-
-            escape = false;
-        }
-        else if(*line == '\0')
-            return line;
+            throw MDX_missing_delimiter(';');
         else if(*line == '\\')
             escape = true;
         else
@@ -105,6 +75,9 @@ const char* MDX_FieldType<int>::load(int& dest, const char* field_data)
         dest = out;
 #endif
 
+    if(str_end == field_data)
+        throw MDX_bad_term("Bad int");
+
     return str_end;
 }
 
@@ -122,6 +95,9 @@ const char* MDX_FieldType<unsigned>::load(unsigned& dest, const char* field_data
         dest = out;
 #endif
 
+    if(str_end == field_data)
+        throw MDX_bad_term("Bad uint");
+
     return str_end;
 }
 
@@ -130,8 +106,10 @@ const char* MDX_FieldType<bool>::load(bool& dest, const char* field_data)
 {
     if(*field_data == '1')
         dest = true;
-    else
+    else if(*field_data == '0')
         dest = false;
+    else
+        throw MDX_bad_term("Bad bool");
 
     return field_data + 1;
 }
@@ -141,6 +119,10 @@ const char* MDX_FieldType<long>::load(long& dest, const char* field_data)
 {
     char* str_end;
     dest = strtol(field_data, &str_end, 10);
+
+    if(str_end == field_data)
+        throw MDX_bad_term("Bad long");
+
     return str_end;
 }
 
@@ -149,6 +131,10 @@ const char* MDX_FieldType<unsigned long>::load(unsigned long& dest, const char* 
 {
     char* str_end;
     dest = strtoul(field_data, &str_end, 10);
+
+    if(str_end == field_data)
+        throw MDX_bad_term("Bad ulong");
+
     return str_end;
 }
 
@@ -157,6 +143,10 @@ const char* MDX_FieldType<long long>::load(long long& dest, const char* field_da
 {
     char* str_end;
     dest = strtoll(field_data, &str_end, 10);
+
+    if(str_end == field_data)
+        throw MDX_bad_term("Bad llong");
+
     return str_end;
 }
 
@@ -166,6 +156,10 @@ const char* MDX_FieldType<unsigned long long>::load(unsigned long long& dest, co
     char* str_end;
     dest = strtoull(field_data, &str_end, 10);
     return str_end;
+
+    if(str_end == field_data)
+        throw MDX_bad_term("Bad ullong");
+
 }
 
 template<>
@@ -173,6 +167,10 @@ const char* MDX_FieldType<float>::load(float& dest, const char* field_data)
 {
     char* str_end;
     dest = strtof(field_data, &str_end);
+
+    if(str_end == field_data)
+        throw MDX_bad_term("Bad float");
+
     return str_end;
 }
 
@@ -181,6 +179,10 @@ const char* MDX_FieldType<double>::load(double& dest, const char* field_data)
 {
     char* str_end;
     dest = strtod(field_data, &str_end);
+
+    if(str_end == field_data)
+        throw MDX_bad_term("Bad double");
+
     return str_end;
 }
 
@@ -190,19 +192,14 @@ const char* MDX_FieldType<PGESTRING>::load(PGESTRING& dest, const char* field_da
     dest.clear();
 
     const char* cur_pos = field_data;
-    if(*cur_pos != '\"')
-    {
-        // this is an error
-        return cur_pos;
-    }
-
-    cur_pos++;
+    if(*cur_pos != '"')
+        throw MDX_missing_delimiter('"');
 
     bool escape = false;
 
     while(true)
     {
-        const char cur_byte = *cur_pos++;
+        const char cur_byte = *(++cur_pos);
 
         if(cur_byte == '\0')
             break;
@@ -238,10 +235,7 @@ const char* MDX_FieldType<PGESTRING>::load(PGESTRING& dest, const char* field_da
     }
 
     if(*cur_pos != '"')
-    {
-        // this is an error
-        return cur_pos;
-    }
+        throw MDX_missing_delimiter('"');
 
     cur_pos++;
 
@@ -261,10 +255,8 @@ const char* MDX_FieldType<PGELIST<bool>>::load(PGELIST<bool>& dest, const char* 
         else if(*cur_pos == '0')
             dest.push_back(false);
         else
-        {
-            // this is an error
-            break;
-        }
+            throw(MDX_bad_array(dest.size() + 1));
+
         cur_pos++;
     }
 

@@ -233,7 +233,7 @@ const char* MDX_LevelEvent_load_controls(LevelSMBX64Event& event, const char* fi
 {
     PGELIST<bool> controls;
 
-    const char* next = MDX_find_next_term(MDX_FieldType<PGELIST<bool>>::load(controls, field_data));
+    const char* next = MDX_finish_term(MDX_FieldType<PGELIST<bool>>::load(controls, field_data));
 
     const auto cs = controls.size();
 
@@ -261,13 +261,10 @@ const char* MDX_LevelEvent_load_autoscroll_path(LevelEvent_Sets& set, const char
 {
     PGELIST<long> arr;
 
-    const char* next = MDX_find_next_term(MDX_FieldType<PGELIST<long>>::load(arr, field_data));
+    const char* next = MDX_finish_term(MDX_FieldType<PGELIST<long>>::load(arr, field_data));
 
     if(arr.size() % 4)
-    {
-        // errorString = "Invalid Section Autoscroll path data contains non-multiple 4 entries";
-        // goto badfile;
-    }
+        throw MDX_bad_term("Invalid Section Autoscroll path data contains non-multiple 4 entries");
 
     for(pge_size_t pe = 0; pe < arr.size(); pe += 4)
     {
@@ -464,8 +461,8 @@ struct MDX_LevelFile : MDX_File<LevelLoadCallbacks, LevelSaveCallbacks>
     MDX_SECTION("CUSTOM_ITEMS_38A", LevelItemSetup38A, levelitem38a);
 };
 
-void MDX_load_level(PGE_FileFormats_misc::TextInput& input, LevelLoadCallbacks& callbacks)
+bool MDX_load_level(PGE_FileFormats_misc::TextInput& input, LevelLoadCallbacks& callbacks)
 {
     MDX_LevelFile f;
-    f.load_file(input, callbacks);
+    return f.load_file(input, callbacks);
 }

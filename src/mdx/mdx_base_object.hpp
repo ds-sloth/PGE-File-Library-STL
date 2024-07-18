@@ -71,7 +71,7 @@ protected:
             }
 
             if(try_field >= m_fields.size())
-                cur_data = MDX_find_next_term(cur_data);
+                cur_data = MDX_skip_term(cur_data);
         }
     }
 };

@@ -36,7 +36,7 @@
 #include "pge_file_lib_globs.h"
 #include "lvl_filedata.h"
 
-void MDX_load_level(PGE_FileFormats_misc::TextInput& input, LevelLoadCallbacks& callbacks);
+bool MDX_load_level(PGE_FileFormats_misc::TextInput& input, LevelLoadCallbacks& callbacks);
 bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData);
 
 #endif // #ifndef MDX_LEVEL_FILE_H

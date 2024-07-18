@@ -37,6 +37,14 @@
 #include "pge_file_lib_private.h"
 #include "pge_file_lib_globs.h"
 
+static void s_on_error(void* _FileData, FileFormatsError& err)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+
+    static_cast<FileFormatsError&>(FileData.meta) = std::move(err);
+    FileData.meta.ReadFileValid = false;
+}
+
 static bool s_load_head(void* _FileData, LevelHead& dest)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
@@ -275,6 +283,8 @@ bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
 
     LevelLoadCallbacks callbacks;
 
+    callbacks.on_error = s_on_error;
+
     callbacks.load_head = s_load_head;
     callbacks.load_bookmark = s_load_bookmark;
     callbacks.load_crash_data = s_load_crash_data;
@@ -290,7 +300,5 @@ bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
 
     callbacks.userdata = reinterpret_cast<void*>(&FileData);
 
-    MDX_load_level(file, callbacks);
-
-    return true;
+    return MDX_load_level(file, callbacks);
 }

@@ -29,6 +29,7 @@
 #define MDX_BASE_FIELD_HPP
 
 #include "pge_file_lib_globs.h"
+#include "mdx/mdx_exception.hpp"
 
 /*! \file mdx_base_field.hpp
  *
@@ -38,8 +39,25 @@
  *
  */
 
-const char* MDX_find_next_term(const char* line);
-const char* MDX_find_next_list_item(const char* line);
+const char* MDX_skip_term(const char* line);
+
+inline const char* MDX_finish_term(const char* line)
+{
+    if(*line != ';')
+        throw MDX_missing_delimiter(';');
+
+    return line + 1;
+}
+
+inline const char* MDX_finish_list_item(const char* line)
+{
+    if(*line == ']')
+        return line;
+    else if(*line == ',')
+        return line + 1;
+    else
+        throw MDX_missing_delimiter(',');
+}
 
 template<class obj_t>
 struct MDX_BaseField
@@ -100,25 +118,26 @@ const char* MDX_FieldType<PGELIST<subtype_t>>::load(PGELIST<subtype_t>& dest, co
 
     const char* cur_pos = field_data;
     if(*cur_pos != '[')
-    {
-        // this is an error
-        return cur_pos;
-    }
+        throw MDX_missing_delimiter('[');
 
     cur_pos++;
 
     while(*cur_pos != ']' && *cur_pos != '\0')
     {
-        dest.emplace_back();
-        cur_pos = MDX_FieldType<subtype_t>::load(dest.back(), cur_pos);
-        cur_pos = MDX_find_next_list_item(cur_pos);
+        try
+        {
+            dest.emplace_back();
+            cur_pos = MDX_FieldType<subtype_t>::load(dest.back(), cur_pos);
+            cur_pos = MDX_finish_list_item(cur_pos);
+        }
+        catch(const MDX_parse_error&)
+        {
+            std::throw_with_nested(MDX_bad_array(dest.size()));
+        }
     }
 
     if(*cur_pos != ']')
-    {
-        // this is an error
-        return cur_pos;
-    }
+        throw MDX_missing_delimiter(']');
 
     cur_pos++;
 
@@ -140,7 +159,6 @@ const char* MDX_FieldType_Object<obj_loader_t>::load(typename obj_loader_t::obj_
     PGESTRING object_string;
 
     const char* next = MDX_FieldType<PGESTRING>::load(object_string, field_data);
-    next = MDX_find_next_list_item(next);
 
     s_obj_loader.load_object(dest, object_string.c_str());
 
@@ -161,10 +179,7 @@ const char* MDX_FieldType_ObjectList<obj_loader_t>::load(PGELIST<typename obj_lo
 
     const char* cur_pos = field_data;
     if(*cur_pos != '[')
-    {
-        // this is an error
-        return cur_pos;
-    }
+        throw MDX_missing_delimiter('[');
 
     cur_pos++;
 
@@ -174,17 +189,21 @@ const char* MDX_FieldType_ObjectList<obj_loader_t>::load(PGELIST<typename obj_lo
     {
         dest.emplace_back();
 
-        cur_pos = MDX_FieldType<PGESTRING>::load(object_string, cur_pos);
-        cur_pos = MDX_find_next_list_item(cur_pos);
+        try
+        {
+            cur_pos = MDX_FieldType<PGESTRING>::load(object_string, cur_pos);
+            cur_pos = MDX_finish_list_item(cur_pos);
 
-        s_obj_loader.load_object(dest.back(), object_string.c_str());
+            s_obj_loader.load_object(dest.back(), object_string.c_str());
+        }
+        catch(const MDX_parse_error&)
+        {
+            std::throw_with_nested(MDX_bad_array(dest.size()));
+        }
     }
 
     if(*cur_pos != ']')
-    {
-        // this is an error
-        return cur_pos;
-    }
+        throw MDX_missing_delimiter(']');
 
     cur_pos++;
 
@@ -205,7 +224,14 @@ struct MDX_Field : public MDX_BaseField<obj_t>
 
     virtual const char* do_load(obj_t& dest, const char* field_data) const
     {
-        return MDX_find_next_term(MDX_FieldType<field_t>::load(dest.*m_field, field_data));
+        try
+        {
+            return MDX_finish_term(MDX_FieldType<field_t>::load(dest.*m_field, field_data));
+        }
+        catch(const MDX_parse_error&)
+        {
+            std::throw_with_nested(MDX_bad_field(MDX_BaseField<obj_t>::m_field_name));
+        }
     }
 };
 
@@ -230,7 +256,14 @@ struct MDX_UniqueField : public MDX_BaseField<obj_t>
         if(!m_load_func)
             return field_data;
 
-        return m_load_func(dest, field_data);
+        try
+        {
+            return m_load_func(dest, field_data);
+        }
+        catch(const MDX_parse_error&)
+        {
+            std::throw_with_nested(MDX_bad_field(MDX_BaseField<obj_t>::m_field_name));
+        }
     }
 };
 

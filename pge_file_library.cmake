@@ -29,6 +29,7 @@ list(APPEND PGE_FILE_LIBRARY_SRCS
 #    ${CMAKE_CURRENT_LIST_DIR}/src/smbx38a/file_rw_lvl_38a_old.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/smbx38a/file_rw_wld_38a.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/mdx/mdx_field_impl.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/mdx/mdx_exception.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/mdx/mdx_level_file.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/mdx/mdx_level_file_rw.cpp
 )

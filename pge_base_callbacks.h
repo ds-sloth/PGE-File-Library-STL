@@ -34,6 +34,7 @@
 #define PGE_BASE_CALLBACKS_H
 
 #include <cstddef>
+#include "meta_filedata.h"
 
 namespace PGE_FileFormats_misc
 {
@@ -41,15 +42,19 @@ namespace PGE_FileFormats_misc
 struct LoadCallbacks
 {
     template<class obj_t> using callback = bool (*)(void* userdata, obj_t& obj);
+    using err_callback = void (*)(void* userdata, FileFormatsError& err);
 
     void* userdata = nullptr;
+    err_callback on_error = nullptr;
 };
 
 struct SaveCallbacks
 {
     template<class obj_t> using callback = bool (*)(void* userdata, obj_t& obj, size_t index);
+    using err_callback = void (*)(void* userdata, FileFormatsError& err);
 
     void* userdata = nullptr;
+    err_callback on_error = nullptr;
 };
 
 }
