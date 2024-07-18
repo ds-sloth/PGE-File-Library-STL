@@ -295,6 +295,11 @@ PGEFile::PGEX_Entry PGEFile::buildTree(PGESTRINGList &src_data, bool *_valid)
                 switch(state)
                 {
                 case STATE_MARKER:
+                    if(i == tail)
+                    {
+                        valid = false;
+                        break;
+                    }
                     if((c == ';') && (escape == 0))
                     {
                         state = STATE_ERROR;
@@ -315,7 +320,7 @@ PGEFile::PGEX_Entry PGEFile::buildTree(PGESTRINGList &src_data, bool *_valid)
                         state = STATE_ERROR;
                         continue;
                     }
-                    if(((c == ';') && (escape == 0) && !quoted) || (i == tail))
+                    if((c == ';') && (escape == 0) && !quoted)
                     {
                         // unterminated quote
                         if(quoted)
@@ -331,12 +336,21 @@ PGEFile::PGEX_Entry PGEFile::buildTree(PGESTRINGList &src_data, bool *_valid)
                         state = STATE_MARKER;
                         continue;
                     }
+                    else if(i == tail)
+                    {
+                        valid = false;
+                        break;
+                    }
                     dataValue.value.push_back(c);
                     break;
                     //case STATE_ERROR: //Dead code
                     //break;
                 }
             }
+
+            if(state == STATE_ERROR)
+                valid = false;
+
             dataItem.type = PGEX_Struct;
             entryData.type = PGEX_Struct;
             entryData.data.push_back(dataItem);
@@ -804,6 +818,11 @@ PGELIST<PGESTRINGList > PGEFile::splitDataLine(const PGESTRING &src_data, bool *
             break;
 
         case STATE_MARKER:
+            if(i == tail)
+            {
+                valid = false;
+                break;
+            }
             if((c == ';') && (escape == 0))
             {
                 state = STATE_ERROR;
@@ -825,15 +844,8 @@ PGELIST<PGESTRINGList > PGEFile::splitDataLine(const PGESTRING &src_data, bool *
                 state = STATE_ERROR;
                 continue;
             }
-            if(((c == ';') && (escape == 0) && !quoted) || (i == tail))
+            if((c == ';') && (escape == 0) && !quoted)
             {
-                // unterminated quote
-                if(quoted)
-                {
-                    valid = false;
-                    break;
-                }
-
                 //STORE ENTRY!
                 PGESTRINGList fields;
                 fields.push_back(marker);
@@ -844,12 +856,20 @@ PGELIST<PGESTRINGList > PGEFile::splitDataLine(const PGESTRING &src_data, bool *
                 state = STATE_MARKER;
                 continue;
             }
+            else if(i == tail)
+            {
+                valid = false;
+                break;
+            }
             value.push_back(c);
             break;
             //case STATE_ERROR:  //Dead code
             //break;
         }
     }
+
+    if(state == STATE_ERROR)
+        valid = false;
 
     if(_valid)
         *_valid = valid;
