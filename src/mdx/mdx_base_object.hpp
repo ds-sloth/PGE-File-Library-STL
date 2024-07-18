@@ -59,19 +59,28 @@ protected:
         while(*cur_data != '\0')
         {
             size_t try_field = next_field;
-            for(; try_field < m_fields.size(); try_field++)
+            while(true)
             {
                 if(m_fields[try_field]->try_load(dest, cur_data))
                 {
-                    if(try_field == next_field)
-                        next_field++;
+                    next_field++;
+                    if(next_field == m_fields.size())
+                        next_field = 0;
 
                     break;
                 }
-            }
 
-            if(try_field >= m_fields.size())
-                cur_data = MDX_skip_term(cur_data);
+                try_field++;
+                if(try_field == m_fields.size())
+                    try_field = 0;
+
+                // couldn't find field
+                if(try_field == next_field)
+                {
+                    cur_data = MDX_skip_term(cur_data);
+                    break;
+                }
+            }
         }
     }
 };
