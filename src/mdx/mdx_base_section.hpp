@@ -44,11 +44,20 @@
 #include "mdx/mdx_base_field.hpp"
 #include "mdx/mdx_base_object.hpp"
 
-inline void MDX_skip_section(PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line);
+inline void MDX_skip_section(PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line, const char* section_name);
 
-inline bool MDX_line_is_section_end(const PGESTRING& cur_line)
+inline bool MDX_line_is_section_end(const PGESTRING& cur_line, const char* section_name)
 {
-    return cur_line.size() > 4 && strncmp(cur_line.c_str() + cur_line.size() - 4, "_END", 4) == 0;
+    if(cur_line.size() <= 4)
+        return false;
+
+    if(strncmp(cur_line.c_str() + cur_line.size() - 4, "_END", 4))
+        return false;
+
+    if(strncmp(cur_line.c_str(), section_name, cur_line.size() - 4))
+        return false;
+
+    return true;
 }
 
 template<class load_callbacks_t, class save_callbacks_t>
@@ -103,16 +112,13 @@ public:
         {
             inf.readLine(cur_line);
 
+            // empty line (or EOF)
             if(cur_line.empty())
             {
-                // unexpected EOF
                 if(inf.eof())
-                    return true;
-                // invalid line
+                    throw MDX_parse_error_misc("Unterminated section");
                 else
-                {
-                    // complain, eventually...
-                }
+                    throw MDX_parse_error_misc("Empty line");
             }
             // ordinary line
             else if(*(cur_line.end() - 1) == ';')
@@ -122,33 +128,33 @@ public:
 
                 if(!callback(cb.userdata, m_obj))
                 {
-                    MDX_skip_section(inf, cur_line);
+                    MDX_skip_section(inf, cur_line, m_section_name);
                     return true;
                 }
             }
             // section end line
-            else if(MDX_line_is_section_end(cur_line) && strncmp(cur_line.c_str(), m_section_name, cur_line.size() - 4) == 0)
+            else if(MDX_line_is_section_end(cur_line, m_section_name))
             {
                 return true;
             }
-            // invalid line
+            // unterminated line
             else
-            {
-                // complain, eventually...
-            }
+                throw MDX_missing_delimiter(';');
         }
     }
 };
 
-inline void MDX_skip_section(PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line)
+inline void MDX_skip_section(PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line, const char* section_name)
 {
     while(!inf.eof())
     {
         inf.readLine(cur_line);
 
-        if(MDX_line_is_section_end(cur_line))
-            break;
+        if(MDX_line_is_section_end(cur_line, section_name))
+            return;
     }
+
+    throw MDX_parse_error_misc("Unterminated section");
 }
 
 #endif // #ifndef MDX_BASE_SECTION_HPP

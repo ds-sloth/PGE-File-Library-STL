@@ -50,6 +50,15 @@ public:
     virtual const char* what() const noexcept;
 };
 
+// misc error for MDX parsing
+class MDX_parse_error_misc : public MDX_parse_error
+{
+    const char* const m_message = nullptr;
+public:
+    MDX_parse_error_misc(const char* message) noexcept : m_message(message) {}
+    virtual const char* what() const noexcept;
+};
+
 // primitive error denoting that a term is malformed
 class MDX_bad_term : public MDX_parse_error
 {

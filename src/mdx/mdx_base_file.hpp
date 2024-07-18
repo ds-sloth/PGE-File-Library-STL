@@ -76,7 +76,10 @@ struct MDX_File
                 }
 
                 if(!handled)
-                    MDX_skip_section(inf, cur_line);
+                {
+                    std::string section_name = cur_line;
+                    MDX_skip_section(inf, cur_line, section_name.c_str());
+                }
             }
         }
         catch(const std::exception& e)
