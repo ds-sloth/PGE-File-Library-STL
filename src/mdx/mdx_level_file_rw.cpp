@@ -33,6 +33,7 @@
  */
 
 #include "mdx/mdx_level_file.h"
+#include "mdx/mdx_exception.hpp"
 #include "file_formats.h"
 #include "pge_file_lib_private.h"
 #include "pge_file_lib_globs.h"
@@ -87,6 +88,9 @@ static bool s_load_section(void* _FileData, LevelSection& dest)
 
     //add captured value into array
     pge_size_t sections_count = FileData.sections.size();
+
+    if(dest.id < 0)
+        throw MDX_callback_error("Negative section ID");
 
     if(dest.id >= static_cast<int>(sections_count))
     {

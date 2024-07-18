@@ -41,6 +41,15 @@ class MDX_parse_error : public MDX_exception
     virtual const char* what() const noexcept;
 };
 
+// error that callbacks may raise when unpacking object
+class MDX_callback_error : public MDX_parse_error
+{
+    const char* const m_message = nullptr;
+public:
+    MDX_callback_error(const char* message) noexcept : m_message(message) {}
+    virtual const char* what() const noexcept;
+};
+
 // primitive error denoting that a term is malformed
 class MDX_bad_term : public MDX_parse_error
 {
@@ -65,6 +74,7 @@ class MDX_bad_field : public MDX_parse_error
     char m_description[16];
 public:
     MDX_bad_field(const char* field_name) noexcept;
+    MDX_bad_field(const char* field_name, size_t len) noexcept;
     virtual const char* what() const noexcept;
 };
 
