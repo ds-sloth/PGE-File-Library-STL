@@ -122,7 +122,9 @@ public:
                 if(inf.eof())
                     throw MDX_parse_error_misc("Unterminated section");
                 else
-                    throw MDX_parse_error_misc("Empty line");
+                {
+                    // allow it because PGE-X does
+                }
             }
             // ordinary line
             else if(*(cur_line.end() - 1) == ';')
