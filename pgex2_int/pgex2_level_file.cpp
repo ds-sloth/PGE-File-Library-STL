@@ -304,6 +304,7 @@ PGEX2_SETUP_OBJECT(LevelEvent_Sets,
     PGEX2_FIELD("AXX", expression_autoscrool_x);
     PGEX2_FIELD("AYX", expression_autoscrool_y);
 );
+PGEX2_ENABLE_SUB_LIST(LevelEvent_Sets);
 
 PGEX2_SETUP_OBJECT(LevelEvent_MoveLayer,
     PGEX2_FIELD("LN", name);
@@ -313,6 +314,7 @@ PGEX2_SETUP_OBJECT(LevelEvent_MoveLayer,
     PGEX2_FIELD("SYX", expression_y);
     PGEX2_FIELD("MW", way);
 );
+PGEX2_ENABLE_SUB_STRUCT(LevelEvent_MoveLayer);
 
 PGEX2_SETUP_OBJECT(LevelEvent_SpawnNPC,
     PGEX2_FIELD("ID", id);
@@ -326,6 +328,7 @@ PGEX2_SETUP_OBJECT(LevelEvent_SpawnNPC,
     PGEX2_FIELD("SSYX", expression_sy);
     PGEX2_FIELD("SSS", special);
 );
+PGEX2_ENABLE_SUB_LIST(LevelEvent_SpawnNPC);
 
 PGEX2_SETUP_OBJECT(LevelEvent_SpawnEffect,
     PGEX2_FIELD("ID", id);
@@ -341,11 +344,13 @@ PGEX2_SETUP_OBJECT(LevelEvent_SpawnEffect,
     PGEX2_FIELD("TTL", max_life_time);
     PGEX2_FIELD("GT", gravity);
 );
+PGEX2_ENABLE_SUB_LIST(LevelEvent_SpawnEffect);
 
 PGEX2_SETUP_OBJECT(LevelEvent_UpdateVariable,
     PGEX2_FIELD("N", name);
     PGEX2_FIELD("V", newval);
 );
+PGEX2_ENABLE_SUB_LIST(LevelEvent_UpdateVariable);
 
 PGEX2_SETUP_OBJECT(LevelSMBX64Event,
     PGEX2_FIELD("ET", name);  //Event Title

@@ -43,6 +43,7 @@ template<class _obj_t>
 struct PGEX2_BaseObject
 {
     template<class obj_loader_t> friend struct PGEX2_FieldType_ObjectList;
+    template<class obj_loader_t> friend struct PGEX2_FieldType_Object;
 
     using obj_t = _obj_t;
 

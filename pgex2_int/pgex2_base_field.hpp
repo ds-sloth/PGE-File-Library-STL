@@ -126,6 +126,28 @@ const char* PGEX2_FieldType<PGELIST<subtype_t>>::load(PGELIST<subtype_t>& dest, 
 }
 
 template<class obj_loader_t>
+struct PGEX2_FieldType_Object
+{
+    static const obj_loader_t s_obj_loader;
+    static const char* load(typename obj_loader_t::obj_t& dest, const char* field_data);
+};
+
+template<class obj_loader_t>
+const char* PGEX2_FieldType_Object<obj_loader_t>::load(typename obj_loader_t::obj_t& dest, const char* field_data)
+{
+    dest = typename obj_loader_t::obj_t();
+
+    PGESTRING object_string;
+
+    const char* next = PGEX2_FieldType<PGESTRING>::load(object_string, field_data);
+    next = PGEX2_find_next_list_item(next);
+
+    s_obj_loader.load_object(dest, object_string.c_str());
+
+    return next;
+}
+
+template<class obj_loader_t>
 struct PGEX2_FieldType_ObjectList
 {
     static const obj_loader_t s_obj_loader;

@@ -52,11 +52,17 @@ struct PGEX2_Object<OBJ_T> : PGEX2_BaseObject<OBJ_T> \
 { \
     BODY \
 }; \
-\
-template<> \
+
+#define PGEX2_ENABLE_SUB_LIST(OBJ_T) template<> \
 struct PGEX2_FieldType<PGELIST<OBJ_T>> : public PGEX2_FieldType_ObjectList<PGEX2_Object<OBJ_T>> {}; \
 \
 template<> \
-const PGEX2_Object<OBJ_T> PGEX2_FieldType_ObjectList<PGEX2_Object<OBJ_T>>::s_obj_loader{}
+const PGEX2_Object<OBJ_T> PGEX2_FieldType_ObjectList<PGEX2_Object<OBJ_T>>::s_obj_loader{}; \
+
+#define PGEX2_ENABLE_SUB_STRUCT(OBJ_T) template<> \
+struct PGEX2_FieldType<OBJ_T> : public PGEX2_FieldType_Object<PGEX2_Object<OBJ_T>> {}; \
+\
+template<> \
+const PGEX2_Object<OBJ_T> PGEX2_FieldType_Object<PGEX2_Object<OBJ_T>>::s_obj_loader{} \
 
 #endif // #ifndef PGEX2_MACROS_HPP
