@@ -32,8 +32,6 @@
  *
  */
 
-#include <cstdio>
-
 #include "pgex2_level_file.h"
 #include "../file_formats.h"
 #include "../pge_file_lib_private.h"
@@ -296,45 +294,3 @@ bool PGEX2_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData
 
     return true;
 }
-
-#if 0
-#include <SDL2/SDL_rwops.h>
-
-int main(int argc, char** argv)
-{
-    LevelData FileData;
-    FileFormats::CreateLevelData(FileData);
-    FileData.meta.RecentFormat = LevelData::PGEX;
-
-    PGEX2_LevelCallbacks callbacks;
-
-    callbacks.load_head = s_load_head;
-    callbacks.load_bookmark = s_load_bookmark;
-    callbacks.load_crash_data = s_load_crash_data;
-    callbacks.load_section = s_load_section;
-    callbacks.load_startpoint = s_load_startpoint;
-    callbacks.load_block = s_load_block;
-    callbacks.load_bgo = s_load_bgo;
-    callbacks.load_npc = s_load_npc;
-    callbacks.load_phys = s_load_phys;
-    callbacks.load_warp = s_load_warp;
-    callbacks.load_layer = s_load_layer;
-    callbacks.load_event = s_load_event;
-
-    callbacks.userdata = reinterpret_cast<void*>(&FileData);
-
-    PGE_FileFormats_misc::RWopsTextInput input(SDL_RWFromFile(argv[1], "rb"), argv[1]);
-    PGEX2_load_level(input, callbacks);
-
-    std::string arg2 = argv[2];
-    auto out_format = (arg2.back() == 'x') ? FileFormats::LVL_PGEX : FileFormats::LVL_SMBX64;
-
-    FileFormats::SaveLevelFile(FileData, arg2, out_format);
-
-    PGE_FileFormats_misc::RWopsTextInput input2(SDL_RWFromFile(argv[2], "rb"), arg2);
-
-    FileFormats::OpenLevelFileT(input2, FileData);
-
-    return 0;
-}
-#endif
