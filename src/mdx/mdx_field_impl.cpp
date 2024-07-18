@@ -39,14 +39,22 @@
 const char* MDX_skip_term(const char* line)
 {
     bool escape = false;
+    bool quoted = false;
     const char* tag_begin = line;
     const char* tag_end = nullptr;
 
     while(true)
     {
-        if(*line == ';')
+        if(*line == '"')
         {
             if(!escape)
+                quoted = !quoted;
+
+            escape = false;
+        }
+        else if(*line == ';')
+        {
+            if(!escape && !quoted)
             {
                 if(!tag_end)
                     throw MDX_missing_delimiter(':');
@@ -58,7 +66,7 @@ const char* MDX_skip_term(const char* line)
         }
         else if(*line == ':')
         {
-            if(!escape)
+            if(!escape && !quoted)
             {
                 if(!tag_end)
                 {
@@ -75,7 +83,9 @@ const char* MDX_skip_term(const char* line)
         }
         else if(*line == '\0')
         {
-            if(tag_end)
+            if(quoted)
+                throw MDX_missing_delimiter('"');
+            else if(tag_end)
             {
                 try
                 {
