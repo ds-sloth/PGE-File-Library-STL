@@ -108,21 +108,79 @@ const char* MDX_skip_term(const char* line)
     }
 }
 
+const char* load_double(double& dest, const char* field_data)
+{
+    int sign = 1;
+
+    if(*field_data == '-')
+    {
+        sign = -1;
+        field_data++;
+    }
+
+    if(*field_data == '\0')
+        return field_data;
+
+    double value = 0;
+
+    while(true)
+    {
+        char c = *field_data;
+
+        if(c == '.')
+        {
+            break;
+        }
+        else if(c < '0' || c > '9')
+        {
+            dest = sign * value;
+            return field_data;
+        }
+
+        field_data++;
+
+        value *= 10;
+        value += static_cast<double>(c - '0');
+    }
+
+    field_data++;
+
+    double divisor = 0.1;
+
+    while(true)
+    {
+        char c = *field_data;
+
+        if(c < '0' || c > '9')
+        {
+            dest = sign * value;
+            return field_data;
+        }
+
+        field_data++;
+
+        value += divisor * static_cast<double>(c - '0');
+        divisor *= 0.1;
+    }
+}
+
 template<>
 const char* MDX_FieldType<int>::load(int& dest, const char* field_data)
 {
-    char* str_end;
-#if (INT_MAX == LONG_MAX) && (INT_MIN == LONG_MIN)
-    dest = strtol(field_data, &str_end, 10);
-#else
-    long out = strtol(field_data, &str_end, 10);
-    if(out > INT_MAX)
-        dest = UINT_MAX;
-    else if(out < INT_MIN)
-        dest = INT_MIN;
-    else
-        dest = out;
-#endif
+    double alt;
+    const char* str_end = load_double(alt, field_data);
+    dest = alt;
+// #if (INT_MAX == LONG_MAX) && (INT_MIN == LONG_MIN)
+//     dest = strtol(field_data, &str_end, 10);
+// #else
+//     long out = strtol(field_data, &str_end, 10);
+//     if(out > INT_MAX)
+//         dest = UINT_MAX;
+//     else if(out < INT_MIN)
+//         dest = INT_MIN;
+//     else
+//         dest = out;
+// #endif
 
     if(str_end == field_data)
         throw MDX_bad_term("Bad int");
@@ -133,16 +191,19 @@ const char* MDX_FieldType<int>::load(int& dest, const char* field_data)
 template<>
 const char* MDX_FieldType<unsigned>::load(unsigned& dest, const char* field_data)
 {
-    char* str_end;
-#if (UINT_MAX == ULONG_MAX)
-    dest = strtoul(field_data, &str_end, 10);
-#else
-    unsigned long out = strtoul(field_data, &str_end, 10);
-    if(out > UINT_MAX)
-        dest = UINT_MAX;
-    else
-        dest = out;
-#endif
+    double alt;
+    const char* str_end = load_double(alt, field_data);
+    dest = alt;
+//     char* str_end;
+// #if (UINT_MAX == ULONG_MAX)
+//     dest = strtoul(field_data, &str_end, 10);
+// #else
+//     unsigned long out = strtoul(field_data, &str_end, 10);
+//     if(out > UINT_MAX)
+//         dest = UINT_MAX;
+//     else
+//         dest = out;
+// #endif
 
     if(str_end == field_data)
         throw MDX_bad_term("Bad uint");
@@ -166,8 +227,11 @@ const char* MDX_FieldType<bool>::load(bool& dest, const char* field_data)
 template<>
 const char* MDX_FieldType<long>::load(long& dest, const char* field_data)
 {
-    char* str_end;
-    dest = strtol(field_data, &str_end, 10);
+    double alt;
+    const char* str_end = load_double(alt, field_data);
+    dest = alt;
+    // char* str_end;
+    // dest = strtol(field_data, &str_end, 10);
 
     if(str_end == field_data)
         throw MDX_bad_term("Bad long");
@@ -178,8 +242,11 @@ const char* MDX_FieldType<long>::load(long& dest, const char* field_data)
 template<>
 const char* MDX_FieldType<unsigned long>::load(unsigned long& dest, const char* field_data)
 {
-    char* str_end;
-    dest = strtoul(field_data, &str_end, 10);
+    double alt;
+    const char* str_end = load_double(alt, field_data);
+    dest = alt;
+    // char* str_end;
+    // dest = strtoul(field_data, &str_end, 10);
 
     if(str_end == field_data)
         throw MDX_bad_term("Bad ulong");
@@ -190,8 +257,11 @@ const char* MDX_FieldType<unsigned long>::load(unsigned long& dest, const char* 
 template<>
 const char* MDX_FieldType<long long>::load(long long& dest, const char* field_data)
 {
-    char* str_end;
-    dest = strtoll(field_data, &str_end, 10);
+    double alt;
+    const char* str_end = load_double(alt, field_data);
+    dest = alt;
+    // char* str_end;
+    // dest = strtoll(field_data, &str_end, 10);
 
     if(str_end == field_data)
         throw MDX_bad_term("Bad llong");
@@ -202,20 +272,26 @@ const char* MDX_FieldType<long long>::load(long long& dest, const char* field_da
 template<>
 const char* MDX_FieldType<unsigned long long>::load(unsigned long long& dest, const char* field_data)
 {
-    char* str_end;
-    dest = strtoull(field_data, &str_end, 10);
-    return str_end;
+    double alt;
+    const char* str_end = load_double(alt, field_data);
+    dest = alt;
+    // char* str_end;
+    // dest = strtoull(field_data, &str_end, 10);
 
     if(str_end == field_data)
         throw MDX_bad_term("Bad ullong");
 
+    return str_end;
 }
 
 template<>
 const char* MDX_FieldType<float>::load(float& dest, const char* field_data)
 {
-    char* str_end;
-    dest = strtof(field_data, &str_end);
+    double alt;
+    const char* str_end = load_double(alt, field_data);
+    dest = alt;
+    // char* str_end;
+    // dest = strtof(field_data, &str_end);
 
     if(str_end == field_data)
         throw MDX_bad_term("Bad float");
@@ -226,8 +302,11 @@ const char* MDX_FieldType<float>::load(float& dest, const char* field_data)
 template<>
 const char* MDX_FieldType<double>::load(double& dest, const char* field_data)
 {
-    char* str_end;
-    dest = strtod(field_data, &str_end);
+    double alt;
+    const char* str_end = load_double(alt, field_data);
+    dest = alt;
+    // char* str_end;
+    // dest = strtod(field_data, &str_end);
 
     if(str_end == field_data)
         throw MDX_bad_term("Bad double");
