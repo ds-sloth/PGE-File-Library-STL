@@ -39,17 +39,56 @@
 const char* MDX_skip_term(const char* line)
 {
     bool escape = false;
+    const char* tag_begin = line;
+    const char* tag_end = nullptr;
+
     while(true)
     {
         if(*line == ';')
         {
             if(!escape)
+            {
+                if(!tag_end)
+                    throw MDX_missing_delimiter(':');
+
                 return line + 1;
+            }
+
+            escape = false;
+        }
+        else if(*line == ':')
+        {
+            if(!escape)
+            {
+                if(!tag_end)
+                {
+                    if(tag_end == tag_begin)
+                        throw MDX_bad_field("");
+
+                    tag_end = line;
+                }
+                else
+                    throw MDX_bad_field(tag_begin, tag_end - tag_begin);
+            }
 
             escape = false;
         }
         else if(*line == '\0')
-            throw MDX_missing_delimiter(';');
+        {
+            if(tag_end)
+            {
+                try
+                {
+                    throw MDX_missing_delimiter(';');
+                }
+                catch(...)
+                {
+                    std::throw_with_nested(MDX_bad_field(tag_begin, tag_end - tag_begin));
+                }
+            }
+            else
+                throw MDX_missing_delimiter(':');
+        }
         else if(*line == '\\')
             escape = true;
         else
