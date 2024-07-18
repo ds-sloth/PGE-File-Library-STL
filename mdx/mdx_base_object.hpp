@@ -25,13 +25,13 @@
  */
 
 #pragma once
-#ifndef PGEX2_BASE_OBJECT_HPP
-#define PGEX2_BASE_OBJECT_HPP
+#ifndef MDX_BASE_OBJECT_HPP
+#define MDX_BASE_OBJECT_HPP
 
 #include <vector>
-#include "pgex2_base_field.hpp"
+#include "mdx/mdx_base_field.hpp"
 
-/*! \file pgex2_base_object.hpp
+/*! \file mdx_base_object.hpp
  *
  *  \brief Contains templates for objects
  *
@@ -40,15 +40,15 @@
  */
 
 template<class _obj_t>
-struct PGEX2_BaseObject
+struct MDX_BaseObject
 {
-    template<class obj_loader_t> friend struct PGEX2_FieldType_ObjectList;
-    template<class obj_loader_t> friend struct PGEX2_FieldType_Object;
+    template<class obj_loader_t> friend struct MDX_FieldType_ObjectList;
+    template<class obj_loader_t> friend struct MDX_FieldType_Object;
 
     using obj_t = _obj_t;
 
-    template<class field_t> using field = PGEX2_Field<obj_t, field_t>;
-    std::vector<PGEX2_BaseField<obj_t>*> m_fields;
+    template<class field_t> using field = MDX_Field<obj_t, field_t>;
+    std::vector<MDX_BaseField<obj_t>*> m_fields;
 
 protected:
     void load_object(obj_t& dest, const char* line) const
@@ -71,12 +71,12 @@ protected:
             }
 
             if(try_field >= m_fields.size())
-                cur_data = PGEX2_find_next_term(cur_data);
+                cur_data = MDX_find_next_term(cur_data);
         }
     }
 };
 
 template<class _obj_t>
-struct PGEX2_Object;
+struct MDX_Object;
 
-#endif // #ifndef PGEX2_BASE_OBJECT_HPP
+#endif // #ifndef MDX_BASE_OBJECT_HPP

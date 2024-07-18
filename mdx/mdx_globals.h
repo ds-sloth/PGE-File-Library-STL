@@ -25,17 +25,17 @@
  */
 
 /*!
- *  \file pgex2_globals.h
- *  \brief Contains global structures used by PGEX2's headers
+ *  \file mdx_globals.h
+ *  \brief Contains global structures used by MDX's headers
  */
 
 #pragma once
-#ifndef PGEX2_GLOBALS_H
-#define PGEX2_GLOBALS_H
+#ifndef MDX_GLOBALS_H
+#define MDX_GLOBALS_H
 
 #include <cstddef>
 
-struct PGEX2_BaseCallbacks
+struct MDX_BaseCallbacks
 {
     template<class obj_t> using load_callback = bool (*)(void* userdata, obj_t& obj);
     template<class obj_t> using save_callback = bool (*)(void* userdata, obj_t& obj, size_t index);
@@ -43,4 +43,4 @@ struct PGEX2_BaseCallbacks
     void* userdata = nullptr;
 };
 
-#endif // #ifndef PGEX2_GLOBALS_H
+#endif // #ifndef MDX_GLOBALS_H

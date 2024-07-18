@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-/*! \file pgex2_level_file_rw.cpp
+/*! \file mdx_level_file_rw.cpp
  *
  *  \brief Implements defines PGE-X2 functions for loading a level object
  *
@@ -32,12 +32,12 @@
  *
  */
 
-#include "pgex2_level_file.h"
+#include "mdx/mdx_level_file.h"
 #include "../file_formats.h"
 #include "../pge_file_lib_private.h"
 #include "../pge_file_lib_globs.h"
 
-static bool s_load_head(void* _FileData, PGEX2_LevelHead& dest)
+static bool s_load_head(void* _FileData, MDX_LevelHead& dest)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
 
@@ -259,7 +259,7 @@ static bool s_load_event(void* _FileData, LevelSMBX64Event& event)
     return true;
 }
 
-bool PGEX2_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
+bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
 {
     FileFormats::CreateLevelData(FileData);
     FileData.meta.RecentFormat = LevelData::PGEX;
@@ -273,7 +273,7 @@ bool PGEX2_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData
         FileData.meta.path = in_1.dirpath();
     }
 
-    PGEX2_LevelCallbacks callbacks;
+    MDX_LevelCallbacks callbacks;
 
     callbacks.load_head = s_load_head;
     callbacks.load_bookmark = s_load_bookmark;
@@ -290,7 +290,7 @@ bool PGEX2_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData
 
     callbacks.userdata = reinterpret_cast<void*>(&FileData);
 
-    PGEX2_load_level(file, callbacks);
+    MDX_load_level(file, callbacks);
 
     return true;
 }

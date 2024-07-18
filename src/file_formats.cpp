@@ -29,7 +29,7 @@
 
 #include "file_formats.h"
 
-bool FileFormats::g_use_pgex2 = false;
+bool FileFormats::g_use_mdx = false;
 
 PGESTRING FileFormats::removeQuotes(const PGESTRING &str)
 {

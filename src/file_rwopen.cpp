@@ -31,7 +31,7 @@
 
 #include "file_formats.h"
 #include "pge_file_lib_private.h"
-#include "pgex2_int/pgex2_level_file.h"
+#include "mdx/mdx_level_file.h"
 
 bool FileFormats::OpenLevelFile(const PGESTRING &filePath, LevelData &FileData)
 {
@@ -110,10 +110,10 @@ bool FileFormats::OpenLevelFileT(PGE_FileFormats_misc::TextInput &file, LevelDat
         if(!ReadSMBX64LvlFile(file, FileData))
             return false;
     }
-    else if(FileFormats::g_use_pgex2)
+    else if(FileFormats::g_use_mdx)
     {
-        //Read PGE LVLX File with PGEX2
-        if(!PGEX2_load_level(file, FileData))
+        //Read PGE LVLX File with MDX
+        if(!MDX_load_level(file, FileData))
             return false;
     }
     else

@@ -25,10 +25,10 @@
  */
 
 #pragma once
-#ifndef PGEX2_BASE_SECTION_HPP
-#define PGEX2_BASE_SECTION_HPP
+#ifndef MDX_BASE_SECTION_HPP
+#define MDX_BASE_SECTION_HPP
 
-/*! \file pgex2_base_section.hpp
+/*! \file mdx_base_section.hpp
  *
  *  \brief Contains templates for file sections
  *
@@ -41,26 +41,26 @@
 #include <cstring>
 
 #include "../pge_file_lib_globs.h"
-#include "pgex2_base_field.hpp"
-#include "pgex2_base_object.hpp"
+#include "mdx/mdx_base_field.hpp"
+#include "mdx/mdx_base_object.hpp"
 
-inline void PGEX2_skip_section(PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line);
+inline void MDX_skip_section(PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line);
 
-inline bool PGEX2_line_is_section_end(const PGESTRING& cur_line)
+inline bool MDX_line_is_section_end(const PGESTRING& cur_line)
 {
     return cur_line.size() > 4 && strncmp(cur_line.c_str() + cur_line.size() - 4, "_END", 4) == 0;
 }
 
 template<class callback_table_t>
-struct PGEX2_BaseSection
+struct MDX_BaseSection
 {
     virtual bool try_load(const callback_table_t& table, PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line) = 0;
 };
 
 template<class callback_table_t, class _obj_t>
-struct PGEX2_Section : public PGEX2_Object<_obj_t>, public PGEX2_BaseSection<callback_table_t>
+struct MDX_Section : public MDX_Object<_obj_t>, public MDX_BaseSection<callback_table_t>
 {
-    using PGEX2_Object<_obj_t>::load_object;
+    using MDX_Object<_obj_t>::load_object;
     using obj_t = _obj_t;
 
 private:
@@ -80,7 +80,7 @@ private:
 
 public:
     template<class parent_t>
-    PGEX2_Section(parent_t* parent, const char* section_name, load_callback_ptr_t load_callback, save_callback_ptr_t save_callback)
+    MDX_Section(parent_t* parent, const char* section_name, load_callback_ptr_t load_callback, save_callback_ptr_t save_callback)
         : m_section_name(section_name), m_load_callback(load_callback), m_save_callback(save_callback)
     {
         parent->m_sections.push_back(this);
@@ -122,12 +122,12 @@ public:
 
                 if(!callback(cb.userdata, m_obj))
                 {
-                    PGEX2_skip_section(inf, cur_line);
+                    MDX_skip_section(inf, cur_line);
                     return true;
                 }
             }
             // section end line
-            else if(PGEX2_line_is_section_end(cur_line) && strncmp(cur_line.c_str(), m_section_name, cur_line.size() - 4) == 0)
+            else if(MDX_line_is_section_end(cur_line) && strncmp(cur_line.c_str(), m_section_name, cur_line.size() - 4) == 0)
             {
                 return true;
             }
@@ -140,15 +140,15 @@ public:
     }
 };
 
-inline void PGEX2_skip_section(PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line)
+inline void MDX_skip_section(PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line)
 {
     while(!inf.eof())
     {
         inf.readLine(cur_line);
 
-        if(PGEX2_line_is_section_end(cur_line))
+        if(MDX_line_is_section_end(cur_line))
             break;
     }
 }
 
-#endif // #ifndef PGEX2_BASE_SECTION_HPP
+#endif // #ifndef MDX_BASE_SECTION_HPP

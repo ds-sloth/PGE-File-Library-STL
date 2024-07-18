@@ -25,20 +25,20 @@
  */
 
 /*!
- *  \file pgex2_level_file.h
- *  \brief Contains data structure definitions for the PGEX2 level loader
+ *  \file mdx_level_file.h
+ *  \brief Contains data structure definitions for the MDX level loader
  */
 
 #pragma once
-#ifndef PGEX2_LEVEL_FILE_H
-#define PGEX2_LEVEL_FILE_H
+#ifndef MDX_LEVEL_FILE_H
+#define MDX_LEVEL_FILE_H
 
-#include "pgex2_globals.h"
+#include "mdx/mdx_globals.h"
 
 #include "../pge_file_lib_globs.h"
 #include "../lvl_filedata.h"
 
-struct PGEX2_LevelHead
+struct MDX_LevelHead
 {
     PGESTRING LevelName;
     unsigned stars = 0;
@@ -50,10 +50,10 @@ struct PGEX2_LevelHead
     PGELIST<PGESTRING> music_files;
 };
 
-struct PGEX2_LevelCallbacks : PGEX2_BaseCallbacks
+struct MDX_LevelCallbacks : MDX_BaseCallbacks
 {
-    load_callback<PGEX2_LevelHead> load_head = nullptr;
-    save_callback<PGEX2_LevelHead> save_head = nullptr;
+    load_callback<MDX_LevelHead> load_head = nullptr;
+    save_callback<MDX_LevelHead> save_head = nullptr;
 
     load_callback<Bookmark> load_bookmark = nullptr;
     save_callback<Bookmark> save_bookmark = nullptr;
@@ -101,8 +101,8 @@ struct PGEX2_LevelCallbacks : PGEX2_BaseCallbacks
     save_callback<LevelItemSetup38A> save_levelitem38a = nullptr;
 };
 
-void PGEX2_load_level(PGE_FileFormats_misc::TextInput& input, PGEX2_LevelCallbacks& callbacks);
+void MDX_load_level(PGE_FileFormats_misc::TextInput& input, MDX_LevelCallbacks& callbacks);
 
-bool PGEX2_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData);
+bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData);
 
-#endif // #ifndef PGEX2_LEVEL_FILE_H
+#endif // #ifndef MDX_LEVEL_FILE_H

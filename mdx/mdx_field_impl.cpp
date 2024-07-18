@@ -26,17 +26,17 @@
 
 #include <cstdlib>
 #include <climits>
-#include "pgex2_base_field.hpp"
+#include "mdx/mdx_base_field.hpp"
 
 #include "../pge_file_lib_globs.h"
 
-/*! \file pgex2_field_impl.cpp
+/*! \file mdx_field_impl.cpp
  *
  *  \brief Contains code to load specific field types
  *
  */
 
-const char* PGEX2_find_next_term(const char* line)
+const char* MDX_find_next_term(const char* line)
 {
     bool escape = false;
     while(true)
@@ -59,7 +59,7 @@ const char* PGEX2_find_next_term(const char* line)
     }
 }
 
-const char* PGEX2_find_next_list_item(const char* line)
+const char* MDX_find_next_list_item(const char* line)
 {
     bool escape = false;
     while(true)
@@ -90,7 +90,7 @@ const char* PGEX2_find_next_list_item(const char* line)
 }
 
 template<>
-const char* PGEX2_FieldType<int>::load(int& dest, const char* field_data)
+const char* MDX_FieldType<int>::load(int& dest, const char* field_data)
 {
     char* str_end;
 #if (INT_MAX == LONG_MAX) && (INT_MIN == LONG_MIN)
@@ -109,7 +109,7 @@ const char* PGEX2_FieldType<int>::load(int& dest, const char* field_data)
 }
 
 template<>
-const char* PGEX2_FieldType<unsigned>::load(unsigned& dest, const char* field_data)
+const char* MDX_FieldType<unsigned>::load(unsigned& dest, const char* field_data)
 {
     char* str_end;
 #if (UINT_MAX == ULONG_MAX)
@@ -126,7 +126,7 @@ const char* PGEX2_FieldType<unsigned>::load(unsigned& dest, const char* field_da
 }
 
 template<>
-const char* PGEX2_FieldType<bool>::load(bool& dest, const char* field_data)
+const char* MDX_FieldType<bool>::load(bool& dest, const char* field_data)
 {
     if(*field_data == '1')
         dest = true;
@@ -137,7 +137,7 @@ const char* PGEX2_FieldType<bool>::load(bool& dest, const char* field_data)
 }
 
 template<>
-const char* PGEX2_FieldType<long>::load(long& dest, const char* field_data)
+const char* MDX_FieldType<long>::load(long& dest, const char* field_data)
 {
     char* str_end;
     dest = strtol(field_data, &str_end, 10);
@@ -145,7 +145,7 @@ const char* PGEX2_FieldType<long>::load(long& dest, const char* field_data)
 }
 
 template<>
-const char* PGEX2_FieldType<unsigned long>::load(unsigned long& dest, const char* field_data)
+const char* MDX_FieldType<unsigned long>::load(unsigned long& dest, const char* field_data)
 {
     char* str_end;
     dest = strtoul(field_data, &str_end, 10);
@@ -153,7 +153,7 @@ const char* PGEX2_FieldType<unsigned long>::load(unsigned long& dest, const char
 }
 
 template<>
-const char* PGEX2_FieldType<long long>::load(long long& dest, const char* field_data)
+const char* MDX_FieldType<long long>::load(long long& dest, const char* field_data)
 {
     char* str_end;
     dest = strtoll(field_data, &str_end, 10);
@@ -161,7 +161,7 @@ const char* PGEX2_FieldType<long long>::load(long long& dest, const char* field_
 }
 
 template<>
-const char* PGEX2_FieldType<unsigned long long>::load(unsigned long long& dest, const char* field_data)
+const char* MDX_FieldType<unsigned long long>::load(unsigned long long& dest, const char* field_data)
 {
     char* str_end;
     dest = strtoull(field_data, &str_end, 10);
@@ -169,7 +169,7 @@ const char* PGEX2_FieldType<unsigned long long>::load(unsigned long long& dest, 
 }
 
 template<>
-const char* PGEX2_FieldType<float>::load(float& dest, const char* field_data)
+const char* MDX_FieldType<float>::load(float& dest, const char* field_data)
 {
     char* str_end;
     dest = strtof(field_data, &str_end);
@@ -177,7 +177,7 @@ const char* PGEX2_FieldType<float>::load(float& dest, const char* field_data)
 }
 
 template<>
-const char* PGEX2_FieldType<double>::load(double& dest, const char* field_data)
+const char* MDX_FieldType<double>::load(double& dest, const char* field_data)
 {
     char* str_end;
     dest = strtod(field_data, &str_end);
@@ -185,7 +185,7 @@ const char* PGEX2_FieldType<double>::load(double& dest, const char* field_data)
 }
 
 template<>
-const char* PGEX2_FieldType<PGESTRING>::load(PGESTRING& dest, const char* field_data)
+const char* MDX_FieldType<PGESTRING>::load(PGESTRING& dest, const char* field_data)
 {
     dest.clear();
 
@@ -248,7 +248,7 @@ const char* PGEX2_FieldType<PGESTRING>::load(PGESTRING& dest, const char* field_
     return cur_pos;
 }
 
-const char* PGEX2_FieldType<PGELIST<bool>>::load(PGELIST<bool>& dest, const char* field_data)
+const char* MDX_FieldType<PGELIST<bool>>::load(PGELIST<bool>& dest, const char* field_data)
 {
     dest.clear();
 

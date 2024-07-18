@@ -25,10 +25,10 @@
  */
 
 #pragma once
-#ifndef PGEX2_BASE_FILE_HPP
-#define PGEX2_BASE_FILE_HPP
+#ifndef MDX_BASE_FILE_HPP
+#define MDX_BASE_FILE_HPP
 
-/*! \file pgex2_base_file.hpp
+/*! \file mdx_base_file.hpp
  *
  *  \brief Contains templates for file formats
  *
@@ -40,17 +40,17 @@
 #include <cstddef>
 #include <cstring>
 
-#include "../pge_file_lib_globs.h"
-#include "pgex2_base_field.hpp"
-#include "pgex2_base_section.hpp"
+#include "pge_file_lib_globs.h"
+#include "mdx/mdx_base_field.hpp"
+#include "mdx/mdx_base_section.hpp"
 
 template<class _callback_table_t>
-struct PGEX2_File
+struct MDX_File
 {
     using callback_table_t = _callback_table_t;
-    template<class obj_t> using section = PGEX2_Section<callback_table_t, obj_t>;
+    template<class obj_t> using section = MDX_Section<callback_table_t, obj_t>;
 
-    std::vector<PGEX2_BaseSection<callback_table_t>*> m_sections;
+    std::vector<MDX_BaseSection<callback_table_t>*> m_sections;
 
     void load_file(PGE_FileFormats_misc::TextInput& inf, const callback_table_t& cb)
     {
@@ -73,9 +73,9 @@ struct PGEX2_File
             }
 
             if(!handled)
-                PGEX2_skip_section(inf, cur_line);
+                MDX_skip_section(inf, cur_line);
         }
     }
 };
 
-#endif // #ifndef PGEX2_BASE_FILE_HPP
+#endif // #ifndef MDX_BASE_FILE_HPP
