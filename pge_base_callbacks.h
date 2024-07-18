@@ -25,22 +25,33 @@
  */
 
 /*!
- *  \file mdx_globals.h
- *  \brief Contains global structures used by MDX's headers
+ *  \file pge_base_callbacks.h
+ *  \brief Contains base structures used for PGE-FL's callbacks
  */
 
 #pragma once
-#ifndef MDX_GLOBALS_H
-#define MDX_GLOBALS_H
+#ifndef PGE_BASE_CALLBACKS_H
+#define PGE_BASE_CALLBACKS_H
 
 #include <cstddef>
 
-struct MDX_BaseCallbacks
+namespace PGE_FileFormats_misc
 {
-    template<class obj_t> using load_callback = bool (*)(void* userdata, obj_t& obj);
-    template<class obj_t> using save_callback = bool (*)(void* userdata, obj_t& obj, size_t index);
+
+struct LoadCallbacks
+{
+    template<class obj_t> using callback = bool (*)(void* userdata, obj_t& obj);
 
     void* userdata = nullptr;
 };
 
-#endif // #ifndef MDX_GLOBALS_H
+struct SaveCallbacks
+{
+    template<class obj_t> using callback = bool (*)(void* userdata, obj_t& obj, size_t index);
+
+    void* userdata = nullptr;
+};
+
+}
+
+#endif // #ifndef PGE_BASE_CALLBACKS_H

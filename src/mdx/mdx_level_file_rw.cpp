@@ -37,7 +37,7 @@
 #include "pge_file_lib_private.h"
 #include "pge_file_lib_globs.h"
 
-static bool s_load_head(void* _FileData, MDX_LevelHead& dest)
+static bool s_load_head(void* _FileData, LevelHead& dest)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
 
@@ -273,7 +273,7 @@ bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
         FileData.meta.path = in_1.dirpath();
     }
 
-    MDX_LevelCallbacks callbacks;
+    LevelLoadCallbacks callbacks;
 
     callbacks.load_head = s_load_head;
     callbacks.load_bookmark = s_load_bookmark;

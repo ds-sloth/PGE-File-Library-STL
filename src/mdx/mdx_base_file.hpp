@@ -44,15 +44,16 @@
 #include "mdx/mdx_base_field.hpp"
 #include "mdx/mdx_base_section.hpp"
 
-template<class _callback_table_t>
+template<class _load_callbacks_t, class _save_callbacks_t>
 struct MDX_File
 {
-    using callback_table_t = _callback_table_t;
-    template<class obj_t> using section = MDX_Section<callback_table_t, obj_t>;
+    using load_callbacks_t = _load_callbacks_t;
+    using save_callbacks_t = _save_callbacks_t;
+    template<class obj_t> using section = MDX_Section<load_callbacks_t, save_callbacks_t, obj_t>;
 
-    std::vector<MDX_BaseSection<callback_table_t>*> m_sections;
+    std::vector<MDX_BaseSection<load_callbacks_t, save_callbacks_t>*> m_sections;
 
-    void load_file(PGE_FileFormats_misc::TextInput& inf, const callback_table_t& cb)
+    void load_file(PGE_FileFormats_misc::TextInput& inf, const load_callbacks_t& cb)
     {
         inf.seek(0, PGE_FileFormats_misc::TextFileInput::begin);
 

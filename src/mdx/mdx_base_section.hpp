@@ -51,14 +51,14 @@ inline bool MDX_line_is_section_end(const PGESTRING& cur_line)
     return cur_line.size() > 4 && strncmp(cur_line.c_str() + cur_line.size() - 4, "_END", 4) == 0;
 }
 
-template<class callback_table_t>
+template<class load_callbacks_t, class save_callbacks_t>
 struct MDX_BaseSection
 {
-    virtual bool try_load(const callback_table_t& table, PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line) = 0;
+    virtual bool try_load(const load_callbacks_t& table, PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line) = 0;
 };
 
-template<class callback_table_t, class _obj_t>
-struct MDX_Section : public MDX_Object<_obj_t>, public MDX_BaseSection<callback_table_t>
+template<class load_callbacks_t, class save_callbacks_t, class _obj_t>
+struct MDX_Section : public MDX_Object<_obj_t>, public MDX_BaseSection<load_callbacks_t, save_callbacks_t>
 {
     using MDX_Object<_obj_t>::load_object;
     using obj_t = _obj_t;
@@ -67,11 +67,11 @@ private:
     // private fields for load-time
     obj_t m_obj;
 
-    using load_callback_t = typename callback_table_t::template load_callback<obj_t>;
-    using save_callback_t = typename callback_table_t::template save_callback<obj_t>;
+    using load_callback_t = typename load_callbacks_t::template callback<obj_t>;
+    using save_callback_t = typename save_callbacks_t::template callback<obj_t>;
 
-    typedef load_callback_t callback_table_t::* load_callback_ptr_t;
-    typedef save_callback_t callback_table_t::* save_callback_ptr_t;
+    typedef load_callback_t load_callbacks_t::* load_callback_ptr_t;
+    typedef save_callback_t save_callbacks_t::* save_callback_ptr_t;
 
     const char* m_section_name = "";
 
@@ -87,7 +87,7 @@ public:
     }
 
     /* attempts to match the field name. if successful, returns true and leaves the file pointer following the end of the section. */
-    virtual bool try_load(const callback_table_t& cb, PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line)
+    virtual bool try_load(const load_callbacks_t& cb, PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line)
     {
         // check match
         if(cur_line != m_section_name)

@@ -39,7 +39,7 @@
 #include "mdx/mdx_macros.hpp"
 #include "mdx/mdx_level_file.h"
 
-MDX_SETUP_OBJECT(MDX_LevelHead,
+MDX_SETUP_OBJECT(LevelHead,
     MDX_FIELD("TL", LevelName); //Level Title
     MDX_FIELD("SZ", stars); //Starz number
     MDX_FIELD("DL", open_level_on_fail); //Open level on fail
@@ -429,9 +429,9 @@ MDX_SETUP_OBJECT(LevelItemSetup38A,
     // MDX_FIELD("D", data); //Variable value
 );
 
-struct MDX_LevelFile : MDX_File<MDX_LevelCallbacks>
+struct MDX_LevelFile : MDX_File<LevelLoadCallbacks, LevelSaveCallbacks>
 {
-    MDX_SECTION("HEAD", MDX_LevelHead, head);
+    MDX_SECTION("HEAD", LevelHead, head);
 
     MDX_SECTION("BOOKMARK", Bookmark, bookmark);
 
@@ -464,7 +464,7 @@ struct MDX_LevelFile : MDX_File<MDX_LevelCallbacks>
     MDX_SECTION("CUSTOM_ITEMS_38A", LevelItemSetup38A, levelitem38a);
 };
 
-void MDX_load_level(PGE_FileFormats_misc::TextInput& input, MDX_LevelCallbacks& callbacks)
+void MDX_load_level(PGE_FileFormats_misc::TextInput& input, LevelLoadCallbacks& callbacks)
 {
     MDX_LevelFile f;
     f.load_file(input, callbacks);

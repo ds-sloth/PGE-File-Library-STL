@@ -34,6 +34,7 @@
 #define LVL_FILEDATA_H
 
 #include "pge_file_lib_globs.h"
+#include "pge_base_callbacks.h"
 #include "meta_filedata.h"
 #include "pge_ff_units.h"
 
@@ -986,6 +987,21 @@ struct LevelItemSetup38A
 };
 
 /*!
+ * \brief Level header data structure. Contains all available settings on the level.
+ */
+struct LevelHead
+{
+    PGESTRING LevelName;
+    unsigned stars = 0;
+    PGESTRING open_level_on_fail;
+    unsigned open_level_on_fail_warpID = 0;
+    PGELIST<PGESTRING> player_names_overrides;
+    PGESTRING custom_params;
+    PGESTRING configPackId;
+    PGELIST<PGESTRING> music_files;
+};
+
+/*!
  * \brief Level data structure. Contains all available settings and element lists on the level.
  */
 struct LevelData
@@ -1128,6 +1144,45 @@ struct LevelData
     bool layerIsExist(const PGESTRING &title);
 };
 
+struct LevelLoadCallbacks : PGE_FileFormats_misc::LoadCallbacks
+{
+    callback<LevelHead>         load_head = nullptr;
+    callback<Bookmark>          load_bookmark = nullptr;
+    callback<CrashData>         load_crash_data = nullptr;
+    callback<LevelSection>      load_section = nullptr;
+    callback<PlayerPoint>       load_startpoint = nullptr;
+    callback<LevelBlock>        load_block = nullptr;
+    callback<LevelBGO>          load_bgo = nullptr;
+    callback<LevelNPC>          load_npc = nullptr;
+    callback<LevelPhysEnv>      load_phys = nullptr;
+    callback<LevelDoor>         load_warp = nullptr;
+    callback<LevelLayer>        load_layer = nullptr;
+    callback<LevelSMBX64Event>  load_event = nullptr;
+    callback<LevelVariable>     load_var = nullptr;
+    callback<LevelArray>        load_arr = nullptr;
+    callback<LevelScript>       load_script = nullptr;
+    callback<LevelItemSetup38A> load_levelitem38a = nullptr;
+};
+
+struct LevelSaveCallbacks : PGE_FileFormats_misc::SaveCallbacks
+{
+    callback<LevelHead>         save_head = nullptr;
+    callback<Bookmark>          save_bookmark = nullptr;
+    callback<CrashData>         save_crash_data = nullptr;
+    callback<LevelSection>      save_section = nullptr;
+    callback<PlayerPoint>       save_startpoint = nullptr;
+    callback<LevelBlock>        save_block = nullptr;
+    callback<LevelBGO>          save_bgo = nullptr;
+    callback<LevelNPC>          save_npc = nullptr;
+    callback<LevelPhysEnv>      save_phys = nullptr;
+    callback<LevelDoor>         save_warp = nullptr;
+    callback<LevelLayer>        save_layer = nullptr;
+    callback<LevelSMBX64Event>  save_event = nullptr;
+    callback<LevelVariable>     save_var = nullptr;
+    callback<LevelArray>        save_arr = nullptr;
+    callback<LevelScript>       save_script = nullptr;
+    callback<LevelItemSetup38A> save_levelitem38a = nullptr;
+};
 
 
 #endif // LVL_FILEDATA_H
