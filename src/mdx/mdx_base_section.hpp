@@ -57,6 +57,10 @@ inline bool MDX_line_is_section_end(const PGESTRING& cur_line, const char* secti
     if(strncmp(cur_line.c_str(), section_name, cur_line.size() - 4))
         return false;
 
+    // this is safe because strncmp returned equal
+    if(section_name[cur_line.size() - 4] != '\0')
+        return false;
+
     return true;
 }
 
