@@ -274,6 +274,7 @@ PGEFile::PGEX_Entry PGEFile::buildTree(PGESTRINGList &src_data, bool *_valid)
             pge_size_t state = 0, size = strlen(srcData_nc.c_str()), tail = size - 1;
             PGEX_Val dataValue;
             int escape = 0;
+            bool quoted = false;
             for(pge_size_t i = 0; i < size; i++)
             {
                 if(state == STATE_ERROR)
@@ -307,13 +308,22 @@ PGEFile::PGEX_Entry PGEFile::buildTree(PGESTRINGList &src_data, bool *_valid)
                     dataValue.marker.push_back(c);
                     break;
                 case STATE_VALUE:
-                    if((c == ':') && (escape == 0))
+                    if((c == '"') && (escape == 0))
+                        quoted = !quoted;
+                    if((c == ':') && (escape == 0) && !quoted)
                     {
                         state = STATE_ERROR;
                         continue;
                     }
-                    if(((c == ';') && (escape == 0)) || (i == tail))
+                    if(((c == ';') && (escape == 0) && !quoted) || (i == tail))
                     {
+                        // unterminated quote
+                        if(quoted)
+                        {
+                            valid = false;
+                            break;
+                        }
+
                         //STORE DATA
                         dataItem.values.push_back(dataValue);
                         dataValue.marker.clear();
@@ -604,10 +614,10 @@ bool PGEFile::IsStringArray(const PGESTRING &in) // String array
                 depth = 1;    //Close value
                 comma = 0;
             }
-            else if(!escape && (in[i] == '[' || in[i] == ']' || in[i] == ','))
-            {
-                valid = false;
-            }
+            // else if(!escape && (in[i] == '[' || in[i] == ']' || in[i] == ','))
+            // {
+            //     valid = false;
+            // }
             else if((in[i] == '\\') && (!escape))
             {
                 escape = true;
@@ -679,11 +689,11 @@ PGESTRINGList PGEFile::X2STRArr(const PGESTRING &in, bool *_valid)
                 depth = 1;
                 comma = 0;
             }
-            else if((!escape) && (in[i] == '[' || in[i] == ']' || in[i] == ','))
-            {
-                valid = false;
-                break;
-            }
+            // else if((!escape) && (in[i] == '[' || in[i] == ']' || in[i] == ','))
+            // {
+            //     valid = false;
+            //     break;
+            // }
             else if((in[i] == '\\') && (!escape))
             {
                 escape = true;
@@ -765,6 +775,7 @@ PGELIST<PGESTRINGList > PGEFile::splitDataLine(const PGESTRING &src_data, bool *
     PGESTRING marker;
     PGESTRING value;
     int escape = 0;
+    bool quoted = false;
 
     for(pge_size_t i = 0; i < size; i++)
     {
@@ -807,13 +818,22 @@ PGELIST<PGESTRINGList > PGEFile::splitDataLine(const PGESTRING &src_data, bool *
             break;
 
         case STATE_VALUE:
-            if((c == ':') && (escape == 0))
+            if((c == '"') && (escape == 0))
+                quoted = !quoted;
+            if((c == ':') && (escape == 0) && !quoted)
             {
                 state = STATE_ERROR;
                 continue;
             }
-            if(((c == ';') && (escape == 0)) || (i == tail))
+            if(((c == ';') && (escape == 0) && !quoted) || (i == tail))
             {
+                // unterminated quote
+                if(quoted)
+                {
+                    valid = false;
+                    break;
+                }
+
                 //STORE ENTRY!
                 PGESTRINGList fields;
                 fields.push_back(marker);
