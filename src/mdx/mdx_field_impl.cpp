@@ -57,13 +57,10 @@ const char* MDX_skip_term(const char* line)
             }
             else if(*line == ';')
             {
-                if(!escape && !quoted)
-                {
-                    if(!tag_end)
-                        throw MDX_missing_delimiter(':');
-
+                if(!tag_end)
+                    throw MDX_missing_delimiter(':');
+                else if(!escape && !quoted)
                     return line + 1;
-                }
 
                 escape = false;
             }
