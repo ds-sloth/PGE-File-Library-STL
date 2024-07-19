@@ -235,6 +235,10 @@ const char* load_double(double& dest, const char* field_data)
 
         if(c < '0' || c > '9')
         {
+            // don't allow "." and "-."
+            if(field_data == ret_error + 1 || (field_data == ret_error + 2 && sign == -1))
+                return ret_error;
+
             dest = sign * value;
             return field_data;
         }
