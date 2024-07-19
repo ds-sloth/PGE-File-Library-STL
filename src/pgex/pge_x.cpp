@@ -272,6 +272,10 @@ PGEFile::PGEX_Entry PGEFile::buildTree(PGESTRINGList &src_data, bool *_valid)
                 STATE_ERROR = 2
             };
             pge_size_t state = 0, size = strlen(srcData_nc.c_str()), tail = size - 1;
+
+            if(srcData_nc.size() > 0 && srcData_nc.back() != ';')
+                state = STATE_ERROR;
+
             PGEX_Val dataValue;
             int escape = 0;
             bool quoted = false;
@@ -790,6 +794,10 @@ PGELIST<PGESTRINGList > PGEFile::splitDataLine(const PGESTRING &src_data, bool *
     };
 
     pge_size_t state = 0, size = strlen(src_data.c_str()), tail = size - 1;
+
+    if(src_data.size() > 0 && src_data.back() != ';')
+        state = STATE_ERROR;
+
     PGESTRING marker;
     PGESTRING value;
     int escape = 0;
