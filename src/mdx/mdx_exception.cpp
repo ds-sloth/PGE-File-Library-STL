@@ -76,17 +76,19 @@ MDX_bad_field::MDX_bad_field(const char* field_name) noexcept
 {
     static const char prefix[] = "Bad field ";
     memcpy(m_description, prefix, sizeof(prefix) - 1);
-    strncpy(m_description + sizeof(prefix) - 1, field_name, sizeof(m_description) - (sizeof(prefix) - 1));
+    strncpy(m_description + sizeof(prefix) - 1, field_name, sizeof(m_description) - sizeof(prefix));
+    m_description[sizeof(m_description) - 1] = '\0';
 }
 
 MDX_bad_field::MDX_bad_field(const char* field_name, size_t len) noexcept
 {
     static const char prefix[] = "Bad field ";
     memcpy(m_description, prefix, sizeof(prefix) - 1);
-    size_t buff_left = sizeof(m_description) - (sizeof(prefix) - 1);
-    if(buff_left > len + 1)
-        buff_left = len + 1;
+    size_t buff_left = sizeof(m_description) - sizeof(prefix);
+    if(buff_left > len)
+        buff_left = len;
     strncpy(m_description + sizeof(prefix) - 1, field_name, buff_left);
+    m_description[sizeof(m_description) - 1] = '\0';
 }
 
 const char* MDX_bad_field::what() const noexcept
