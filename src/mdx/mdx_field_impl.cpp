@@ -71,7 +71,7 @@ const char* MDX_skip_term(const char* line)
             {
                 if(!tag_end)
                 {
-                    if(tag_end == tag_begin)
+                    if(line == tag_begin)
                         throw MDX_bad_field("");
 
                     tag_end = line;
