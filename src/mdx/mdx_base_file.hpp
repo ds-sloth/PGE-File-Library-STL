@@ -78,7 +78,10 @@ struct MDX_File
                 if(!handled)
                 {
                     std::string section_name = cur_line;
-                    MDX_skip_section(inf, cur_line, section_name.c_str());
+                    if(section_name.size() != strlen(section_name.c_str()))
+                        throw MDX_parse_error_misc("Bad section name");
+                    else
+                        MDX_skip_section(inf, cur_line, section_name.c_str());
                 }
             }
         }
