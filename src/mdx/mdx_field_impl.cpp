@@ -157,9 +157,6 @@ const char* load_int(int_t& dest, const char* field_data)
             return ret_error;
     }
 
-    if(*field_data == '\0')
-        return ret_error;
-
     int_t value = 0;
 
     while(true)
@@ -198,10 +195,10 @@ const char* load_double(double& dest, const char* field_data)
     {
         sign = -1;
         field_data++;
-    }
 
-    if(*field_data == '\0')
-        return ret_error;
+        if(*field_data < '0' || *field_data > '9')
+            return ret_error;
+    }
 
     double value = 0;
 
