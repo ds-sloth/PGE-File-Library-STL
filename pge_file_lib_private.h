@@ -222,6 +222,7 @@ inline PGESTRING PGE_URLDEC(const PGESTRING &src)
 #include <algorithm>
 #include <map>
 #include <cmath>
+#include <climits>
 #include <cctype>
 #include <unordered_map>
 
@@ -360,12 +361,18 @@ inline bool IsEmpty(const PGESTRINGList &str)
 
 inline int toInt(const PGESTRING &str)
 {
-    return static_cast<int>(std::stol(str, nullptr, 10));
+    long ret = std::stol(str, nullptr, 10);
+    if(ret > INT_MAX || ret < INT_MIN)
+        throw std::range_error("int value out of range");
+    return static_cast<int>(ret);
 }
 
 inline unsigned int toUInt(const PGESTRING &str)
 {
-    return static_cast<unsigned int>(std::stoul(str, nullptr, 10));
+    unsigned long ret = std::stoul(str, nullptr, 10);
+    if(ret > UINT_MAX)
+        throw std::range_error("unsigned int value out of range");
+    return static_cast<unsigned int>(ret);
 }
 
 inline long toLong(const PGESTRING &str)
