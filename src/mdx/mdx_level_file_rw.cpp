@@ -89,7 +89,7 @@ static bool s_load_section(void* _FileData, LevelSection& dest)
     //add captured value into array
     pge_size_t sections_count = FileData.sections.size();
 
-    if(dest.id < 0)
+    if(dest.id < 0 || dest.id > 10000)
         throw MDX_callback_error("Negative section ID");
 
     if(dest.id >= static_cast<int>(sections_count))
@@ -243,6 +243,12 @@ static bool s_load_event(void* _FileData, LevelSMBX64Event& event)
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
 
     // FIXME: do something to add padding to event.sets based on the IDs of the section settings
+    // Note: this causes a hang in extreme cases
+    for(const auto& set : event.sets)
+    {
+        if(set.id < 0 || set.id > 10000)
+            throw MDX_callback_error("Negative section ID");
+    }
 
     //add captured value into array
     bool found = false;
