@@ -48,7 +48,7 @@ const char* MDX_skip_term(const char* line)
     {
         if(*line == '"')
         {
-            if(!escape)
+            if(!escape && tag_end)
                 quoted = !quoted;
 
             escape = false;
