@@ -719,6 +719,7 @@ PGESTRINGList PGEFile::X2STRArr(const PGESTRING &in, bool *_valid)
                 entry.clear();
                 depth = 1;
                 comma = 0;
+                break;
             }
             // else if((!escape) && (in[i] == '[' || in[i] == ']' || in[i] == ','))
             // {
