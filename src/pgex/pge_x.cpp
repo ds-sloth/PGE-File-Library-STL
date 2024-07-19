@@ -1033,7 +1033,7 @@ ReCheckQuotie:
                 i++;
                 break;
             default:
-                output[j++] = input[i];
+                // output[j++] = input[i];
                 output[j]   = input[k];
                 i++;
                 break;
