@@ -77,6 +77,17 @@ struct MDX_File
 
                 if(!handled)
                 {
+                    // ignore line if all spaces
+                    bool all_spaces = true;
+                    for(const auto c : cur_line)
+                    {
+                        if(c != ' ')
+                            all_spaces = false;
+                    }
+                    if(all_spaces)
+                        continue;
+
+                    // otherwise, treat as unrecognized section and skip it
                     std::string section_name = cur_line;
                     if(section_name.size() != strlen(section_name.c_str()))
                         throw MDX_parse_error_misc("Bad section name");
