@@ -44,30 +44,30 @@ const char* MDX_skip_term(const char* line)
     const char* tag_begin = line;
     const char* tag_end = nullptr;
 
-    while(true)
+    try
     {
-        if(*line == '"')
+        while(true)
         {
-            if(!escape && tag_end)
-                quoted = !quoted;
-
-            escape = false;
-        }
-        else if(*line == ';')
-        {
-            if(!escape && !quoted)
+            if(*line == '"')
             {
-                if(!tag_end)
-                    throw MDX_missing_delimiter(':');
+                if(!escape && tag_end)
+                    quoted = !quoted;
 
-                return line + 1;
+                escape = false;
             }
+            else if(*line == ';')
+            {
+                if(!escape && !quoted)
+                {
+                    if(!tag_end)
+                        throw MDX_missing_delimiter(':');
 
-            escape = false;
-        }
-        else if(*line == ':')
-        {
-            if(!escape && !quoted)
+                    return line + 1;
+                }
+
+                escape = false;
+            }
+            else if(*line == ':')
             {
                 if(!tag_end)
                 {
@@ -76,36 +76,34 @@ const char* MDX_skip_term(const char* line)
 
                     tag_end = line;
                 }
-                else
+                else if(!escape && !quoted)
                     throw MDX_bad_field(tag_begin, tag_end - tag_begin);
-            }
 
-            escape = false;
-        }
-        else if(*line == '\0')
-        {
-            if(quoted)
-                throw MDX_missing_delimiter('"');
-            else if(tag_end)
+                escape = false;
+            }
+            else if(*line == '\0')
             {
-                try
-                {
+                if(quoted)
+                    throw MDX_missing_delimiter('"');
+                else if(tag_end)
                     throw MDX_missing_delimiter(';');
-                }
-                catch(...)
-                {
-                    std::throw_with_nested(MDX_bad_field(tag_begin, tag_end - tag_begin));
-                }
+                else
+                    throw MDX_missing_delimiter(':');
             }
+            else if(*line == '\\')
+                escape = true;
             else
-                throw MDX_missing_delimiter(':');
-        }
-        else if(*line == '\\')
-            escape = true;
-        else
-            escape = false;
+                escape = false;
 
-        line++;
+            line++;
+        }
+    }
+    catch(...)
+    {
+        if(tag_end)
+            std::throw_with_nested(MDX_bad_field(tag_begin, tag_end - tag_begin));
+        else
+            std::throw_with_nested(MDX_bad_field(tag_begin, line - tag_begin));
     }
 }
 
