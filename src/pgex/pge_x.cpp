@@ -738,6 +738,9 @@ PGESTRINGList PGEFile::X2STRArr(const PGESTRING &in, bool *_valid)
         i++;
     }
 
+    if(depth != 0)
+        valid = false;
+
     if(_valid)
         *_valid = valid;
 
