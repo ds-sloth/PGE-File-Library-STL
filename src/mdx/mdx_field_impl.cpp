@@ -67,12 +67,7 @@ const char* MDX_skip_term(const char* line)
             else if(*line == ':')
             {
                 if(!tag_end)
-                {
-                    if(line == tag_begin)
-                        throw MDX_bad_field("");
-
                     tag_end = line;
-                }
                 else if(!escape && !quoted)
                     throw MDX_bad_field(tag_begin, tag_end - tag_begin);
 
