@@ -59,7 +59,7 @@ static bool s_load_head(void* _FileData, LevelHead& dest)
     FileData.meta.configPackId = std::move(dest.configPackId);
     FileData.music_files = std::move(dest.music_files);
 
-    return false;
+    return true;
 }
 
 static bool s_load_bookmark(void* _FileData, Bookmark& dest)
