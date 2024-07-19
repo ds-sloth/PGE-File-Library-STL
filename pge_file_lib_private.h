@@ -360,7 +360,7 @@ inline bool IsEmpty(const PGESTRINGList &str)
 
 inline int toInt(const PGESTRING &str)
 {
-    return std::atoi(str.c_str());
+    return static_cast<int>(std::stol(str, nullptr, 10));
 }
 
 inline unsigned int toUInt(const PGESTRING &str)
@@ -370,12 +370,12 @@ inline unsigned int toUInt(const PGESTRING &str)
 
 inline long toLong(const PGESTRING &str)
 {
-    return std::atol(str.c_str());
+    return std::stol(str, nullptr, 10);
 }
 
 inline unsigned long toULong(const PGESTRING &str)
 {
-    return static_cast<unsigned long>(std::atoll(str.c_str()));
+    return std::stoull(str, nullptr, 10);
 }
 
 inline float toFloat(const PGESTRING &str)
