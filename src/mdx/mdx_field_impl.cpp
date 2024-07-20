@@ -83,7 +83,12 @@ const char* MDX_skip_term(const char* line)
                     throw MDX_missing_delimiter(':');
             }
             else if(*line == '\\')
-                escape = true;
+            {
+                if(!tag_end)
+                    throw MDX_bad_field(tag_begin, tag_end - tag_begin);
+                else
+                    escape = true;
+            }
             else
                 escape = false;
 
