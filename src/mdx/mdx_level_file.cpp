@@ -116,7 +116,7 @@ MDX_SETUP_OBJECT(LevelBlock,
     MDX_FIELD("ED", event_destroy); //Destroy event slot
     MDX_FIELD("EH", event_hit); //Hit event slot
     MDX_FIELD("EE", event_emptylayer); //Hit event slot
-    // MDX_FIELD("XTRA", meta.custom_params);//Custom JSON data tree
+    MDX_FIELD_XTRA();//Custom JSON data tree
 );
 
 MDX_SETUP_OBJECT(LevelBGO,
@@ -129,7 +129,7 @@ MDX_SETUP_OBJECT(LevelBGO,
     MDX_FIELD("ZP", z_mode);  //Z Position
     MDX_FIELD("SP", smbx64_sp);  //SMBX64 Sorting priority
     MDX_FIELD("LR", layer);   //Layer name
-    // MDX_FIELD("XTRA", meta.custom_params);//Custom JSON data tree
+    MDX_FIELD_XTRA();//Custom JSON data tree
 );
 
 MDX_SETUP_OBJECT(LevelNPC,
@@ -170,7 +170,7 @@ MDX_SETUP_OBJECT(LevelNPC,
     MDX_FIELD("EG", event_grab);//Event slot "On grab"
     MDX_FIELD("EO", event_touch);//Event slot "On touch"
     MDX_FIELD("EF", event_nextframe);//Evemt slot "Trigger every frame"
-    // MDX_FIELD("XTRA", meta.custom_params);//Custom JSON data tree
+    MDX_FIELD_XTRA();//Custom JSON data tree
 );
 
 MDX_SETUP_OBJECT(LevelPhysEnv,
@@ -185,7 +185,7 @@ MDX_SETUP_OBJECT(LevelPhysEnv,
     MDX_FIELD("AC", accel); //Custom acceleration
     MDX_FIELD("MV", max_velocity); //Maximal velocity
     MDX_FIELD("EO",  touch_event); //Touch event/script
-    // MDX_FIELD("XTRA", meta.custom_params);//Custom JSON data tree
+    MDX_FIELD_XTRA();//Custom JSON data tree
 );
 
 MDX_SETUP_OBJECT(LevelDoor,
@@ -221,7 +221,7 @@ MDX_SETUP_OBJECT(LevelDoor,
     MDX_FIELD("LR", layer);  //Layer
     MDX_FIELD("EE", event_enter);  //On-Enter event slot
     MDX_FIELD("TW", two_way); //Two-way warp
-    // MDX_FIELD("XTRA", meta.custom_params);//Custom JSON data tree
+    MDX_FIELD_XTRA();//Custom JSON data tree
 );
 
 MDX_SETUP_OBJECT(LevelLayer,

@@ -267,4 +267,27 @@ struct MDX_UniqueField : public MDX_BaseField<obj_t>
     }
 };
 
+template<class obj_t>
+struct MDX_FieldXtra : public MDX_BaseField<obj_t>
+{
+    template<class parent_t>
+    MDX_FieldXtra(parent_t* parent)
+        : MDX_BaseField<obj_t>("XTRA")
+    {
+        parent->m_fields.push_back(this);
+    }
+
+    virtual const char* do_load(obj_t& dest, const char* field_data) const
+    {
+        try
+        {
+            return MDX_finish_term(MDX_FieldType<PGESTRING>::load(dest.meta.custom_params, field_data));
+        }
+        catch(const MDX_parse_error&)
+        {
+            std::throw_with_nested(MDX_bad_field(MDX_BaseField<obj_t>::m_field_name));
+        }
+    }
+};
+
 #endif // #ifndef MDX_BASE_FIELD_HPP

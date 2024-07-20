@@ -42,6 +42,8 @@
 #define MDX_UNIQUE_FIELD_NAME(LOAD_FUNC) unique_field_ ## LOAD_FUNC
 #define MDX_UNIQUE_FIELD(NAME, LOAD_FUNC) MDX_UniqueField<obj_t> MDX_UNIQUE_FIELD_NAME(LOAD_FUNC){this, NAME, LOAD_FUNC}
 
+#define MDX_FIELD_XTRA() MDX_FieldXtra<obj_t> xtra_field{this}
+
 #define MDX_CALLBACK_LOAD(CALLBACK_NAME) load_ ## CALLBACK_NAME
 #define MDX_CALLBACK_SAVE(CALLBACK_NAME) save_ ## CALLBACK_NAME
 #define MDX_SECTION_NAME(OBJ_T) section_ ## OBJ_T
