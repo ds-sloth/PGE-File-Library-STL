@@ -96,26 +96,27 @@ MDX_SETUP_OBJECT(PlayerPoint,
 );
 
 MDX_SETUP_OBJECT(LevelBlock,
-    MDX_FIELD("ID", id);
-    MDX_FIELD("X", x);
-    MDX_FIELD("Y", y);
-    MDX_FIELD("W", w);
-    MDX_FIELD("H", h);
-    MDX_FIELD("CN", npc_id);
-    MDX_FIELD("CS", npc_special_value);
-    MDX_FIELD("IV", invisible);
-    MDX_FIELD("SL", slippery);
-    MDX_FIELD("MA", motion_ai_id);
-    MDX_FIELD("S1", special_data);
-    MDX_FIELD("S2", special_data2);
-    MDX_FIELD("LR", layer);
-    MDX_FIELD("ED", event_destroy);
-    MDX_FIELD("EH", event_hit);
-    MDX_FIELD("EE", event_emptylayer);
-    // MDX_FIELD("XTRA", meta.custom_params); // need to move out of meta
-    MDX_FIELD("GXN", gfx_name);
-    MDX_FIELD("GXX", gfx_dx);
-    MDX_FIELD("GXY", gfx_dy);
+    MDX_FIELD("ID", id); //Block ID
+    MDX_FIELD("X", x); // Position X
+    MDX_FIELD("Y", y); //Position Y
+    MDX_FIELD("W", w); //Width
+    MDX_FIELD("H", h); //Height
+    MDX_FIELD("AS", autoscale);//Enable auto-Scaling
+    MDX_FIELD("GXN", gfx_name); //38A GFX-Name
+    MDX_FIELD("GXX", gfx_dx); //38A graphics extend x
+    MDX_FIELD("GXY", gfx_dy); //38A graphics extend y
+    MDX_FIELD("CN", npc_id); //Contains (coins/NPC)
+    MDX_FIELD("CS", npc_special_value); //Special value for contained NPC
+    MDX_FIELD("IV", invisible); //Invisible
+    MDX_FIELD("SL", slippery); //Slippery
+    MDX_FIELD("MA", motion_ai_id); //Motion AI type
+    MDX_FIELD("S1", special_data); //Special value 1
+    MDX_FIELD("S2", special_data2); //Special value 2
+    MDX_FIELD("LR", layer); //Layer name
+    MDX_FIELD("ED", event_destroy); //Destroy event slot
+    MDX_FIELD("EH", event_hit); //Hit event slot
+    MDX_FIELD("EE", event_emptylayer); //Hit event slot
+    // MDX_FIELD("XTRA", meta.custom_params);//Custom JSON data tree
 );
 
 MDX_SETUP_OBJECT(LevelBGO,
