@@ -458,7 +458,7 @@ struct MDX_LevelFile : MDX_File<LevelLoadCallbacks, LevelSaveCallbacks>
 {
     MDX_SECTION("HEAD", LevelHead, head);
 
-    MDX_SECTION("BOOKMARK", Bookmark, bookmark);
+    MDX_SECTION("META_BOOKMARKS", Bookmark, bookmark);
 
     MDX_SECTION("META_SYS_CRASH", CrashData, crash_data);
 
