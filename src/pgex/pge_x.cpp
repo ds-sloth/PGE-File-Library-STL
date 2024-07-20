@@ -155,6 +155,16 @@ bool PGEFile::buildTreeFromRaw()
         if(all_spaces)
             continue;
 
+        // ban section name including null characters
+        if(PGEXsection.first.size() != strlen(PGEXsection.first.c_str()))
+        {
+            PGESTRING errSect = PGEXsection.first;
+            PGE_CutLength(errSect, 20);
+            PGE_FilterBinary(errSect);
+            m_lastError = PGESTRING("Section [" + errSect + "] has invalid name");
+            return false;
+        }
+
         sectionOpened = true;
         PGESTRING data;
         while(!in.atEnd())
