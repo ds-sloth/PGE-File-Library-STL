@@ -537,51 +537,41 @@ bool PGEFile::IsFloat(PGESTRING &in) // Float Point numeric
 
     if((in.size() == 1) && (!isDegit(in[0])))
         return false;
-    if((!isDegit(in[0])) && (PGEGetChar(in[0]) != '-') && (PGEGetChar(in[0]) != '.') && (PGEGetChar(in[0]) != ','))
+    if((!isDegit(in[0])) && (PGEGetChar(in[0]) != '-') && (PGEGetChar(in[0]) != '.'))
         return false;
 
+    bool has_digit = false;
     bool decimal = false;
     bool pow10  = false;
-    bool sign   = false;
     for(pge_size_t i = ((PGEGetChar(in[0]) == '-') ? 1 : 0); i < in.size(); i++)
     {
         if((!decimal) && (!pow10))
         {
-            if((PGEGetChar(in[i]) == '.') || (PGEGetChar(in[i]) == ','))
+            if((PGEGetChar(in[i]) == '.'))
             {
                 in[i] = '.'; //replace comma with a dot.empty()
                 decimal = true;
-                if(i == (in.size() - 1))
-                    return false;
                 continue;
             }
         }
         if(!pow10)
         {
-            if((PGEGetChar(in[i]) == 'E') || (PGEGetChar(in[i]) == 'e'))
+            if((PGEGetChar(in[i]) == 'e'))
             {
                 pow10 = true;
+                if(i == (in.size() - 1)) return false;
+                // allow exponent sign (negative only)
+                if(PGEGetChar(in[i + 1]) == '-') i++;
                 if(i == (in.size() - 1)) return false;
                 continue;
             }
         }
-        else
-        {
-            if(!sign)
-            {
-                sign = true;
-                if((PGEGetChar(in[i]) == '+') || (PGEGetChar(in[i]) == '-'))
-                {
-                    if(i == (in.size() - 1))
-                        return false;
-                    continue;
-                }
-            }
-        }
         if(!isDegit(in[i])) return false;
+        if(!pow10)
+            has_digit = true;
     }
 
-    return true;
+    return has_digit;
 }
 
 bool PGEFile::IsBoolArray(const PGESTRING &in) // Boolean array
