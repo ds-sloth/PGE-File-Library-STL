@@ -1095,7 +1095,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                                 else
                                     goto badfile;
                             }
-                            else if(param[0] == "AXX")
+                            else if(param[0] == "SXX")
                             {
                                 errorString = "Invalid movelayer speed X expression value type";
 
@@ -1104,7 +1104,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                                 else
                                     goto badfile;
                             }
-                            else if(param[0] == "AYX")
+                            else if(param[0] == "SYX")
                             {
                                 errorString = "Invalid movelayer speed Y expression value type";
 
