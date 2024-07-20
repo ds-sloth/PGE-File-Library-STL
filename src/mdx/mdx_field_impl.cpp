@@ -148,7 +148,7 @@ static const char* s_load_int(int_t& dest, const char* field_data)
 
         if(c < '0' || c > '9')
         {
-            dest = sign * value;
+            dest = value;
             return field_data;
         }
 
@@ -156,14 +156,28 @@ static const char* s_load_int(int_t& dest, const char* field_data)
 
         int_t digit = c - '0';
 
-        if(value >= std::numeric_limits<int_t>::max() / 10) [[unlikely]]
+        if(sign == 1)
         {
-            if(value > std::numeric_limits<int_t>::max() / 10 || digit > std::numeric_limits<int_t>::max() % 10) [[likely]]
-                return ret_error;
+            if(value >= std::numeric_limits<int_t>::max() / 10) [[unlikely]]
+            {
+                if(value > std::numeric_limits<int_t>::max() / 10 || digit > std::numeric_limits<int_t>::max() % 10) [[likely]]
+                    return ret_error;
+            }
+        }
+        else
+        {
+            if(value <= std::numeric_limits<int_t>::min() / 10) [[unlikely]]
+            {
+                if(value < std::numeric_limits<int_t>::min() / 10 || digit > -(std::numeric_limits<int_t>::min() % 10)) [[likely]]
+                    return ret_error;
+            }
         }
 
         value *= 10;
-        value += digit;
+        if(sign == 1)
+            value += digit;
+        else
+            value -= digit;
     }
 }
 
