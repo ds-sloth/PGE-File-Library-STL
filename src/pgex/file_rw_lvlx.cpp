@@ -1595,7 +1595,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                     LevelItemSetup38A::Entry e;
                     PGESTRINGList pair;
                     PGE_SPLITSTRING(pair, s, "=");
-                    if(pair.size() < 2)
+                    if(pair.size() != 2)
                         goto badfile;
 
                     if(PGEFile::IsIntU(pair[0]))
