@@ -114,10 +114,9 @@ static const char* s_load_uint(uint_t& dest, const char* field_data)
 
         uint_t digit = c - '0';
 
-        [[unlikely]]
-        if(value >= std::numeric_limits<uint_t>::max() / 10)
+        if(value >= std::numeric_limits<uint_t>::max() / 10) [[unlikely]]
         {
-            if(value > std::numeric_limits<uint_t>::max() / 10 || digit > std::numeric_limits<uint_t>::max() % 10)
+            if(value > std::numeric_limits<uint_t>::max() / 10 || digit > std::numeric_limits<uint_t>::max() % 10) [[likely]]
                 return ret_error;
         }
 
@@ -157,10 +156,9 @@ static const char* s_load_int(int_t& dest, const char* field_data)
 
         int_t digit = c - '0';
 
-        [[unlikely]]
-        if(value >= std::numeric_limits<int_t>::max() / 10)
+        if(value >= std::numeric_limits<int_t>::max() / 10) [[unlikely]]
         {
-            if(value > std::numeric_limits<int_t>::max() / 10 || digit > std::numeric_limits<int_t>::max() % 10)
+            if(value > std::numeric_limits<int_t>::max() / 10 || digit > std::numeric_limits<int_t>::max() % 10) [[likely]]
                 return ret_error;
         }
 
