@@ -1534,7 +1534,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 {
                     PGEX_ValueBegin()
                     PGEX_UIntVal("T",  type) //Type of item
-                    PGEX_UIntVal("ID", customcfg38A.id)
+                    PGEX_SLongVal("ID", customcfg38A.id)
                     PGEX_StrArrVal("D", data) //Variable value
                 }
                 errorString = "Wrong pair syntax";
