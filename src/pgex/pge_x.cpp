@@ -145,9 +145,15 @@ bool PGEFile::buildTreeFromRaw()
         PGEXsection.first = in.readLine();
         PGEXsection.second.clear();
 
-        //Skip empty parts
-        PGESTRING pgex_sectionName = removeSpaces(PGEXsection.first);
-        if(IsEmpty(pgex_sectionName)) continue;
+        // ignore line if all spaces
+        bool all_spaces = true;
+        for(const auto c : PGEXsection.first)
+        {
+            if(c != ' ')
+                all_spaces = false;
+        }
+        if(all_spaces)
+            continue;
 
         sectionOpened = true;
         PGESTRING data;
