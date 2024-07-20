@@ -94,7 +94,7 @@ const char* MDX_skip_term(const char* line)
 }
 
 template<class uint_t>
-const char* load_uint(uint_t& dest, const char* field_data)
+static const char* s_load_uint(uint_t& dest, const char* field_data)
 {
     const char* const ret_error = field_data;
 
@@ -127,12 +127,12 @@ const char* load_uint(uint_t& dest, const char* field_data)
 }
 
 template<class int_t, int sign>
-const char* load_int(int_t& dest, const char* field_data)
+static const char* s_load_int(int_t& dest, const char* field_data)
 {
     const char* const ret_error = field_data;
 
     if(sign == 1 && *field_data == '-')
-        return load_int<int_t, -1>(dest, field_data);
+        return s_load_int<int_t, -1>(dest, field_data);
 
     if(sign == -1)
     {
@@ -169,7 +169,7 @@ const char* load_int(int_t& dest, const char* field_data)
     }
 }
 
-const char* load_double(double& dest, const char* field_data)
+static const char* s_load_double(double& dest, const char* field_data)
 {
     const char* const ret_error = field_data;
 
@@ -234,7 +234,7 @@ const char* load_double(double& dest, const char* field_data)
 template<>
 const char* MDX_FieldType<int>::load(int& dest, const char* field_data)
 {
-    const char* str_end = load_int<int, 1>(dest, field_data);
+    const char* str_end = s_load_int<int, 1>(dest, field_data);
 
     if(str_end == field_data)
         throw MDX_bad_term("Bad int");
@@ -245,7 +245,7 @@ const char* MDX_FieldType<int>::load(int& dest, const char* field_data)
 template<>
 const char* MDX_FieldType<unsigned>::load(unsigned& dest, const char* field_data)
 {
-    const char* str_end = load_uint(dest, field_data);
+    const char* str_end = s_load_uint(dest, field_data);
 
     if(str_end == field_data)
         throw MDX_bad_term("Bad uint");
@@ -269,7 +269,7 @@ const char* MDX_FieldType<bool>::load(bool& dest, const char* field_data)
 template<>
 const char* MDX_FieldType<long>::load(long& dest, const char* field_data)
 {
-    const char* str_end = load_int<long, 1>(dest, field_data);
+    const char* str_end = s_load_int<long, 1>(dest, field_data);
 
     if(str_end == field_data)
         throw MDX_bad_term("Bad long");
@@ -280,7 +280,7 @@ const char* MDX_FieldType<long>::load(long& dest, const char* field_data)
 template<>
 const char* MDX_FieldType<unsigned long>::load(unsigned long& dest, const char* field_data)
 {
-    const char* str_end = load_uint(dest, field_data);
+    const char* str_end = s_load_uint(dest, field_data);
 
     if(str_end == field_data)
         throw MDX_bad_term("Bad ulong");
@@ -291,7 +291,7 @@ const char* MDX_FieldType<unsigned long>::load(unsigned long& dest, const char* 
 template<>
 const char* MDX_FieldType<long long>::load(long long& dest, const char* field_data)
 {
-    const char* str_end = load_int<long long, 1>(dest, field_data);
+    const char* str_end = s_load_int<long long, 1>(dest, field_data);
 
     if(str_end == field_data)
         throw MDX_bad_term("Bad llong");
@@ -302,7 +302,7 @@ const char* MDX_FieldType<long long>::load(long long& dest, const char* field_da
 template<>
 const char* MDX_FieldType<unsigned long long>::load(unsigned long long& dest, const char* field_data)
 {
-    const char* str_end = load_uint(dest, field_data);
+    const char* str_end = s_load_uint(dest, field_data);
 
     if(str_end == field_data)
         throw MDX_bad_term("Bad ullong");
@@ -314,7 +314,7 @@ template<>
 const char* MDX_FieldType<float>::load(float& dest, const char* field_data)
 {
     double ret;
-    const char* str_end = load_double(ret, field_data);
+    const char* str_end = s_load_double(ret, field_data);
     dest = ret;
 
     if(str_end == field_data)
@@ -326,7 +326,7 @@ const char* MDX_FieldType<float>::load(float& dest, const char* field_data)
 template<>
 const char* MDX_FieldType<double>::load(double& dest, const char* field_data)
 {
-    const char* str_end = load_double(dest, field_data);
+    const char* str_end = s_load_double(dest, field_data);
 
     if(str_end == field_data)
         throw MDX_bad_term("Bad double");
