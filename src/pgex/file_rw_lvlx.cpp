@@ -710,10 +710,15 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 PGESTRINGList bgSets;
                 PGESTRINGList ssSets;
                 PGESTRINGList movingLayers;
+                size_t movingLayers_begin = 0;
                 PGESTRINGList newSectionSettingsSets;
+                size_t newSectionSettingsSets_begin = 0;
                 PGESTRINGList spawnNPCs;
+                size_t spawnNPCs_begin = 0;
                 PGESTRINGList spawnEffectss;
+                size_t spawnEffectss_begin = 0;
                 PGESTRINGList variablesToUpdate;
+                size_t variablesToUpdate_begin = 0;
                 PGELIST<bool > controls;
                 PGEX_Values() //Look markers and values
                 {
@@ -731,13 +736,13 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                     PGEX_StrArrVal("SS", ssSets)     //Section Size
                     //-------------------
                     //New values (with SMBX-38A values support)
-                    PGEX_StrArrVal_Validate("SSS", newSectionSettingsSets) //Section settings in new format
+                    PGEX_StrArrVal_Validate("SSS", newSectionSettingsSets, newSectionSettingsSets_begin) //Section settings in new format
                     //-------------------
                     //---SMBX-38A entries-----
-                    PGEX_StrArrVal_Validate("MLA",  movingLayers)       //NPC's to spawn
-                    PGEX_StrArrVal_Validate("SNPC", spawnNPCs)       //NPC's to spawn
-                    PGEX_StrArrVal_Validate("SEF",  spawnEffectss)    //Effects to spawn
-                    PGEX_StrArrVal_Validate("UV",   variablesToUpdate) //Variables to update
+                    PGEX_StrArrVal_Validate("MLA",  movingLayers, movingLayers_begin)       //NPC's to spawn
+                    PGEX_StrArrVal_Validate("SNPC", spawnNPCs, spawnNPCs_begin)       //NPC's to spawn
+                    PGEX_StrArrVal_Validate("SEF",  spawnEffectss, spawnEffectss_begin)    //Effects to spawn
+                    PGEX_StrArrVal_Validate("UV",   variablesToUpdate, variablesToUpdate_begin) //Variables to update
                     PGEX_StrVal("TSCR", event.trigger_script) //Trigger script
                     PGEX_USIntVal("TAPI", event.trigger_api_id) //Trigger script
                     PGEX_BoolVal("TMR", event.timer_def.enable) //Enable timer
@@ -763,8 +768,10 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 //Parse new-style parameters
                 if(!newSectionSettingsSets.empty())
                 {
-                    for(const auto &newSectionSettingsSet : newSectionSettingsSets)
+                    for(size_t i = 0; i < newSectionSettingsSets.size(); i++)
                     {
+                        const auto &newSectionSettingsSet = newSectionSettingsSets[i];
+
                         LevelEvent_Sets sectionSet;
                         bool valid = false;
                         PGELIST<PGESTRINGList> sssData = PGEFile::splitDataLine(newSectionSettingsSet, &valid);
@@ -978,6 +985,10 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                             }
                         }//for parameters
 
+                        // skip after validating if the field got duplicated
+                        if(i < newSectionSettingsSets_begin)
+                            continue;
+
                         if(
                             ((sectionSet.id < 0) || (sectionSet.id >= static_cast<long>(event.sets.size())))
                         )//Append sections
@@ -1054,8 +1065,10 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 //Parse Moving layers
                 if(!movingLayers.empty())
                 {
-                    for(const auto &movingLayer : movingLayers)
+                    for(size_t i = 0; i < movingLayers.size(); i++)
                     {
+                        const auto &movingLayer = movingLayers[i];
+
                         LevelEvent_MoveLayer moveLayer;
                         bool valid = false;
                         PGELIST<PGESTRINGList> mlaData = PGEFile::splitDataLine(movingLayer, &valid);
@@ -1124,6 +1137,10 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                             }
                         }//for parameters
 
+                        // skip after validating if the field got duplicated
+                        if(i < movingLayers_begin)
+                            continue;
+
                         event.moving_layers.push_back(moveLayer);
                     }//for moving layers entries
                 }//If SMBX38A moving layers are gotten
@@ -1131,8 +1148,10 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 //Parse NPCs to spawn
                 if(!spawnNPCs.empty())
                 {
-                    for(auto &spawnNpc : spawnNPCs)
+                    for(size_t i = 0; i < spawnNPCs.size(); i++)
                     {
+                        auto &spawnNpc = spawnNPCs[i];
+
                         LevelEvent_SpawnNPC spawnNPC;
                         bool valid = false;
                         PGELIST<PGESTRINGList> mlaData = PGEFile::splitDataLine(spawnNpc, &valid);
@@ -1237,6 +1256,10 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                             }
                         }//for parameters
 
+                        // skip after validating if the field got duplicated
+                        if(i < spawnNPCs_begin)
+                            continue;
+
                         event.spawn_npc.push_back(spawnNPC);
                     }//for Spawn NPC
                 }//If SMBX38A NPC Spawning lists are gotten
@@ -1244,8 +1267,10 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 //Parse Effects to spawn
                 if(!spawnEffectss.empty())
                 {
-                    for(auto &spawnEffects : spawnEffectss)
+                    for(size_t i = 0; i < spawnEffectss.size(); i++)
                     {
+                        const auto &spawnEffects = spawnEffectss[i];
+
                         LevelEvent_SpawnEffect spawnEffect;
                         bool valid = false;
                         PGELIST<PGESTRINGList> mlaData = PGEFile::splitDataLine(spawnEffects, &valid);
@@ -1368,6 +1393,10 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                             }
                         }//for parameters
 
+                        // skip after validating if the field got duplicated
+                        if(i < spawnEffectss_begin)
+                            continue;
+
                         event.spawn_effects.push_back(spawnEffect);
                     }//for Spawn Effect
                 }//If SMBX38A Effect Spawning lists are gotten
@@ -1375,8 +1404,10 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 //Parse Variables to update
                 if(!variablesToUpdate.empty())
                 {
-                    for(auto &updVar: variablesToUpdate)
+                    for(size_t i = 0; i < variablesToUpdate.size(); i++)
                     {
+                        const auto &updVar = variablesToUpdate[i];
+
                         LevelEvent_UpdateVariable variableToUpdate;
                         bool valid = false;
                         PGELIST<PGESTRINGList> mlaData = PGEFile::splitDataLine(updVar, &valid);
@@ -1408,6 +1439,10 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                                     goto badfile;
                             }
                         }//for parameters
+
+                        // skip after validating if the field got duplicated
+                        if(i < variablesToUpdate_begin)
+                            continue;
 
                         event.update_variable.push_back(variableToUpdate);
                     }//for Variable update events

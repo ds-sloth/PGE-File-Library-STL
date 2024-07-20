@@ -114,20 +114,12 @@ PGEFile::PGEX_Item x = f_section.data[sdata];
 
 /*! \def PGEX_StrArrVal_Validate(Mark, targetValue)
     \brief Parse sub-struct string array value by requested Marker and write into target variable.
-    If duplicated, confirm that substructures have valid syntax before overwriting them with new incoming values.
+    If duplicated, don't overwrite existing values, but mark the beginning as following them.
 */
-#define PGEX_StrArrVal_Validate(Mark, targetValue)  else if(v.marker==Mark) { bool valid=false;\
-                                                for(const auto &substruct : targetValue) \
-                                                { \
-                                                    bool valid = false; \
-                                                    PGEFile::splitDataLine(substruct, &valid); \
-                                                    if(!valid) \
-                                                    { \
-                                                        errorString = "Wrong sub-struct encoded entry in array"; \
-                                                        goto badfile; \
-                                                    } \
-                                                } \
-                                                targetValue = PGEFile::X2STRArr(v.value, &valid); \
+#define PGEX_StrArrVal_Validate(Mark, targetValue, targetValueBegin)  else if(v.marker==Mark) { bool valid=false;\
+                                                targetValueBegin = targetValue.size(); \
+                                                auto newValues = PGEFile::X2STRArr(v.value, &valid); \
+                                                targetValue.insert(targetValue.end(), newValues.begin(), newValues.end()); \
                                                 if(!valid) goto badfile; \
                                                 }
 
