@@ -193,7 +193,7 @@ static const char* s_load_double(double& dest, const char* field_data)
         field_data++;
     }
 
-    if(*field_data < '0' || *field_data > '9')
+    if((*field_data < '0' || *field_data > '9') && *field_data != '.')
         return ret_error;
 
     double value = 0;
