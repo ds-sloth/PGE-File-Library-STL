@@ -26,7 +26,7 @@
 
 #include <cstdlib>
 #include <limits>
-#include <climits>
+#include <cmath>
 #include "mdx/mdx_base_field.hpp"
 
 #include "pge_file_lib_globs.h"
@@ -191,12 +191,13 @@ static const char* s_load_double(double& dest, const char* field_data)
     {
         sign = -1;
         field_data++;
-
-        if(*field_data < '0' || *field_data > '9')
-            return ret_error;
     }
 
+    if(*field_data < '0' || *field_data > '9')
+        return ret_error;
+
     double value = 0;
+    double divisor = 0.1;
 
     while(true)
     {
@@ -208,6 +209,9 @@ static const char* s_load_double(double& dest, const char* field_data)
         }
         else if(c < '0' || c > '9')
         {
+            if(c == 'e')
+                goto exponent;
+
             dest = sign * value;
             return field_data;
         }
@@ -220,8 +224,6 @@ static const char* s_load_double(double& dest, const char* field_data)
 
     field_data++;
 
-    double divisor = 0.1;
-
     while(true)
     {
         char c = *field_data;
@@ -232,6 +234,9 @@ static const char* s_load_double(double& dest, const char* field_data)
             if(field_data == ret_error + 1 || (field_data == ret_error + 2 && sign == -1))
                 return ret_error;
 
+            if(c == 'e')
+                goto exponent;
+
             dest = sign * value;
             return field_data;
         }
@@ -241,6 +246,18 @@ static const char* s_load_double(double& dest, const char* field_data)
         value += divisor * static_cast<double>(c - '0');
         divisor *= 0.1;
     }
+
+exponent:
+    field_data++;
+    const char* exp_start = field_data;
+
+    int exponent;
+    field_data = s_load_int<int, 1>(exponent, field_data);
+    if(field_data == exp_start)
+        return ret_error;
+
+    dest = sign * value * std::pow(10, exponent);
+    return field_data;
 }
 
 template<>
