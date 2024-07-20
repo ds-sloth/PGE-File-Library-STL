@@ -88,11 +88,13 @@ struct MDX_File
                         continue;
 
                     // otherwise, treat as unrecognized section and skip it
-                    std::string section_name = cur_line;
-                    if(section_name.size() != strlen(section_name.c_str()))
+                    if(cur_line.size() != strlen(cur_line.c_str()))
                         throw MDX_parse_error_misc("Bad section name");
                     else
+                    {
+                        std::string section_name = cur_line;
                         MDX_skip_section(inf, cur_line, section_name.c_str());
+                    }
                 }
             }
         }
