@@ -412,13 +412,13 @@ MDX_SETUP_OBJECT(LevelScript,
 template<>
 const char* MDX_FieldType<LevelItemSetup38A::ItemType>::load(LevelItemSetup38A::ItemType& dest, const char* field_data)
 {
-    long got = -1;
-    const char* str_end = MDX_FieldType<long>::load(got, field_data);
+    int got = 0;
+    const char* str_end = MDX_FieldType<int>::load(got, field_data);
 
-    if(got < 0 || got > 2)
-        dest = LevelItemSetup38A::UNKNOWN;
-    else
-        dest = (LevelItemSetup38A::ItemType)got;
+    if(got < LevelItemSetup38A::UNKNOWN || got >= LevelItemSetup38A::ITEM_TYPE_MAX)
+        throw MDX_bad_term("Bad type");
+
+    dest = (LevelItemSetup38A::ItemType)got;
 
     return str_end;
 }

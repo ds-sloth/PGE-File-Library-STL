@@ -1581,11 +1581,11 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
                 customcfg38A = LevelItemSetup38A();
                 PGESTRINGList data;
-                unsigned int type = 0;
+                int type = -1;
                 PGEX_Values() //Look markers and values
                 {
                     PGEX_ValueBegin()
-                    PGEX_UIntVal("T",  type) //Type of item
+                    PGEX_SIntVal("T",  type) //Type of item
                     PGEX_SLongVal("ID", customcfg38A.id)
                     PGEX_StrArrVal("D", data) //Variable value
                 }
@@ -1607,6 +1607,11 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                     else goto badfile;
 
                     customcfg38A.data.push_back(e);
+                }
+                if(type < LevelItemSetup38A::UNKNOWN || type >= LevelItemSetup38A::ITEM_TYPE_MAX)
+                {
+                    errorString = "Wrong type";
+                    goto badfile;
                 }
                 customcfg38A.type = (LevelItemSetup38A::ItemType)type;
                 FileData.custom38A_configs.push_back(customcfg38A);
