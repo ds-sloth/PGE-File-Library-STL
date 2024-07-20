@@ -35,6 +35,21 @@
 #ifndef PGE_X_MACRO_H
 #define PGE_X_MACRO_H
 
+struct PGEX_IGNORE
+{
+    template<class o>
+    void operator=(const o&) const {}
+};
+
+template<class want, class got>
+static inline void PGE_check_inst(const got& g)
+{
+    (void)const_cast<const want&>(g);
+}
+
+template<class want>
+static inline void PGE_check_inst(const PGEX_IGNORE&) {}
+
 /*! \def PGEX_FileBegin()
     \brief Placing at begin of the parsing function
 */
@@ -143,7 +158,7 @@ PGEFile::PGEX_Item x = f_section.data[sdata];
 #define PGEX_USIntVal(Mark, targetValue)  if(v.marker==Mark) { if(PGEFile::IsIntS(v.value)) \
                                          targetValue = toInt(v.value);\
                                          else goto badfile; \
-                                         (void)const_cast<const int&>(targetValue); }
+                                         PGE_check_inst<int>(targetValue); }
 
 /*! \def PGEX_UIntVal(Mark, targetValue)
     \brief Parse unsigned integer value by requested Marker and write into target variable
@@ -151,7 +166,7 @@ PGEFile::PGEX_Item x = f_section.data[sdata];
 #define PGEX_UIntVal(Mark, targetValue)  if(v.marker==Mark) { if(PGEFile::IsIntU(v.value)) \
                                          targetValue = toUInt(v.value);\
                                          else goto badfile; \
-                                         (void)const_cast<const unsigned&>(targetValue); }
+                                         PGE_check_inst<unsigned>(targetValue); }
 
 /*! \def PGEX_SIntVal(Mark, targetValue)
     \brief Parse signed integer value by requested Marker and write into target variable
@@ -159,7 +174,7 @@ PGEFile::PGEX_Item x = f_section.data[sdata];
 #define PGEX_SIntVal(Mark, targetValue)  if(v.marker==Mark) { if(PGEFile::IsIntS(v.value)) \
                                          targetValue = toInt(v.value);\
                                          else goto badfile; \
-                                         (void)const_cast<const int&>(targetValue); }
+                                         PGE_check_inst<int>(targetValue); }
 
 /*! \def PGEX_SLongVal(Mark, targetValue)
     \brief Parse signed long integer value by requested Marker and write into target variable
@@ -167,7 +182,7 @@ PGEFile::PGEX_Item x = f_section.data[sdata];
 #define PGEX_SLongVal(Mark, targetValue) if(v.marker==Mark) { if(PGEFile::IsIntS(v.value)) \
                                          targetValue = toLong(v.value);\
                                          else goto badfile; \
-                                         (void)const_cast<const long&>(targetValue); }
+                                         PGE_check_inst<long>(targetValue); }
 
 /*! \def PGEX_ULongVal(Mark, targetValue)
     \brief Parse unsigned long integer value by requested Marker and write into target variable
@@ -175,7 +190,7 @@ PGEFile::PGEX_Item x = f_section.data[sdata];
 #define PGEX_ULongVal(Mark, targetValue) if(v.marker==Mark) { if(PGEFile::IsIntU(v.value)) \
                                          targetValue = toULong(v.value);\
                                          else goto badfile; \
-                                         (void)const_cast<const unsigned long&>(targetValue); }
+                                         PGE_check_inst<unsigned long>(targetValue); }
 
 /*! \def PGEX_USLongVal(Mark, targetValue)
     \brief Parse unsigned long integer value by requested Marker and write into target variable
@@ -183,7 +198,7 @@ PGEFile::PGEX_Item x = f_section.data[sdata];
 #define PGEX_USLongVal(Mark, targetValue) if(v.marker==Mark) { if(PGEFile::IsIntS(v.value)) \
                                          targetValue = toLong(v.value);\
                                          else goto badfile; \
-                                         (void)const_cast<const long&>(targetValue); }
+                                         PGE_check_inst<long>(targetValue); }
 
 
 /*! \def PGEX_FloatVal(Mark, targetValue)

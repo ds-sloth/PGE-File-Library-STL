@@ -50,6 +50,9 @@ static bool s_load_head(void* _FileData, LevelHead& dest)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
 
+    if(FileData.head_loaded)
+        return true;
+
     FileData.LevelName = std::move(dest.LevelName);
     FileData.stars = dest.stars;
     FileData.open_level_on_fail = std::move(dest.open_level_on_fail);
@@ -58,6 +61,8 @@ static bool s_load_head(void* _FileData, LevelHead& dest)
     FileData.custom_params = std::move(dest.custom_params);
     FileData.meta.configPackId = std::move(dest.configPackId);
     FileData.music_files = std::move(dest.music_files);
+
+    FileData.head_loaded = true;
 
     return true;
 }

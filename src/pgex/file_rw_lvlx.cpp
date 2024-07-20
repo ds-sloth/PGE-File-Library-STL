@@ -270,16 +270,33 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
                 PGEX_Values() //Look markers and values
                 {
-                    PGEX_ValueBegin()
-                    PGEX_StrVal("TL", FileData.LevelName) //Level Title
-                    PGEX_USIntVal("SZ", FileData.stars) //Starz number
+                    if(!FileData.head_loaded)
+                    {
+                        PGEX_ValueBegin()
+                        PGEX_StrVal("TL", FileData.LevelName) //Level Title
+                        PGEX_USIntVal("SZ", FileData.stars) //Starz number
                     PGEX_StrVal("DL", FileData.open_level_on_fail) //Open level on fail
                     PGEX_UIntVal("DE", FileData.open_level_on_fail_warpID) //Open level's warpID on fail
                     PGEX_StrArrVal("NO", FileData.player_names_overrides) //Overrides of player names
-                    PGEX_StrVal("XTRA", FileData.custom_params) //Level-wide Extra settings
-                    PGEX_StrVal("CPID", FileData.meta.configPackId)//Config pack ID string
-                    PGEX_StrArrVal("MUS", FileData.music_files)// Level-wide list of external music files
+                        PGEX_StrVal("XTRA", FileData.custom_params) //Level-wide Extra settings
+                        PGEX_StrVal("CPID", FileData.meta.configPackId)//Config pack ID string
+                        PGEX_StrArrVal("MUS", FileData.music_files)// Level-wide list of external music files
+                    }
+                    else
+                    {
+                        PGEX_ValueBegin()
+                        PGEX_StrVal("TL", PGEX_IGNORE()) //Level Title
+                        PGEX_USIntVal("SZ", PGEX_IGNORE()) //Starz number
+                        PGEX_StrVal("DL", PGEX_IGNORE()) //Open level on fail
+                        PGEX_UIntVal("DE", PGEX_IGNORE()) //Open level's warpID on fail
+                        PGEX_StrArrVal("NO", PGEX_IGNORE()) //Overrides of player names
+                        PGEX_StrVal("XTRA", PGEX_IGNORE()) //Level-wide Extra settings
+                        PGEX_StrVal("CPID", PGEX_IGNORE())//Config pack ID string
+                        PGEX_StrArrVal("MUS", PGEX_IGNORE())// Level-wide list of external music files
+                    }
                 }
+
+                FileData.head_loaded = true;
             }
         }//HEADER
         ///////////////////////////////MetaDATA/////////////////////////////////////////////
