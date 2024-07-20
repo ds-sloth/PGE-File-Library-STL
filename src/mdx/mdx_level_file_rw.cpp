@@ -277,6 +277,38 @@ static bool s_load_event(void* _FileData, LevelSMBX64Event& event)
     return true;
 }
 
+static bool s_load_var(void* _FileData, LevelVariable& v)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+    FileData.variables.push_back(std::move(v));
+
+    return true;
+}
+
+static bool s_load_arr(void* _FileData, LevelArray& a)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+    FileData.arrays.push_back(std::move(a));
+
+    return true;
+}
+
+static bool s_load_script(void* _FileData, LevelScript& s)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+    FileData.scripts.push_back(std::move(s));
+
+    return true;
+}
+
+static bool s_load_levelitem38a(void* _FileData, LevelItemSetup38A& customcfg38A)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+    FileData.custom38A_configs.push_back(std::move(customcfg38A));
+
+    return true;
+}
+
 bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
 {
     FileFormats::CreateLevelData(FileData);
@@ -307,6 +339,10 @@ bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
     callbacks.load_warp = s_load_warp;
     callbacks.load_layer = s_load_layer;
     callbacks.load_event = s_load_event;
+    callbacks.load_var = s_load_var;
+    callbacks.load_arr = s_load_arr;
+    callbacks.load_script = s_load_script;
+    callbacks.load_levelitem38a = s_load_levelitem38a;
 
     callbacks.userdata = reinterpret_cast<void*>(&FileData);
 
