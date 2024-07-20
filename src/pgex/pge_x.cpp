@@ -307,11 +307,6 @@ PGEFile::PGEX_Entry PGEFile::buildTree(PGESTRINGList &src_data, bool *_valid)
                 {
                     escape--;
                 }
-                if((c == '\\') && (escape == 0))
-                {
-                    //Skip escape sequence
-                    escape = 2;
-                }
                 switch(state)
                 {
                 case STATE_MARKER:
@@ -320,7 +315,7 @@ PGEFile::PGEX_Entry PGEFile::buildTree(PGESTRINGList &src_data, bool *_valid)
                         valid = false;
                         break;
                     }
-                    if(c == ';')
+                    if(c == ';' || c == '\\')
                     {
                         state = STATE_ERROR;
                         continue;
@@ -333,6 +328,11 @@ PGEFile::PGEX_Entry PGEFile::buildTree(PGESTRINGList &src_data, bool *_valid)
                     dataValue.marker.push_back(c);
                     break;
                 case STATE_VALUE:
+                    if((c == '\\') && (escape == 0))
+                    {
+                        //Skip escape sequence
+                        escape = 2;
+                    }
                     if((c == '"') && (escape == 0))
                         quoted = !quoted;
                     if((c == ':') && (escape == 0) && !quoted)
