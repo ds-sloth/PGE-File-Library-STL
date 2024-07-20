@@ -48,32 +48,7 @@ const char* MDX_skip_term(const char* line)
     {
         while(true)
         {
-            if(*line == '"')
-            {
-                if(!escape && tag_end)
-                    quoted = !quoted;
-
-                escape = false;
-            }
-            else if(*line == ';')
-            {
-                if(!tag_end)
-                    throw MDX_missing_delimiter(':');
-                else if(!escape && !quoted)
-                    return line + 1;
-
-                escape = false;
-            }
-            else if(*line == ':')
-            {
-                if(!tag_end)
-                    tag_end = line;
-                else if(!escape && !quoted)
-                    throw MDX_bad_field(tag_begin, tag_end - tag_begin);
-
-                escape = false;
-            }
-            else if(*line == '\0')
+            if(*line == '\0')
             {
                 if(quoted)
                     throw MDX_missing_delimiter('"');
@@ -82,6 +57,30 @@ const char* MDX_skip_term(const char* line)
                 else
                     throw MDX_missing_delimiter(':');
             }
+            else if(escape)
+            {
+                // ignore character
+                escape = false;
+            }
+            else if(*line == '"')
+            {
+                if(tag_end)
+                    quoted = !quoted;
+            }
+            else if(*line == ';')
+            {
+                if(!tag_end)
+                    throw MDX_missing_delimiter(':');
+                else if(!quoted)
+                    return line + 1;
+            }
+            else if(*line == ':')
+            {
+                if(!tag_end)
+                    tag_end = line;
+                else if(!quoted)
+                    throw MDX_bad_field(tag_begin, tag_end - tag_begin);
+            }
             else if(*line == '\\')
             {
                 if(!tag_end)
@@ -89,8 +88,6 @@ const char* MDX_skip_term(const char* line)
                 else
                     escape = true;
             }
-            else
-                escape = false;
 
             line++;
         }
