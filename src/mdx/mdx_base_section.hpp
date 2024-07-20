@@ -72,6 +72,10 @@ inline bool MDX_line_is_section_end(const PGESTRING& cur_line, const char* secti
     if(c[0] != '_' || c[1] != 'E' || c[2] != 'N' || c[3] != 'D' || c[4] != '\0')
         return false;
 
+    // current line must not have embedded null
+    if((size_t)(&c[4] - &cur_line[0]) != cur_line.size())
+        return false;
+
     return true;
 }
 
