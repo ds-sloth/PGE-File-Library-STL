@@ -51,14 +51,25 @@ inline bool MDX_line_is_section_end(const PGESTRING& cur_line, const char* secti
     if(cur_line.size() <= 4)
         return false;
 
-    if(strncmp(cur_line.c_str() + cur_line.size() - 4, "_END", 4))
+    const char* c = cur_line.c_str();
+    const char* s = section_name;
+
+    // scan to find difference between strings
+    while(true)
+    {
+        if(*c != *s || *c == '\0')
+            break;
+
+        c++;
+        s++;
+    }
+
+    // section name should be a prefix to current line
+    if(*s != '\0')
         return false;
 
-    if(strncmp(cur_line.c_str(), section_name, cur_line.size() - 4))
-        return false;
-
-    // this is safe because strncmp returned equal
-    if(section_name[cur_line.size() - 4] != '\0')
+    // current line must have a suffix of precisely "_END"
+    if(c[0] != '_' || c[1] != 'E' || c[2] != 'N' || c[3] != 'D' || c[4] != '\0')
         return false;
 
     return true;
