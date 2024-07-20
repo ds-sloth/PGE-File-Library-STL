@@ -412,19 +412,46 @@ MDX_SETUP_OBJECT(LevelScript,
 template<>
 const char* MDX_FieldType<LevelItemSetup38A::ItemType>::load(LevelItemSetup38A::ItemType& dest, const char* field_data)
 {
-    char* str_end;
-    long got = strtol(field_data, &str_end, 10);
+    long got = -1;
+    const char* str_end = MDX_FieldType<long>::load(got, field_data);
+
     if(got < 0 || got > 2)
         dest = LevelItemSetup38A::UNKNOWN;
     else
         dest = (LevelItemSetup38A::ItemType)got;
+
     return str_end;
+}
+
+template<>
+const char* MDX_FieldType<LevelItemSetup38A::Entry>::load(LevelItemSetup38A::Entry& e, const char* field_data)
+{
+    if(*field_data != '"')
+        throw MDX_missing_delimiter('"');
+
+    field_data++;
+
+    field_data = MDX_FieldType<decltype(LevelItemSetup38A::Entry::key)>::load(e.key, field_data);
+
+    if(*field_data != '=')
+        throw MDX_missing_delimiter('=');
+
+    field_data++;
+
+    field_data = MDX_FieldType<decltype(LevelItemSetup38A::Entry::value)>::load(e.value, field_data);
+
+    if(*field_data != '"')
+        throw MDX_missing_delimiter('"');
+
+    field_data++;
+
+    return field_data;
 }
 
 MDX_SETUP_OBJECT(LevelItemSetup38A,
     MDX_FIELD("T",  type); //Type of item
     MDX_FIELD("ID", id);
-    // MDX_FIELD("D", data); //Variable value
+    MDX_FIELD("D", data); //Variable value
 );
 
 struct MDX_LevelFile : MDX_File<LevelLoadCallbacks, LevelSaveCallbacks>
