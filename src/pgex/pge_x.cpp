@@ -310,12 +310,12 @@ PGEFile::PGEX_Entry PGEFile::buildTree(PGESTRINGList &src_data, bool *_valid)
                         valid = false;
                         break;
                     }
-                    if((c == ';') && (escape == 0))
+                    if(c == ';')
                     {
                         state = STATE_ERROR;
                         continue;
                     }
-                    if((c == ':') && (escape == 0))
+                    if(c == ':')
                     {
                         state = STATE_VALUE;
                         continue;
