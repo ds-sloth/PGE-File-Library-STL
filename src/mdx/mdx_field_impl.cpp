@@ -106,6 +106,10 @@ const char* load_uint(uint_t& dest, const char* field_data)
 
     uint_t value = 0;
 
+    // temporarily needed for fuzzing compliance
+    if(field_data[0] == '0' && field_data[1] >= '0' && field_data[1] <= '9')
+        return ret_error;
+
     while(true)
     {
         char c = *field_data;
@@ -146,6 +150,10 @@ const char* load_int(int_t& dest, const char* field_data)
         if(*field_data < '0' || *field_data > '9')
             return ret_error;
     }
+
+    // temporarily needed for fuzzing compliance
+    if(field_data[0] == '0' && field_data[1] >= '0' && field_data[1] <= '9')
+        return ret_error;
 
     int_t value = 0;
 
@@ -189,6 +197,10 @@ const char* load_double(double& dest, const char* field_data)
         if(*field_data < '0' || *field_data > '9')
             return ret_error;
     }
+
+    // temporarily needed for fuzzing compliance
+    if(field_data[0] == '0' && field_data[1] >= '0' && field_data[1] <= '9')
+        return ret_error;
 
     double value = 0;
 
