@@ -85,7 +85,7 @@ const char* MDX_skip_term(const char* line)
             else if(*line == '\\')
             {
                 if(!tag_end)
-                    throw MDX_bad_field(tag_begin, tag_end - tag_begin);
+                    throw MDX_bad_field(tag_begin, line + 1 - tag_begin);
                 else
                     escape = true;
             }
@@ -94,6 +94,10 @@ const char* MDX_skip_term(const char* line)
 
             line++;
         }
+    }
+    catch(const MDX_bad_field& e)
+    {
+        throw e;
     }
     catch(...)
     {
