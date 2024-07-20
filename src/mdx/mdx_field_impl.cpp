@@ -40,7 +40,6 @@
 const char* MDX_skip_term(const char* line)
 {
     bool escape = false;
-    bool quoted = false;
     const char* tag_begin = line;
     const char* tag_end = nullptr;
 
@@ -50,9 +49,7 @@ const char* MDX_skip_term(const char* line)
         {
             if(*line == '\0')
             {
-                if(quoted)
-                    throw MDX_missing_delimiter('"');
-                else if(tag_end)
+                if(tag_end)
                     throw MDX_missing_delimiter(';');
                 else
                     throw MDX_missing_delimiter(':');
@@ -62,39 +59,30 @@ const char* MDX_skip_term(const char* line)
                 // ignore character
                 escape = false;
             }
-            else if(*line == '"')
-            {
-                if(tag_end)
-                    quoted = !quoted;
-            }
             else if(*line == ';')
             {
                 if(!tag_end)
                     throw MDX_missing_delimiter(':');
-                else if(!quoted)
+                else
                     return line + 1;
             }
             else if(*line == ':')
             {
                 if(!tag_end)
                     tag_end = line;
-                else if(!quoted)
-                    throw MDX_bad_field(tag_begin, tag_end - tag_begin);
+                else
+                    throw MDX_unexpected_character(':');
             }
             else if(*line == '\\')
             {
                 if(!tag_end)
-                    throw MDX_bad_field(tag_begin, line + 1 - tag_begin);
+                    throw MDX_unexpected_character('\\');
                 else
                     escape = true;
             }
 
             line++;
         }
-    }
-    catch(const MDX_bad_field& e)
-    {
-        throw e;
     }
     catch(...)
     {
@@ -385,6 +373,8 @@ const char* MDX_FieldType<PGESTRING>::load(PGESTRING& dest, const char* field_da
             escape = true;
             continue;
         }
+        else if(cur_byte == ';' || cur_byte == ':')
+            throw MDX_unexpected_character(cur_byte);
         else if(cur_byte == '"')
             break;
         else

@@ -294,7 +294,6 @@ PGEFile::PGEX_Entry PGEFile::buildTree(PGESTRINGList &src_data, bool *_valid)
 
             PGEX_Val dataValue;
             int escape = 0;
-            bool quoted = false;
             for(pge_size_t i = 0; i < size; i++)
             {
                 if(state == STATE_ERROR)
@@ -333,22 +332,13 @@ PGEFile::PGEX_Entry PGEFile::buildTree(PGESTRINGList &src_data, bool *_valid)
                         //Skip escape sequence
                         escape = 2;
                     }
-                    if((c == '"') && (escape == 0))
-                        quoted = !quoted;
-                    if((c == ':') && (escape == 0) && !quoted)
+                    if((c == ':') && (escape == 0))
                     {
                         state = STATE_ERROR;
                         continue;
                     }
-                    if((c == ';') && (escape == 0) && !quoted)
+                    if((c == ';') && (escape == 0))
                     {
-                        // unterminated quote
-                        if(quoted)
-                        {
-                            valid = false;
-                            break;
-                        }
-
                         //STORE DATA
                         dataItem.values.push_back(dataValue);
                         dataValue.marker.clear();
@@ -844,7 +834,6 @@ PGELIST<PGESTRINGList > PGEFile::splitDataLine(const PGESTRING &src_data, bool *
     PGESTRING marker;
     PGESTRING value;
     int escape = 0;
-    bool quoted = false;
 
     for(pge_size_t i = 0; i < size; i++)
     {
@@ -891,14 +880,12 @@ PGELIST<PGESTRINGList > PGEFile::splitDataLine(const PGESTRING &src_data, bool *
                 //Skip escape sequence
                 escape = 2;
             }
-            if((c == '"') && (escape == 0))
-                quoted = !quoted;
-            if((c == ':') && (escape == 0) && !quoted)
+            if((c == ':') && (escape == 0))
             {
                 state = STATE_ERROR;
                 continue;
             }
-            if((c == ';') && (escape == 0) && !quoted)
+            if((c == ';') && (escape == 0))
             {
                 //STORE ENTRY!
                 PGESTRINGList fields;
