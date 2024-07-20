@@ -61,12 +61,30 @@ const char* MDX_bad_term::what() const noexcept
 MDX_missing_delimiter::MDX_missing_delimiter(char expected) noexcept
 {
     static const char prefix[] = "Missing ";
+    static_assert(sizeof(m_description) == sizeof(prefix) + 1, "Description size inconsistent with prefix size");
+
     memcpy(m_description, prefix, sizeof(prefix) - 1);
     m_description[sizeof(prefix) - 1] = expected;
     m_description[sizeof(prefix)] = '\0';
 }
 
 const char* MDX_missing_delimiter::what() const noexcept
+{
+    return m_description;
+}
+
+// derived error denoting an unexpected character
+MDX_unexpected_character::MDX_unexpected_character(char unexpected) noexcept
+{
+    static const char prefix[] = "Unexpected ";
+    static_assert(sizeof(m_description) == sizeof(prefix) + 1, "Description size inconsistent with prefix size");
+
+    memcpy(m_description, prefix, sizeof(prefix) - 1);
+    m_description[sizeof(prefix) - 1] = unexpected;
+    m_description[sizeof(prefix)] = '\0';
+}
+
+const char* MDX_unexpected_character::what() const noexcept
 {
     return m_description;
 }

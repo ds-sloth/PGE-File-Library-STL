@@ -59,7 +59,7 @@ public:
     virtual const char* what() const noexcept;
 };
 
-// primitive error denoting that a term is malformed
+// derived error denoting that a term is malformed
 class MDX_bad_term : public MDX_parse_error
 {
     const char* const m_message = nullptr;
@@ -68,12 +68,21 @@ public:
     virtual const char* what() const noexcept;
 };
 
-// primitive error denoting that a delimiter is missing
+// derived error denoting that a delimiter is missing
 class MDX_missing_delimiter : public MDX_parse_error
 {
     char m_description[10];
 public:
     MDX_missing_delimiter(char expected) noexcept;
+    virtual const char* what() const noexcept;
+};
+
+// derived error denoting an unexpected character
+class MDX_unexpected_character : public MDX_parse_error
+{
+    char m_description[13];
+public:
+    MDX_unexpected_character(char unexpected) noexcept;
     virtual const char* what() const noexcept;
 };
 
