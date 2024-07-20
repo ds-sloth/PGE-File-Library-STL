@@ -992,7 +992,7 @@ struct LevelItemSetup38A
 struct LevelHead
 {
     PGESTRING LevelName;
-    unsigned stars = 0;
+    int stars = 0;
     PGESTRING open_level_on_fail;
     unsigned open_level_on_fail_warpID = 0;
     PGELIST<PGESTRING> player_names_overrides;
