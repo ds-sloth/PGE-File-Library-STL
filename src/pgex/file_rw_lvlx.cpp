@@ -731,13 +731,13 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                     PGEX_StrArrVal("SS", ssSets)     //Section Size
                     //-------------------
                     //New values (with SMBX-38A values support)
-                    PGEX_StrArrVal("SSS", newSectionSettingsSets) //Section settings in new format
+                    PGEX_StrArrVal_Validate("SSS", newSectionSettingsSets) //Section settings in new format
                     //-------------------
                     //---SMBX-38A entries-----
-                    PGEX_StrArrVal("MLA",  movingLayers)       //NPC's to spawn
-                    PGEX_StrArrVal("SNPC", spawnNPCs)       //NPC's to spawn
-                    PGEX_StrArrVal("SEF",  spawnEffectss)    //Effects to spawn
-                    PGEX_StrArrVal("UV",   variablesToUpdate) //Variables to update
+                    PGEX_StrArrVal_Validate("MLA",  movingLayers)       //NPC's to spawn
+                    PGEX_StrArrVal_Validate("SNPC", spawnNPCs)       //NPC's to spawn
+                    PGEX_StrArrVal_Validate("SEF",  spawnEffectss)    //Effects to spawn
+                    PGEX_StrArrVal_Validate("UV",   variablesToUpdate) //Variables to update
                     PGEX_StrVal("TSCR", event.trigger_script) //Trigger script
                     PGEX_USIntVal("TAPI", event.trigger_api_id) //Trigger script
                     PGEX_BoolVal("TMR", event.timer_def.enable) //Enable timer
