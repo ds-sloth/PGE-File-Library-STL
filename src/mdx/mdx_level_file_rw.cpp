@@ -94,7 +94,7 @@ static bool s_load_section(void* _FileData, LevelSection& dest)
     //add captured value into array
     pge_size_t sections_count = FileData.sections.size();
 
-    if(dest.id < 0 || dest.id > 10000)
+    if(dest.id < 0 || dest.id > 1000)
         throw MDX_callback_error("Negative section ID");
 
     if(dest.id >= static_cast<int>(sections_count))
@@ -255,7 +255,7 @@ static bool s_load_event(void* _FileData, LevelSMBX64Event& event)
             ((sectionSet.id < 0) || (sectionSet.id >= static_cast<long>(padded_sets.size())))
         )//Append sections
         {
-            if(sectionSet.id < 0 || sectionSet.id > 10000)
+            if(sectionSet.id < 0 || sectionSet.id > 1000)
                 throw MDX_callback_error("Invalid section ID");
 
             long last = static_cast<long>(padded_sets.size() - 1);
