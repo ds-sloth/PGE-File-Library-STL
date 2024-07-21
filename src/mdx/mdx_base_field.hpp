@@ -252,6 +252,30 @@ struct MDX_Field : public MDX_BaseField<obj_t>
     }
 };
 
+template<class obj_t, class field_t>
+struct MDX_NonNegField : public MDX_Field<obj_t, field_t>
+{
+    using MDX_Field<obj_t, field_t>::MDX_Field;
+    using MDX_Field<obj_t, field_t>::m_field;
+
+    virtual const char* do_load(obj_t& dest, const char* field_data) const
+    {
+        try
+        {
+            const char* ret = MDX_finish_term(MDX_FieldType<field_t>::load(dest.*m_field, field_data));
+
+            if(dest.*m_field < 0)
+                throw(MDX_bad_term("Negative value"));
+
+            return ret;
+        }
+        catch(const MDX_parse_error&)
+        {
+            std::throw_with_nested(MDX_bad_field(MDX_BaseField<obj_t>::m_field_name));
+        }
+    }
+};
+
 template<class obj_t>
 struct MDX_UniqueField : public MDX_BaseField<obj_t>
 {
@@ -302,6 +326,31 @@ struct MDX_NestedField : public MDX_BaseField<obj_t>
         try
         {
             return MDX_finish_term(MDX_FieldType<field_t>::load(dest.*m_substruct.*m_field, field_data));
+        }
+        catch(const MDX_parse_error&)
+        {
+            std::throw_with_nested(MDX_bad_field(MDX_BaseField<obj_t>::m_field_name));
+        }
+    }
+};
+
+template<class obj_t, class substruct_t, class field_t>
+struct MDX_NonNegNestedField : public MDX_NestedField<obj_t, substruct_t, field_t>
+{
+    using MDX_NestedField<obj_t, substruct_t, field_t>::MDX_NestedField;
+    using MDX_NestedField<obj_t, substruct_t, field_t>::m_substruct;
+    using MDX_NestedField<obj_t, substruct_t, field_t>::m_field;
+
+    virtual const char* do_load(obj_t& dest, const char* field_data) const
+    {
+        try
+        {
+            const char* ret = MDX_finish_term(MDX_FieldType<field_t>::load(dest.*m_substruct.*m_field, field_data));
+
+            if(dest.*m_substruct.*m_field < 0)
+                throw(MDX_bad_term("Illegal negative"));
+
+            return ret;
         }
         catch(const MDX_parse_error&)
         {
