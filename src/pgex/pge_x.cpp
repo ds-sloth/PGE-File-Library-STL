@@ -156,7 +156,12 @@ bool PGEFile::buildTreeFromRaw()
             continue;
 
         // ban section name including null characters
+#ifndef PGE_FILES_QT
         if(PGEXsection.first.size() != strlen(PGEXsection.first.c_str()))
+#else
+        int found = PGEXsection.first.indexOf('\0');
+        if(found != -1)
+#endif
         {
             PGESTRING errSect = PGEXsection.first;
             PGE_CutLength(errSect, 20);
@@ -171,7 +176,7 @@ bool PGEFile::buildTreeFromRaw()
         {
             data = in.readLine();
 
-            if(data.empty())
+            if(IsEmpty(data))
                 continue;
 
             if(data == PGEXsection.first + "_END")
@@ -291,7 +296,14 @@ PGEFile::PGEX_Entry PGEFile::buildTree(PGESTRINGList &src_data, bool *_valid)
                 STATE_VALUE = 1,
                 STATE_ERROR = 2
             };
-            pge_size_t state = 0, size = strlen(srcData_nc.c_str()), tail = size - 1;
+            pge_size_t state = 0;
+#ifndef PGE_FILES_QT
+            pge_size_t size = strlen(srcData_nc.c_str());
+#else
+            int first_nul = srcData_nc.indexOf('\0');
+            pge_size_t size = (first_nul == -1) ? srcData_nc.size() : first_nul;
+#endif
+            pge_size_t tail = size - 1;
 
             if(srcData_nc.size() > 0 && srcData_nc.back() != ';')
                 state = STATE_ERROR;
@@ -820,7 +832,14 @@ PGELIST<PGESTRINGList > PGEFile::splitDataLine(const PGESTRING &src_data, bool *
         STATE_ERROR = 2
     };
 
-    pge_size_t state = 0, size = strlen(src_data.c_str()), tail = size - 1;
+    pge_size_t state = 0;
+#ifndef PGE_FILES_QT
+    pge_size_t size = strlen(src_data.c_str());
+#else
+    int first_nul = src_data.indexOf('\0');
+    pge_size_t size = (first_nul == -1) ? src_data.size() : first_nul;
+#endif
+    pge_size_t tail = size - 1;
 
     if(src_data.size() > 0 && src_data.back() != ';')
         state = STATE_ERROR;
@@ -984,7 +1003,7 @@ void PGEFile::restoreString(PGESTRING &input, bool removeQuotes)
 {
     PGESTRING &output = input;
     const pge_size_t first = 0;//For convenience to understand
-    pge_size_t j = 0, size = strlen(input.c_str()), tail = size - 1;
+    pge_size_t j = 0, size = input.size(), tail = size - 1;
     for(pge_size_t i = 0; i < size; i++, j++)
     {
         if(removeQuotes && ((i == first) || (i == tail)))

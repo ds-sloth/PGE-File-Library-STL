@@ -727,15 +727,15 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 PGESTRINGList bgSets;
                 PGESTRINGList ssSets;
                 PGESTRINGList movingLayers;
-                size_t movingLayers_begin = 0;
+                pge_size_t movingLayers_begin = 0;
                 PGESTRINGList newSectionSettingsSets;
-                size_t newSectionSettingsSets_begin = 0;
+                pge_size_t newSectionSettingsSets_begin = 0;
                 PGESTRINGList spawnNPCs;
-                size_t spawnNPCs_begin = 0;
+                pge_size_t spawnNPCs_begin = 0;
                 PGESTRINGList spawnEffectss;
-                size_t spawnEffectss_begin = 0;
+                pge_size_t spawnEffectss_begin = 0;
                 PGESTRINGList variablesToUpdate;
-                size_t variablesToUpdate_begin = 0;
+                pge_size_t variablesToUpdate_begin = 0;
                 PGELIST<bool > controls;
                 PGEX_Values() //Look markers and values
                 {
@@ -785,7 +785,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 //Parse new-style parameters
                 if(!newSectionSettingsSets.empty())
                 {
-                    for(size_t i = 0; i < newSectionSettingsSets.size(); i++)
+                    for(pge_size_t i = 0; i < newSectionSettingsSets.size(); i++)
                     {
                         const auto &newSectionSettingsSet = newSectionSettingsSets[i];
 
@@ -1082,7 +1082,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 //Parse Moving layers
                 if(!movingLayers.empty())
                 {
-                    for(size_t i = 0; i < movingLayers.size(); i++)
+                    for(pge_size_t i = 0; i < movingLayers.size(); i++)
                     {
                         const auto &movingLayer = movingLayers[i];
 
@@ -1165,7 +1165,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 //Parse NPCs to spawn
                 if(!spawnNPCs.empty())
                 {
-                    for(size_t i = 0; i < spawnNPCs.size(); i++)
+                    for(pge_size_t i = 0; i < spawnNPCs.size(); i++)
                     {
                         auto &spawnNpc = spawnNPCs[i];
 
@@ -1284,7 +1284,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 //Parse Effects to spawn
                 if(!spawnEffectss.empty())
                 {
-                    for(size_t i = 0; i < spawnEffectss.size(); i++)
+                    for(pge_size_t i = 0; i < spawnEffectss.size(); i++)
                     {
                         const auto &spawnEffects = spawnEffectss[i];
 
@@ -1421,7 +1421,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 //Parse Variables to update
                 if(!variablesToUpdate.empty())
                 {
-                    for(size_t i = 0; i < variablesToUpdate.size(); i++)
+                    for(pge_size_t i = 0; i < variablesToUpdate.size(); i++)
                     {
                         const auto &updVar = variablesToUpdate[i];
 
@@ -1581,7 +1581,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
                 customcfg38A = LevelItemSetup38A();
                 PGESTRINGList data;
-                size_t data_begin = 0;
+                pge_size_t data_begin = 0;
                 int type = -1;
                 PGEX_Values() //Look markers and values
                 {
@@ -1591,7 +1591,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                     PGEX_StrArrVal_Validate("D", data, data_begin) //Variable value
                 }
                 errorString = "Wrong pair syntax";
-                for(size_t i = 0; i < data.size(); i++)
+                for(pge_size_t i = 0; i < data.size(); i++)
                 {
                     PGESTRING &s = data[i];
 
