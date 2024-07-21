@@ -290,7 +290,7 @@ const char* MDX_LevelEvent_load_autoscroll_path(LevelEvent_Sets& set, const char
 }
 
 MDX_SETUP_OBJECT(LevelEvent_Sets,
-    MDX_FIELD("ID", id);
+    MDX_FIELD_NONNEG("ID", id);
     MDX_FIELD("SL", position_left);
     MDX_FIELD("ST", position_top);
     MDX_FIELD("SB", position_bottom);
@@ -319,12 +319,12 @@ MDX_SETUP_OBJECT(LevelEvent_MoveLayer,
     MDX_FIELD("SXX", expression_x);
     MDX_FIELD("SY", speed_y);
     MDX_FIELD("SYX", expression_y);
-    MDX_FIELD("MW", way);
+    MDX_FIELD_NONNEG("MW", way);
 );
 MDX_ENABLE_SUB_STRUCT(LevelEvent_MoveLayer);
 
 MDX_SETUP_OBJECT(LevelEvent_SpawnNPC,
-    MDX_FIELD("ID", id);
+    MDX_FIELD_NONNEG("ID", id);
     MDX_FIELD("SX", x);
     MDX_FIELD("SXX", expression_x);
     MDX_FIELD("SY", y);
@@ -333,12 +333,12 @@ MDX_SETUP_OBJECT(LevelEvent_SpawnNPC,
     MDX_FIELD("SSXX", expression_sx);
     MDX_FIELD("SSY", speed_y);
     MDX_FIELD("SSYX", expression_sy);
-    MDX_FIELD("SSS", special);
+    MDX_FIELD_NONNEG("SSS", special);
 );
 MDX_ENABLE_SUB_LIST(LevelEvent_SpawnNPC);
 
 MDX_SETUP_OBJECT(LevelEvent_SpawnEffect,
-    MDX_FIELD("ID", id);
+    MDX_FIELD_NONNEG("ID", id);
     MDX_FIELD("SX", x);
     MDX_FIELD("SXX", expression_x);
     MDX_FIELD("SY", y);
