@@ -1011,7 +1011,7 @@ void PGEFile::restoreString(PGESTRING &input, bool removeQuotes)
 {
     PGESTRING &output = input;
     const pge_size_t first = 0;//For convenience to understand
-    pge_size_t j = 0, size = input.size(), tail = size - 1;
+    pge_size_t j = 0, size = input.size(), tail = input.size() - 1;
     for(pge_size_t i = 0; i < size; i++, j++)
     {
         if(removeQuotes && ((i == first) || (i == tail)))
