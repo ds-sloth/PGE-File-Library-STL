@@ -236,7 +236,14 @@ const char* MDX_LevelEvent_load_controls(LevelSMBX64Event& event, const char* fi
 
     const char* next = MDX_finish_term(MDX_FieldType<PGELIST<bool>>::load(controls, field_data));
 
+#ifndef PGE_FILES_QT
     controls.resize(12);
+#else
+    if(controls.size() > 12)
+        controls.erase(controls.begin() + 12, controls.end());
+    while(controls.size() < 12)
+        controls.push_back(false);
+#endif
 
     // SMBX64-only
     event.ctrl_up = controls[0];
