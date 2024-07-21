@@ -769,10 +769,6 @@ PGESTRINGList PGEFile::X2STRArr(const PGESTRING &in, bool *_valid)
             valid = false;
             break;
 
-        case 3: //Array terminated
-            valid = false;
-            break;
-
         default:
             valid = false;
             break;
