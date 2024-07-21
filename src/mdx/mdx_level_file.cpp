@@ -415,39 +415,38 @@ template<>
 const char* MDX_FieldType<LevelItemSetup38A::ItemType>::load(LevelItemSetup38A::ItemType& dest, const char* field_data)
 {
     int got = 0;
-    const char* str_end = MDX_FieldType<int>::load(got, field_data);
+    const char* ret = MDX_FieldType<int>::load(got, field_data);
 
     if(got < LevelItemSetup38A::UNKNOWN || got >= LevelItemSetup38A::ITEM_TYPE_MAX)
         throw MDX_bad_term("Bad type");
 
     dest = (LevelItemSetup38A::ItemType)got;
 
-    return str_end;
+    return ret;
 }
 
 template<>
 const char* MDX_FieldType<LevelItemSetup38A::Entry>::load(LevelItemSetup38A::Entry& e, const char* field_data)
 {
-    if(*field_data != '"')
-        throw MDX_missing_delimiter('"');
+    std::string got;
+    const char* ret = MDX_FieldType<std::string>::load(got, field_data);
 
-    field_data++;
+    const char* const str_data_start = got.c_str();
+    const char* str_data = str_data_start;
 
-    field_data = MDX_FieldType<decltype(LevelItemSetup38A::Entry::key)>::load(e.key, field_data);
+    str_data = MDX_FieldType<decltype(LevelItemSetup38A::Entry::key)>::load(e.key, str_data);
 
-    if(*field_data != '=')
+    if(*str_data != '=')
         throw MDX_missing_delimiter('=');
 
-    field_data++;
+    str_data++;
 
-    field_data = MDX_FieldType<decltype(LevelItemSetup38A::Entry::value)>::load(e.value, field_data);
+    str_data = MDX_FieldType<decltype(LevelItemSetup38A::Entry::value)>::load(e.value, str_data);
 
-    if(*field_data != '"')
+    if((size_t)(str_data - str_data_start) != got.size())
         throw MDX_missing_delimiter('"');
 
-    field_data++;
-
-    return field_data;
+    return ret;
 }
 
 MDX_SETUP_OBJECT(LevelItemSetup38A,
