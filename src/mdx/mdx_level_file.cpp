@@ -101,21 +101,21 @@ MDX_SETUP_OBJECT(LevelBlock,
     MDX_FIELD("Y", y); //Position Y
     MDX_FIELD_NONNEG("W", w); //Width
     MDX_FIELD_NONNEG("H", h); //Height
-    MDX_FIELD("AS", autoscale);//Enable auto-Scaling
-    MDX_FIELD("GXN", gfx_name); //38A GFX-Name
-    MDX_FIELD("GXX", gfx_dx); //38A graphics extend x
-    MDX_FIELD("GXY", gfx_dy); //38A graphics extend y
     MDX_FIELD("CN", npc_id); //Contains (coins/NPC)
-    MDX_FIELD("CS", npc_special_value); //Special value for contained NPC
     MDX_FIELD("IV", invisible); //Invisible
     MDX_FIELD("SL", slippery); //Slippery
-    MDX_FIELD("MA", motion_ai_id); //Motion AI type
-    MDX_FIELD("S1", special_data); //Special value 1
-    MDX_FIELD("S2", special_data2); //Special value 2
     MDX_FIELD("LR", layer); //Layer name
     MDX_FIELD("ED", event_destroy); //Destroy event slot
     MDX_FIELD("EH", event_hit); //Hit event slot
     MDX_FIELD("EE", event_emptylayer); //Hit event slot
+    MDX_FIELD("S1", special_data); //Special value 1
+    MDX_FIELD("S2", special_data2); //Special value 2
+    MDX_FIELD("AS", autoscale);//Enable auto-Scaling
+    MDX_FIELD("GXN", gfx_name); //38A GFX-Name
+    MDX_FIELD("GXX", gfx_dx); //38A graphics extend x
+    MDX_FIELD("GXY", gfx_dy); //38A graphics extend y
+    MDX_FIELD("CS", npc_special_value); //Special value for contained NPC
+    MDX_FIELD("MA", motion_ai_id); //Motion AI type
     MDX_FIELD_XTRA();//Custom JSON data tree
 );
 
@@ -123,12 +123,12 @@ MDX_SETUP_OBJECT(LevelBGO,
     MDX_FIELD("ID", id);  //BGO ID
     MDX_FIELD("X",  x);  //X Position
     MDX_FIELD("Y",  y);  //Y Position
-    MDX_FIELD("GXX", gfx_dx); //38A graphics extend x
-    MDX_FIELD("GXY", gfx_dy); //38A graphics extend y
     MDX_FIELD("ZO", z_offset); //Z Offset
     MDX_FIELD("ZP", z_mode);  //Z Position
     MDX_FIELD("SP", smbx64_sp);  //SMBX64 Sorting priority
     MDX_FIELD("LR", layer);   //Layer name
+    MDX_FIELD("GXX", gfx_dx); //38A graphics extend x
+    MDX_FIELD("GXY", gfx_dy); //38A graphics extend y
     MDX_FIELD_XTRA();//Custom JSON data tree
 );
 
@@ -136,14 +136,6 @@ MDX_SETUP_OBJECT(LevelNPC,
     MDX_FIELD("ID", id); //NPC ID
     MDX_FIELD("X", x); //X position
     MDX_FIELD("Y", y); //Y position
-    MDX_FIELD("GXN", gfx_name); //38A GFX-Name
-    MDX_FIELD("GXX", gfx_dx); //38A graphics extend x
-    MDX_FIELD("GXY", gfx_dy); //38A graphics extend y
-    MDX_FIELD("OW", override_width); //Override width
-    MDX_FIELD("OH", override_height); //Override height
-    MDX_FIELD("GAS", gfx_autoscale); //Autoscale GFX on size override
-    MDX_FIELD("WGT", wings_type); //38A: Wings type
-    MDX_FIELD("WGS", wings_style); //38A: Wings style
     MDX_FIELD("D", direct); //Direction
     MDX_FIELD("CN", contents); //Contents of container-NPC
     MDX_FIELD("S1", special_data); //Special value 1
@@ -152,17 +144,12 @@ MDX_SETUP_OBJECT(LevelNPC,
     MDX_FIELD("GT", generator_type); //Generator type
     MDX_FIELD("GD", generator_direct); //Generator direction
     MDX_FIELD_NONNEG("GM", generator_period); //Generator period
-    MDX_FIELD("GA", generator_custom_angle); //Generator custom angle
-    MDX_FIELD_NONNEG("GB",  generator_branches); //Generator number of branches
-    MDX_FIELD("GR", generator_angle_range); //Generator angle range
-    MDX_FIELD("GS", generator_initial_speed); //Generator custom initial speed
     MDX_FIELD("MG", msg); //Message
     MDX_FIELD("FD", friendly); //Friendly
     MDX_FIELD("NM", nomove); //Don't move
     MDX_FIELD("BS", is_boss); //Enable boss mode!
     MDX_FIELD("LR", layer); //Layer
     MDX_FIELD("LA", attach_layer); //Attach Layer
-    MDX_FIELD("SV", send_id_to_variable); //Send ID to variable
     MDX_FIELD("EA", event_activate); //Event slot "Activated"
     MDX_FIELD("ED", event_die); //Event slot "Death/Take/Destroy"
     MDX_FIELD("ET", event_talk); //Event slot "Talk"
@@ -170,6 +157,19 @@ MDX_SETUP_OBJECT(LevelNPC,
     MDX_FIELD("EG", event_grab);//Event slot "On grab"
     MDX_FIELD("EO", event_touch);//Event slot "On touch"
     MDX_FIELD("EF", event_nextframe);//Evemt slot "Trigger every frame"
+    MDX_FIELD("SV", send_id_to_variable); //Send ID to variable
+    MDX_FIELD("GXN", gfx_name); //38A GFX-Name
+    MDX_FIELD("GXX", gfx_dx); //38A graphics extend x
+    MDX_FIELD("GXY", gfx_dy); //38A graphics extend y
+    MDX_FIELD("OW", override_width); //Override width
+    MDX_FIELD("OH", override_height); //Override height
+    MDX_FIELD("GAS", gfx_autoscale); //Autoscale GFX on size override
+    MDX_FIELD("WGT", wings_type); //38A: Wings type
+    MDX_FIELD("WGS", wings_style); //38A: Wings style
+    MDX_FIELD("GA", generator_custom_angle); //Generator custom angle
+    MDX_FIELD_NONNEG("GB",  generator_branches); //Generator number of branches
+    MDX_FIELD("GR", generator_angle_range); //Generator angle range
+    MDX_FIELD("GS", generator_initial_speed); //Generator custom initial speed
     MDX_FIELD_XTRA();//Custom JSON data tree
 );
 
