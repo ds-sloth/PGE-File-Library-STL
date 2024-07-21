@@ -275,9 +275,9 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                         PGEX_ValueBegin()
                         PGEX_StrVal("TL", FileData.LevelName) //Level Title
                         PGEX_USIntVal("SZ", FileData.stars) //Starz number
-                    PGEX_StrVal("DL", FileData.open_level_on_fail) //Open level on fail
-                    PGEX_UIntVal("DE", FileData.open_level_on_fail_warpID) //Open level's warpID on fail
-                    PGEX_StrArrVal("NO", FileData.player_names_overrides) //Overrides of player names
+                        PGEX_StrVal("DL", FileData.open_level_on_fail) //Open level on fail
+                        PGEX_UIntVal("DE", FileData.open_level_on_fail_warpID) //Open level's warpID on fail
+                        PGEX_StrArrVal("NO", FileData.player_names_overrides) //Overrides of player names
                         PGEX_StrVal("XTRA", FileData.custom_params) //Level-wide Extra settings
                         PGEX_StrVal("CPID", FileData.meta.configPackId)//Config pack ID string
                         PGEX_StrArrVal("MUS", FileData.music_files)// Level-wide list of external music files
@@ -748,9 +748,9 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                     PGEX_StrArrVal("LS", event.layers_show) //Show layers
                     PGEX_StrArrVal("LT", event.layers_toggle) //Toggle layers
                     //Legacy values (without SMBX-38A values support)
-                    PGEX_StrArrVal("SM", musicSets)  //Switch music
-                    PGEX_StrArrVal("SB", bgSets)     //Switch background
-                    PGEX_StrArrVal("SS", ssSets)     //Section Size
+                    // PGEX_StrArrVal("SM", musicSets)  //Switch music
+                    // PGEX_StrArrVal("SB", bgSets)     //Switch background
+                    // PGEX_StrArrVal("SS", ssSets)     //Section Size
                     //-------------------
                     //New values (with SMBX-38A values support)
                     PGEX_StrArrVal_Validate("SSS", newSectionSettingsSets, newSectionSettingsSets_begin) //Section settings in new format
