@@ -99,8 +99,8 @@ MDX_SETUP_OBJECT(LevelBlock,
     MDX_FIELD("ID", id); //Block ID
     MDX_FIELD("X", x); // Position X
     MDX_FIELD("Y", y); //Position Y
-    MDX_FIELD("W", w); //Width
-    MDX_FIELD("H", h); //Height
+    MDX_FIELD_NONNEG("W", w); //Width
+    MDX_FIELD_NONNEG("H", h); //Height
     MDX_FIELD("AS", autoscale);//Enable auto-Scaling
     MDX_FIELD("GXN", gfx_name); //38A GFX-Name
     MDX_FIELD("GXX", gfx_dx); //38A graphics extend x
@@ -177,8 +177,8 @@ MDX_SETUP_OBJECT(LevelPhysEnv,
     MDX_FIELD_NONNEG("ET", env_type); //Environment type
     MDX_FIELD("X",  x); //X position
     MDX_FIELD("Y",  y); //Y position
-    MDX_FIELD("W",  w); //Width
-    MDX_FIELD("H",  h); //Height
+    MDX_FIELD_NONNEG("W",  w); //Width
+    MDX_FIELD_NONNEG("H",  h); //Height
     MDX_FIELD("LR", layer);  //Layer
     MDX_FIELD("FR", friction); //Friction
     MDX_FIELD("AD", accel_direct); //Custom acceleration direction

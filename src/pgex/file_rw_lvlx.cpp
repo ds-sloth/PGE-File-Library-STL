@@ -480,8 +480,8 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                     PGEX_ULongVal("ID", block.id) //Block ID
                     PGEX_SLongVal("X", block.x) // Position X
                     PGEX_SLongVal("Y", block.y) //Position Y
-                    PGEX_SLongVal("W", block.w) //Width
-                    PGEX_SLongVal("H", block.h) //Height
+                    PGEX_USLongVal("W", block.w) //Width
+                    PGEX_USLongVal("H", block.h) //Height
                     PGEX_BoolVal("AS", block.autoscale)//Enable auto-Scaling
                     PGEX_StrVal("GXN", block.gfx_name) //38A GFX-Name
                     PGEX_SLongVal("GXX", block.gfx_dx) //38A graphics extend x
@@ -600,8 +600,8 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                     PGEX_USIntVal("ET", physiczone.env_type) //Environment type
                     PGEX_SLongVal("X",  physiczone.x) //X position
                     PGEX_SLongVal("Y",  physiczone.y) //Y position
-                    PGEX_SLongVal("W",  physiczone.w) //Width
-                    PGEX_SLongVal("H",  physiczone.h) //Height
+                    PGEX_USLongVal("W",  physiczone.w) //Width
+                    PGEX_USLongVal("H",  physiczone.h) //Height
                     PGEX_StrVal("LR", physiczone.layer)  //Layer
                     PGEX_FloatVal("FR", physiczone.friction) //Friction
                     PGEX_FloatVal("AD", physiczone.accel_direct) //Custom acceleration direction
