@@ -35,6 +35,8 @@
 #ifndef PGE_X_MACRO_H
 #define PGE_X_MACRO_H
 
+#include <climits>
+
 struct PGEX_IGNORE
 {
     template<class o>
@@ -44,7 +46,11 @@ struct PGEX_IGNORE
 template<class want, class got>
 static inline void PGE_check_inst(const got& g)
 {
+#if INT_MAX != LONG_MAX
     (void)const_cast<const want&>(g);
+#else
+    (void)g;
+#endif
 }
 
 template<class want>
