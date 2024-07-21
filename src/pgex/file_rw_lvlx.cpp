@@ -1006,6 +1006,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                         if(i < newSectionSettingsSets_begin)
                             continue;
 
+                        // TODO: remove this logic (duplicated in the load callback)
                         if(
                             ((sectionSet.id < 0) || (sectionSet.id >= static_cast<long>(event.sets.size())))
                         )//Append sections

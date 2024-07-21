@@ -247,13 +247,32 @@ static bool s_load_event(void* _FileData, LevelSMBX64Event& event)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
 
-    // FIXME: do something to add padding to event.sets based on the IDs of the section settings
-    // Note: this causes a hang in extreme cases
-    for(const auto& set : event.sets)
+    // create a new padded list of the event sets
+    PGELIST<LevelEvent_Sets> padded_sets;
+    for(LevelEvent_Sets& sectionSet : event.sets)
     {
-        if(set.id < 0 || set.id > 10000)
-            throw MDX_callback_error("Negative section ID");
+        if(
+            ((sectionSet.id < 0) || (sectionSet.id >= static_cast<long>(padded_sets.size())))
+        )//Append sections
+        {
+            if(sectionSet.id < 0 || sectionSet.id > 10000)
+                throw MDX_callback_error("Invalid section ID");
+
+            long last = static_cast<long>(padded_sets.size() - 1);
+
+            while(sectionSet.id >= static_cast<long>(padded_sets.size()))
+            {
+                LevelEvent_Sets set;
+                set.id = last;
+                padded_sets.push_back(set);
+                last++;
+            }
+        }
+
+        padded_sets[static_cast<pge_size_t>(sectionSet.id)] = std::move(sectionSet);
     }
+
+    event.sets = std::move(padded_sets);
 
     //add captured value into array
     bool found = false;
