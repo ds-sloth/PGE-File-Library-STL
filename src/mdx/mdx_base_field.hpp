@@ -264,7 +264,7 @@ struct MDX_NonNegField : public MDX_Field<obj_t, field_t>
         {
             const char* ret = MDX_finish_term(MDX_FieldType<field_t>::load(dest.*m_field, field_data));
 
-            if(dest.*m_field < 0)
+            if(*field_data == '-' || dest.*m_field < 0)
                 throw(MDX_bad_term("Negative value"));
 
             return ret;
@@ -347,7 +347,7 @@ struct MDX_NonNegNestedField : public MDX_NestedField<obj_t, substruct_t, field_
         {
             const char* ret = MDX_finish_term(MDX_FieldType<field_t>::load(dest.*m_substruct.*m_field, field_data));
 
-            if(dest.*m_substruct.*m_field < 0)
+            if(*field_data == '-' || dest.*m_substruct.*m_field < 0)
                 throw(MDX_bad_term("Illegal negative"));
 
             return ret;
