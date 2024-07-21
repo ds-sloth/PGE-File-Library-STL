@@ -267,6 +267,8 @@ const char* MDX_LevelEvent_load_autoscroll_path(LevelEvent_Sets& set, const char
     if(arr.size() % 4)
         throw MDX_bad_term("Invalid Section Autoscroll path data contains non-multiple 4 entries");
 
+    set.autoscroll_path.clear();
+
     for(pge_size_t pe = 0; pe < arr.size(); pe += 4)
     {
         LevelEvent_Sets::AutoScrollStopPoint stop;
