@@ -87,7 +87,7 @@ struct MDX_BaseSection
     virtual bool try_load(const load_callbacks_t& table, PGE_FileFormats_misc::TextInput& inf, std::string& cur_line) = 0;
 };
 
-template<class load_callbacks_t, class save_callbacks_t, class _obj_t>
+template<class load_callbacks_t, class save_callbacks_t, class _obj_t, bool t_combine_objects = false>
 struct MDX_Section : public MDX_Object<_obj_t>, public MDX_BaseSection<load_callbacks_t, save_callbacks_t>
 {
     using MDX_Object<_obj_t>::load_object;
@@ -133,6 +133,9 @@ public:
         if(!callback)
             return false;
 
+        if(t_combine_objects)
+            m_obj = obj_t();
+
         while(true)
         {
 #ifndef PGE_FILES_QT
@@ -155,18 +158,26 @@ public:
             // ordinary line
             else if(*(cur_line.end() - 1) == ';')
             {
-                m_obj = obj_t();
+                if(!t_combine_objects)
+                    m_obj = obj_t();
+
                 load_object(m_obj, cur_line.c_str());
 
-                if(!callback(cb.userdata, m_obj))
+                if(!t_combine_objects)
                 {
-                    MDX_skip_section(inf, cur_line, m_section_name);
-                    return true;
+                    if(!callback(cb.userdata, m_obj))
+                    {
+                        MDX_skip_section(inf, cur_line, m_section_name);
+                        return true;
+                    }
                 }
             }
             // section end line
             else if(MDX_line_is_section_end(cur_line, m_section_name))
             {
+                if(t_combine_objects)
+                    callback(cb.userdata, m_obj);
+
                 return true;
             }
             // unterminated line

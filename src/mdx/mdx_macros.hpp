@@ -51,6 +51,7 @@
 #define MDX_CALLBACK_SAVE(CALLBACK_NAME) save_ ## CALLBACK_NAME
 #define MDX_SECTION_NAME(OBJ_T) section_ ## OBJ_T
 #define MDX_SECTION(NAME, OBJ_T, CALLBACK_NAME) section<OBJ_T> MDX_SECTION_NAME(OBJ_T){this, NAME, &load_callbacks_t::MDX_CALLBACK_LOAD(CALLBACK_NAME), &save_callbacks_t::MDX_CALLBACK_SAVE(CALLBACK_NAME)}
+#define MDX_SECTION_SINGLE(NAME, OBJ_T, CALLBACK_NAME) section_single<OBJ_T> MDX_SECTION_NAME(OBJ_T){this, NAME, &load_callbacks_t::MDX_CALLBACK_LOAD(CALLBACK_NAME), &save_callbacks_t::MDX_CALLBACK_SAVE(CALLBACK_NAME)}
 
 #define MDX_SETUP_OBJECT(OBJ_T, BODY) template<> \
 struct MDX_Object<OBJ_T> : MDX_BaseObject<OBJ_T> \

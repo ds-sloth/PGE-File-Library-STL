@@ -1127,8 +1127,6 @@ struct LevelData
     int CurSection = 0;
     //! is music playing button pressed?
     bool playmusic = false;
-    //! has the header been loaded?
-    bool head_loaded = false;
 
     /*
      * Helpful functions

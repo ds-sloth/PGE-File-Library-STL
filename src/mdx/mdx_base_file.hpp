@@ -52,6 +52,7 @@ struct MDX_File
     using load_callbacks_t = _load_callbacks_t;
     using save_callbacks_t = _save_callbacks_t;
     template<class obj_t> using section = MDX_Section<load_callbacks_t, save_callbacks_t, obj_t>;
+    template<class obj_t> using section_single = MDX_Section<load_callbacks_t, save_callbacks_t, obj_t, true>;
 
     std::vector<MDX_BaseSection<load_callbacks_t, save_callbacks_t>*> m_sections;
 

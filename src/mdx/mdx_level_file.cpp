@@ -464,11 +464,11 @@ MDX_SETUP_OBJECT(LevelItemSetup38A,
 
 struct MDX_LevelFile : MDX_File<LevelLoadCallbacks, LevelSaveCallbacks>
 {
-    MDX_SECTION("HEAD", LevelHead, head);
+    MDX_SECTION_SINGLE("HEAD", LevelHead, head);
+
+    MDX_SECTION_SINGLE("META_SYS_CRASH", CrashData, crash_data);
 
     MDX_SECTION("META_BOOKMARKS", Bookmark, bookmark);
-
-    MDX_SECTION("META_SYS_CRASH", CrashData, crash_data);
 
     MDX_SECTION("SECTION", LevelSection, section);
 
