@@ -432,6 +432,45 @@ const char* MDX_FieldType<QString>::load(QString& dest, const char* field_data)
 
     return ret;
 }
+
+template<>
+const char* MDX_FieldType<QStringList>::load(QStringList& dest, const char* field_data)
+{
+    dest.clear();
+
+    const char* cur_pos = field_data;
+    if(*cur_pos != '[')
+        throw MDX_missing_delimiter('[');
+
+    cur_pos++;
+
+    std::string got_utf8;
+
+    while(*cur_pos != ']' && *cur_pos != '\0')
+    {
+        try
+        {
+            cur_pos = MDX_FieldType<std::string>::load(got_utf8, cur_pos);
+            cur_pos = MDX_finish_list_item(cur_pos);
+        }
+        catch(const MDX_parse_error&)
+        {
+            std::throw_with_nested(MDX_bad_array(dest.size()));
+        }
+
+        dest.push_back(QString::fromStdString(got_utf8));
+    }
+
+    if(*(cur_pos - 1) == ',')
+        throw MDX_unexpected_character(']');
+
+    if(*cur_pos != ']')
+        throw MDX_missing_delimiter(']');
+
+    cur_pos++;
+
+    return cur_pos;
+}
 #endif
 
 const char* MDX_FieldType<PGELIST<bool>>::load(PGELIST<bool>& dest, const char* field_data)
