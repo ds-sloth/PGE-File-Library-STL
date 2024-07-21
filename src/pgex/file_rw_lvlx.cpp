@@ -47,7 +47,18 @@ bool FileFormats::ReadExtendedLvlFileHeader(const PGESTRING &filePath, LevelData
         return false;
     }
 
-    return ReadExtendedLvlFileHeaderT(inf, FileData);
+    try
+    {
+        return ReadExtendedLvlFileHeaderT(inf, FileData);
+    }
+    catch(const std::exception& e)
+    {
+        FileData.meta.ERROR_info = e.what();
+        FileData.meta.ERROR_linedata.clear();
+        FileData.meta.ERROR_linenum = -1;
+        FileData.meta.ReadFileValid = false;
+        return false;
+    }
 }
 
 bool FileFormats::ReadExtendedLvlFileHeaderRaw(PGESTRING &rawdata, const PGESTRING &filePath, LevelData &FileData)
@@ -63,7 +74,18 @@ bool FileFormats::ReadExtendedLvlFileHeaderRaw(PGESTRING &rawdata, const PGESTRI
         return false;
     }
 
-    return ReadExtendedLvlFileHeaderT(inf, FileData);
+    try
+    {
+        return ReadExtendedLvlFileHeaderT(inf, FileData);
+    }
+    catch(const std::exception& e)
+    {
+        FileData.meta.ERROR_info = e.what();
+        FileData.meta.ERROR_linedata.clear();
+        FileData.meta.ERROR_linenum = -1;
+        FileData.meta.ReadFileValid = false;
+        return false;
+    }
 }
 
 bool FileFormats::ReadExtendedLvlFileHeaderT(PGE_FileFormats_misc::TextInput &inf, LevelData &FileData)
@@ -204,7 +226,18 @@ bool FileFormats::ReadExtendedLvlFileF(const PGESTRING &filePath, LevelData &Fil
         return false;
     }
 
-    return ReadExtendedLvlFile(file, FileData);
+    try
+    {
+        return ReadExtendedLvlFile(file, FileData);
+    }
+    catch(const std::exception& e)
+    {
+        FileData.meta.ERROR_info = e.what();
+        FileData.meta.ERROR_linedata.clear();
+        FileData.meta.ERROR_linenum = -1;
+        FileData.meta.ReadFileValid = false;
+        return false;
+    }
 }
 
 bool FileFormats::ReadExtendedLvlFileRaw(PGESTRING &rawdata, const PGESTRING &filePath,  LevelData &FileData)
@@ -221,7 +254,18 @@ bool FileFormats::ReadExtendedLvlFileRaw(PGESTRING &rawdata, const PGESTRING &fi
         return false;
     }
 
-    return ReadExtendedLvlFile(file, FileData);
+    try
+    {
+        return ReadExtendedLvlFile(file, FileData);
+    }
+    catch(const std::exception& e)
+    {
+        FileData.meta.ERROR_info = e.what();
+        FileData.meta.ERROR_linedata.clear();
+        FileData.meta.ERROR_linenum = -1;
+        FileData.meta.ReadFileValid = false;
+        return false;
+    }
 }
 
 bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelData &FileData)
@@ -379,7 +423,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 //add captured value into array
                 pge_size_t sections_count = FileData.sections.size();
 
-                if(lvl_section.id < 0 || lvl_section.id > 10000)
+                if(lvl_section.id < 0 || lvl_section.id > 1000)
                 {
                     errorString = "Negative section ID";
                     goto badfile;
@@ -931,8 +975,8 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                             {
                                 errorString = "Invalid Section Autoscroll type value type";
 
-                                if(PGEFile::IsIntS(param[1]))
-                                    sectionSet.autoscroll_style = static_cast<int>(toInt(param[1]));
+                                if(PGEFile::IsIntU(param[1]))
+                                    sectionSet.autoscroll_style = toInt(param[1]);
                                 else
                                     goto badfile;
                             }
@@ -1011,7 +1055,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                             ((sectionSet.id < 0) || (sectionSet.id >= static_cast<long>(event.sets.size())))
                         )//Append sections
                         {
-                            if(sectionSet.id < 0 || sectionSet.id > 10000)
+                            if(sectionSet.id < 0 || sectionSet.id > 1000)
                             {
                                 errorString = "Section settings event contains negative section ID value or missed!";
                                 goto badfile;//Missmatched section ID!
@@ -1587,8 +1631,8 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 PGEX_Values() //Look markers and values
                 {
                     PGEX_ValueBegin()
-                    PGEX_SIntVal("T",  type) //Type of item
-                    PGEX_SLongVal("ID", customcfg38A.id)
+                    PGEX_USIntVal("T",  type) //Type of item
+                    PGEX_USLongVal("ID", customcfg38A.id)
                     PGEX_StrArrVal_Validate("D", data, data_begin) //Variable value
                 }
                 errorString = "Wrong pair syntax";
@@ -1602,7 +1646,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                     if(pair.size() != 2)
                         goto badfile;
 
-                    if(PGEFile::IsIntS(pair[0]))
+                    if(PGEFile::IsIntU(pair[0]))
                         e.key = toInt(pair[0]);
                     else goto badfile;
 

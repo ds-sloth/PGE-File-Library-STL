@@ -305,7 +305,7 @@ PGEFile::PGEX_Entry PGEFile::buildTree(PGESTRINGList &src_data, bool *_valid)
 #endif
             pge_size_t tail = size - 1;
 
-            if(srcData_nc.size() > 0 && srcData_nc.back() != ';')
+            if(size > 0 && srcData_nc.back() != ';')
                 state = STATE_ERROR;
 
             PGEX_Val dataValue;
@@ -732,6 +732,10 @@ PGESTRINGList PGEFile::X2STRArr(const PGESTRING &in, bool *_valid)
                 else if(in[i] == '"') depth = 2; //Open value
                 else valid = false;
                 break;
+
+            default:
+                valid = false;
+                break;
             }
             break;
 
@@ -765,6 +769,10 @@ PGESTRINGList PGEFile::X2STRArr(const PGESTRING &in, bool *_valid)
             valid = false;
             break;
 
+        case 3: //Array terminated
+            valid = false;
+            break;
+
         default:
             valid = false;
             break;
@@ -775,6 +783,7 @@ PGESTRINGList PGEFile::X2STRArr(const PGESTRING &in, bool *_valid)
         i++;
     }
 
+    // require closing ]
     if(depth != 3)
         valid = false;
 
@@ -844,7 +853,7 @@ PGELIST<PGESTRINGList > PGEFile::splitDataLine(const PGESTRING &src_data, bool *
 #endif
     pge_size_t tail = size - 1;
 
-    if(src_data.size() > 0 && src_data.back() != ';')
+    if(size > 0 && src_data.back() != ';')
         state = STATE_ERROR;
 
     PGESTRING marker;
@@ -1073,6 +1082,7 @@ ReCheckQuotie:
                 i++;
                 break;
             default:
+                // invalid escape sequence, simply ignore the backslash
                 // output[j++] = input[i];
                 output[j]   = input[k];
                 i++;
