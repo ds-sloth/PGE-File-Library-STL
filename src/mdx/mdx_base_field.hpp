@@ -136,6 +136,9 @@ const char* MDX_FieldType<PGELIST<subtype_t>>::load(PGELIST<subtype_t>& dest, co
         }
     }
 
+    if(*(cur_pos - 1) == ',')
+        throw MDX_unexpected_character(']');
+
     if(*cur_pos != ']')
         throw MDX_missing_delimiter(']');
 
@@ -201,6 +204,9 @@ const char* MDX_FieldType_ObjectList<obj_loader_t>::load(PGELIST<typename obj_lo
             std::throw_with_nested(MDX_bad_array(dest.size()));
         }
     }
+
+    if(*(cur_pos - 1) == ',')
+        throw MDX_unexpected_character(']');
 
     if(*cur_pos != ']')
         throw MDX_missing_delimiter(']');
