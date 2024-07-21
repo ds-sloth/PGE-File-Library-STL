@@ -284,6 +284,32 @@ struct MDX_UniqueField : public MDX_BaseField<obj_t>
     }
 };
 
+template<class obj_t, class substruct_t, class field_t>
+struct MDX_NestedField : public MDX_BaseField<obj_t>
+{
+    substruct_t obj_t::* m_substruct = nullptr;
+    field_t substruct_t::* m_field = nullptr;
+
+    template<class parent_t>
+    MDX_NestedField(parent_t* parent, const char* field_name, substruct_t obj_t::* substruct, field_t substruct_t::* field)
+        : MDX_BaseField<obj_t>(field_name), m_substruct(substruct), m_field(field)
+    {
+        parent->m_fields.push_back(this);
+    }
+
+    virtual const char* do_load(obj_t& dest, const char* field_data) const
+    {
+        try
+        {
+            return MDX_finish_term(MDX_FieldType<field_t>::load(dest.*m_substruct.*m_field, field_data));
+        }
+        catch(const MDX_parse_error&)
+        {
+            std::throw_with_nested(MDX_bad_field(MDX_BaseField<obj_t>::m_field_name));
+        }
+    }
+};
+
 template<class obj_t>
 struct MDX_FieldXtra : public MDX_BaseField<obj_t>
 {

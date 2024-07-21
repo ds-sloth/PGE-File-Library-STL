@@ -382,11 +382,11 @@ MDX_SETUP_OBJECT(LevelSMBX64Event,
     MDX_FIELD("UV",   update_variable); //Variables to update
     MDX_FIELD("TSCR", trigger_script); //Trigger script
     MDX_FIELD("TAPI", trigger_api_id); //Trigger script
-    // MDX_FIELD("TMR", timer_def.enable); //Enable timer
-    // MDX_FIELD("TMC", timer_def.count); //Count of timer units
-    // MDX_FIELD("TMI", timer_def.interval); //Interval of timer tick
-    // MDX_FIELD("TMD", timer_def.count_dir); //Direction of count
-    // MDX_FIELD("TMV", timer_def.show); //Show timer on screen
+    MDX_NESTED_FIELD("TMR", timer_def, enable); //Enable timer
+    MDX_NESTED_FIELD("TMC", timer_def, count); //Count of timer units
+    MDX_NESTED_FIELD("TMI", timer_def, interval); //Interval of timer tick
+    MDX_NESTED_FIELD("TMD", timer_def, count_dir); //Direction of count
+    MDX_NESTED_FIELD("TMV", timer_def, show); //Show timer on screen
     //-------------------
     MDX_FIELD("TE", trigger); //Trigger event
     MDX_FIELD("TD", trigger_timer); //Trigger delay
