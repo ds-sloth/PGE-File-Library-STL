@@ -555,6 +555,7 @@ bool PGEFile::IsFloat(PGESTRING &in) // Float Point numeric
     bool has_digit = false;
     bool decimal = false;
     bool pow10  = false;
+    int pow10_digits = 0;
     for(pge_size_t i = ((PGEGetChar(in[0]) == '-') ? 1 : 0); i < in.size(); i++)
     {
         if((!decimal) && (!pow10))
@@ -581,9 +582,11 @@ bool PGEFile::IsFloat(PGESTRING &in) // Float Point numeric
         if(!isDegit(in[i])) return false;
         if(!pow10)
             has_digit = true;
+        else
+            pow10_digits++;
     }
 
-    return has_digit;
+    return has_digit && (pow10_digits <= 4);
 }
 
 bool PGEFile::IsBoolArray(const PGESTRING &in) // Boolean array

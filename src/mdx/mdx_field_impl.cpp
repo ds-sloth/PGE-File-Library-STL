@@ -253,7 +253,7 @@ exponent:
 
     int exponent;
     field_data = s_load_int<int, 1>(exponent, field_data);
-    if(field_data == exp_start)
+    if(field_data == exp_start || field_data - exp_start > 4)
         return ret_error;
 
     dest = sign * value * std::pow(10, exponent);
