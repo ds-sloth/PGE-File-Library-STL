@@ -236,23 +236,23 @@ const char* MDX_LevelEvent_load_controls(LevelSMBX64Event& event, const char* fi
 
     const char* next = MDX_finish_term(MDX_FieldType<PGELIST<bool>>::load(controls, field_data));
 
-    const auto cs = controls.size();
+    controls.resize(12);
 
     // SMBX64-only
-    if(cs >= 1)  event.ctrl_up = controls[0];
-    if(cs >= 2)  event.ctrl_down = controls[1];
-    if(cs >= 3)  event.ctrl_left = controls[2];
-    if(cs >= 4)  event.ctrl_right = controls[3]; //-V112
-    if(cs >= 5)  event.ctrl_run = controls[4];
-    if(cs >= 6)  event.ctrl_jump = controls[5];
-    if(cs >= 7)  event.ctrl_drop = controls[6];
-    if(cs >= 8)  event.ctrl_start = controls[7];
-    if(cs >= 9)  event.ctrl_altrun = controls[8];
-    if(cs >= 10) event.ctrl_altjump = controls[9];
+    event.ctrl_up = controls[0];
+    event.ctrl_down = controls[1];
+    event.ctrl_left = controls[2];
+    event.ctrl_right = controls[3]; //-V112
+    event.ctrl_run = controls[4];
+    event.ctrl_jump = controls[5];
+    event.ctrl_drop = controls[6];
+    event.ctrl_start = controls[7];
+    event.ctrl_altrun = controls[8];
+    event.ctrl_altjump = controls[9];
     // SMBX64-only end
     // SMBX-38A begin
-    if(cs >= 11) event.ctrls_enable = controls[10];
-    if(cs >= 12) event.ctrl_lock_keyboard = controls[11];
+    event.ctrls_enable = controls[10];
+    event.ctrl_lock_keyboard = controls[11];
     // SMBX-38A end
 
     return next;
