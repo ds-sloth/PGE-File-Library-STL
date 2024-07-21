@@ -41,7 +41,7 @@
 
 MDX_SETUP_OBJECT(LevelHead,
     MDX_FIELD("TL", LevelName); //Level Title
-    MDX_FIELD("SZ", stars); //Starz number
+    MDX_FIELD_NONNEG("SZ", stars); //Starz number
     MDX_FIELD("DL", open_level_on_fail); //Open level on fail
     MDX_FIELD("DE", open_level_on_fail_warpID); //Open level's warpID on fail
     MDX_FIELD("NO", player_names_overrides); //Overrides of player names
@@ -67,7 +67,7 @@ MDX_SETUP_OBJECT(CrashData,
 );
 
 MDX_SETUP_OBJECT(LevelSection,
-    MDX_FIELD("SC", id); //Section ID
+    MDX_FIELD_NONNEG("SC", id); //Section ID
     MDX_FIELD("L",  size_left); //Left side
     MDX_FIELD("R",  size_right);//Right side
     MDX_FIELD("T",  size_top); //Top side
@@ -151,9 +151,9 @@ MDX_SETUP_OBJECT(LevelNPC,
     MDX_FIELD("GE", generator); //Generator
     MDX_FIELD("GT", generator_type); //Generator type
     MDX_FIELD("GD", generator_direct); //Generator direction
-    MDX_FIELD("GM", generator_period); //Generator period
+    MDX_FIELD_NONNEG("GM", generator_period); //Generator period
     MDX_FIELD("GA", generator_custom_angle); //Generator custom angle
-    MDX_FIELD("GB",  generator_branches); //Generator number of branches
+    MDX_FIELD_NONNEG("GB",  generator_branches); //Generator number of branches
     MDX_FIELD("GR", generator_angle_range); //Generator angle range
     MDX_FIELD("GS", generator_initial_speed); //Generator custom initial speed
     MDX_FIELD("MG", msg); //Message
@@ -174,7 +174,7 @@ MDX_SETUP_OBJECT(LevelNPC,
 );
 
 MDX_SETUP_OBJECT(LevelPhysEnv,
-    MDX_FIELD("ET", env_type); //Environment type
+    MDX_FIELD_NONNEG("ET", env_type); //Environment type
     MDX_FIELD("X",  x); //X position
     MDX_FIELD("Y",  y); //Y position
     MDX_FIELD("W",  w); //Width
@@ -195,16 +195,16 @@ MDX_SETUP_OBJECT(LevelDoor,
     MDX_FIELD("OY", oy); //Output point
     MDX_FIELD("IL", length_i); //Length of entrance (input) point
     MDX_FIELD("OL", length_o); //Length of exit (output) point
-    MDX_FIELD("DT", type); //Input point
-    MDX_FIELD("ID", idirect); //Input direction
-    MDX_FIELD("OD", odirect); //Output direction
+    MDX_FIELD_NONNEG("DT", type); //Input point
+    MDX_FIELD_NONNEG("ID", idirect); //Input direction
+    MDX_FIELD_NONNEG("OD", odirect); //Output direction
     MDX_FIELD("WX", world_x); //Target world map point
     MDX_FIELD("WY", world_y); //Target world map point
     MDX_FIELD("LF", lname);  //Target level file
-    MDX_FIELD("LI", warpto); //Target level file's input warp
+    MDX_FIELD_NONNEG("LI", warpto); //Target level file's input warp
     MDX_FIELD("ET", lvl_i); //Level Entrance
     MDX_FIELD("EX", lvl_o); //Level exit
-    MDX_FIELD("SL", stars); //Stars limit
+    MDX_FIELD_NONNEG("SL", stars); //Stars limit
     MDX_FIELD("SM", stars_msg);  //Message about stars/leeks
     MDX_FIELD("NV", novehicles); //No Vehicles
     MDX_FIELD("SH", star_num_hide); //Don't show stars number
@@ -304,7 +304,7 @@ MDX_SETUP_OBJECT(LevelEvent_Sets,
     MDX_FIELD("ME", music_file_idx);
     MDX_FIELD("BG", background_id);
     MDX_FIELD("AS", autoscrol);
-    MDX_FIELD("AST", autoscroll_style);
+    MDX_FIELD_NONNEG("AST", autoscroll_style);
     MDX_UNIQUE_FIELD("ASP", MDX_LevelEvent_load_autoscroll_path);
     MDX_FIELD("AX", autoscrol_x);
     MDX_FIELD("AY", autoscrol_y);
@@ -362,8 +362,8 @@ MDX_ENABLE_SUB_LIST(LevelEvent_UpdateVariable);
 MDX_SETUP_OBJECT(LevelSMBX64Event,
     MDX_FIELD("ET", name);  //Event Title
     MDX_FIELD("MG", msg);  //Event Message
-    MDX_FIELD("SD", sound_id); //Play Sound ID
-    MDX_FIELD("EG", end_game); //End game algorithm
+    MDX_FIELD_NONNEG("SD", sound_id); //Play Sound ID
+    MDX_FIELD_NONNEG("EG", end_game); //End game algorithm
     MDX_FIELD("LH", layers_hide); //Hide layers
     MDX_FIELD("LS", layers_show); //Show layers
     MDX_FIELD("LT", layers_toggle); //Toggle layers
@@ -381,17 +381,17 @@ MDX_SETUP_OBJECT(LevelSMBX64Event,
     MDX_FIELD("SEF",  spawn_effects);    //Effects to spawn
     MDX_FIELD("UV",   update_variable); //Variables to update
     MDX_FIELD("TSCR", trigger_script); //Trigger script
-    MDX_FIELD("TAPI", trigger_api_id); //Trigger script
+    MDX_FIELD_NONNEG("TAPI", trigger_api_id); //Trigger script
     MDX_NESTED_FIELD("TMR", timer_def, enable); //Enable timer
-    MDX_NESTED_FIELD("TMC", timer_def, count); //Count of timer units
+    MDX_NESTED_FIELD_NONNEG("TMC", timer_def, count); //Count of timer units
     MDX_NESTED_FIELD("TMI", timer_def, interval); //Interval of timer tick
-    MDX_NESTED_FIELD("TMD", timer_def, count_dir); //Direction of count
+    MDX_NESTED_FIELD_NONNEG("TMD", timer_def, count_dir); //Direction of count
     MDX_NESTED_FIELD("TMV", timer_def, show); //Show timer on screen
     //-------------------
     MDX_FIELD("TE", trigger); //Trigger event
-    MDX_FIELD("TD", trigger_timer); //Trigger delay
+    MDX_FIELD_NONNEG("TD", trigger_timer); //Trigger delay
     MDX_FIELD("DS", nosmoke); //Disable smoke
-    MDX_FIELD("AU", autostart); //Auto start
+    MDX_FIELD_NONNEG("AU", autostart); //Auto start
     MDX_FIELD("AUC", autostart_condition); //Auto start condition
     MDX_UNIQUE_FIELD("PC", MDX_LevelEvent_load_controls);
     MDX_FIELD("ML", movelayer);   //Move layer
@@ -443,6 +443,9 @@ const char* MDX_FieldType<LevelItemSetup38A::Entry>::load(LevelItemSetup38A::Ent
 
     str_data = MDX_FieldType<decltype(LevelItemSetup38A::Entry::key)>::load(e.key, str_data);
 
+    if(e.key < 0)
+        throw MDX_bad_term("Negative value");
+
     if(*str_data != '=')
         throw MDX_missing_delimiter('=');
 
@@ -457,8 +460,8 @@ const char* MDX_FieldType<LevelItemSetup38A::Entry>::load(LevelItemSetup38A::Ent
 }
 
 MDX_SETUP_OBJECT(LevelItemSetup38A,
-    MDX_FIELD("T",  type); //Type of item
-    MDX_FIELD("ID", id);
+    MDX_FIELD_NONNEG("T",  type); //Type of item
+    MDX_FIELD_NONNEG("ID", id);
     MDX_FIELD("D", data); //Variable value
 );
 
