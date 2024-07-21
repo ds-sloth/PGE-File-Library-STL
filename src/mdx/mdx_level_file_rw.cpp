@@ -50,14 +50,14 @@ static bool s_load_head(void* _FileData, LevelHead& dest)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
 
-    FileData.LevelName = std::move(dest.LevelName);
+    FileData.LevelName = dest.LevelName;
     FileData.stars = dest.stars;
-    FileData.open_level_on_fail = std::move(dest.open_level_on_fail);
+    FileData.open_level_on_fail = dest.open_level_on_fail;
     FileData.open_level_on_fail_warpID = dest.open_level_on_fail_warpID;
-    FileData.player_names_overrides = std::move(dest.player_names_overrides);
-    FileData.custom_params = std::move(dest.custom_params);
-    FileData.meta.configPackId = std::move(dest.configPackId);
-    FileData.music_files = std::move(dest.music_files);
+    FileData.player_names_overrides = dest.player_names_overrides;
+    FileData.custom_params = dest.custom_params;
+    FileData.meta.configPackId = dest.configPackId;
+    FileData.music_files = dest.music_files;
 
     return true;
 }
@@ -73,7 +73,7 @@ static bool s_load_bookmark(void* _FileData, Bookmark& dest)
 static bool s_load_crash_data(void* _FileData, CrashData& dest)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
-    FileData.metaData.crash = std::move(dest);
+    FileData.metaData.crash = dest;
     FileData.metaData.crash.used = true;
 
     return true;

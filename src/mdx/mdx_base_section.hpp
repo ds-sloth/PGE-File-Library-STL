@@ -85,6 +85,7 @@ template<class load_callbacks_t, class save_callbacks_t>
 struct MDX_BaseSection
 {
     virtual bool try_load(const load_callbacks_t& table, PGE_FileFormats_misc::TextInput& inf, std::string& cur_line) = 0;
+    virtual void reset() {};
 };
 
 template<class load_callbacks_t, class save_callbacks_t, class _obj_t, bool t_combine_objects = false>
@@ -116,6 +117,12 @@ public:
         parent->m_sections.push_back(this);
     }
 
+    virtual void reset()
+    {
+        if(t_combine_objects)
+            m_obj = obj_t();
+    }
+
     /* attempts to match the field name. if successful, returns true and leaves the file pointer following the end of the section. */
     virtual bool try_load(const load_callbacks_t& cb, PGE_FileFormats_misc::TextInput& inf, std::string& cur_line)
     {
@@ -132,9 +139,6 @@ public:
 
         if(!callback)
             return false;
-
-        if(t_combine_objects)
-            m_obj = obj_t();
 
         while(true)
         {

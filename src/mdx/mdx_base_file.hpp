@@ -64,6 +64,9 @@ struct MDX_File
 
         std::string cur_line;
 
+        for(auto* section : m_sections)
+            section->reset();
+
         try
         {
             inf.seek(0, PGE_FileFormats_misc::TextFileInput::begin);
