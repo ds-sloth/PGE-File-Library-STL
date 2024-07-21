@@ -873,7 +873,7 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                                 else
                                     goto badfile;
                             }
-                            else if(param[0] == "SWH")
+                            else if(param[0] == "SHX")
                             {
                                 errorString = "Invalid Section pos h expression value type";
 
