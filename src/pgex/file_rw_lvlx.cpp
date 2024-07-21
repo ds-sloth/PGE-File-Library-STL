@@ -1601,8 +1601,8 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                     if(pair.size() != 2)
                         goto badfile;
 
-                    if(PGEFile::IsIntU(pair[0]))
-                        e.key = (int32_t)toUInt(pair[0]);
+                    if(PGEFile::IsIntS(pair[0]))
+                        e.key = toInt(pair[0]);
                     else goto badfile;
 
                     if(PGEFile::IsIntS(pair[1]))
