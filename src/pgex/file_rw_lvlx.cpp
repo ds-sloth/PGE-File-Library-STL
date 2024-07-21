@@ -1581,17 +1581,20 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
                 customcfg38A = LevelItemSetup38A();
                 PGESTRINGList data;
+                size_t data_begin = 0;
                 int type = -1;
                 PGEX_Values() //Look markers and values
                 {
                     PGEX_ValueBegin()
                     PGEX_SIntVal("T",  type) //Type of item
                     PGEX_SLongVal("ID", customcfg38A.id)
-                    PGEX_StrArrVal("D", data) //Variable value
+                    PGEX_StrArrVal_Validate("D", data, data_begin) //Variable value
                 }
                 errorString = "Wrong pair syntax";
-                for(PGESTRING &s : data)
+                for(size_t i = 0; i < data.size(); i++)
                 {
+                    PGESTRING &s = data[i];
+
                     LevelItemSetup38A::Entry e;
                     PGESTRINGList pair;
                     PGE_SPLITSTRING(pair, s, "=");
@@ -1605,6 +1608,9 @@ bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, Level
                     if(PGEFile::IsIntS(pair[1]))
                         e.value = toLong(pair[1]);
                     else goto badfile;
+
+                    if(i < data_begin)
+                        continue;
 
                     customcfg38A.data.push_back(e);
                 }
