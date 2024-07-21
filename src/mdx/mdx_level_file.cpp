@@ -230,7 +230,7 @@ MDX_SETUP_OBJECT(LevelLayer,
     MDX_FIELD("LC", locked); //Locked
 );
 
-const char* MDX_LevelEvent_load_controls(LevelSMBX64Event& event, const char* field_data)
+static const char* MDX_LevelEvent_load_controls(LevelSMBX64Event& event, const char* field_data)
 {
     PGELIST<bool> controls;
 
@@ -265,7 +265,7 @@ const char* MDX_LevelEvent_load_controls(LevelSMBX64Event& event, const char* fi
     return next;
 }
 
-const char* MDX_LevelEvent_load_autoscroll_path(LevelEvent_Sets& set, const char* field_data)
+static const char* MDX_LevelEvent_load_autoscroll_path(LevelEvent_Sets& set, const char* field_data)
 {
     PGELIST<long> arr;
 
@@ -359,6 +359,119 @@ MDX_SETUP_OBJECT(LevelEvent_UpdateVariable,
 );
 MDX_ENABLE_SUB_LIST(LevelEvent_UpdateVariable);
 
+static inline const char* MDX_LevelEvent_load_legacy_SM_SB(LevelSMBX64Event& event, const char* field_data, long LevelEvent_Sets::* field)
+{
+    PGELIST<std::string> arr;
+
+    const char* next = MDX_finish_term(MDX_FieldType<PGELIST<std::string>>::load(arr, field_data));
+
+    bool ignore_me = (event.sets.size() >= 1 && !event.sets[0]._pgefl_mdx_priv_legacy_parse);
+
+    for(pge_size_t q = 0; q < arr.size(); q++)
+    {
+        // validate input even if it will be ignored
+        long got;
+        const char* end = MDX_FieldType<long>::load(got, arr[q].c_str());
+        if(end != arr[q].c_str() + arr[q].size())
+            throw MDX_unexpected_character(*end);
+
+        // goes up to 21 because this is the legacy PGE-X parser initializes the event with that many section settings, then bounds at event.sets.size()
+        if(ignore_me || q >= 21)
+            continue;
+
+        // q cannot be greater than event.sets.size()
+        if(q == event.sets.size())
+            event.sets.push_back(LevelEvent_Sets());
+
+        auto &s = event.sets[q];
+        s.id = static_cast<long>(q);
+        s._pgefl_mdx_priv_legacy_parse = true;
+        s.*field = got;
+    }
+
+    if(!ignore_me)
+    {
+        // reset all higher sections
+        for(pge_size_t q = arr.size(); q < event.sets.size(); q++)
+            event.sets[q].*field = LevelEvent_Sets::LESet_Nothing;
+    }
+
+    return next;
+}
+
+static const char* MDX_LevelEvent_load_legacy_SM(LevelSMBX64Event& event, const char* field_data)
+{
+    return MDX_LevelEvent_load_legacy_SM_SB(event, field_data, &LevelEvent_Sets::music_id);
+}
+
+static const char* MDX_LevelEvent_load_legacy_SB(LevelSMBX64Event& event, const char* field_data)
+{
+    return MDX_LevelEvent_load_legacy_SM_SB(event, field_data, &LevelEvent_Sets::background_id);
+}
+
+static const char* MDX_LevelEvent_load_legacy_SS(LevelSMBX64Event& event, const char* field_data)
+{
+    PGELIST<std::string> arr;
+
+    const char* next = MDX_finish_term(MDX_FieldType<PGELIST<std::string>>::load(arr, field_data));
+
+    bool ignore_me = (event.sets.size() >= 1 && !event.sets[0]._pgefl_mdx_priv_legacy_parse);
+
+    for(pge_size_t q = 0; q < arr.size(); q++)
+    {
+        // validate input even if it will be ignored
+        long got[4];
+        const char* next = arr[q].c_str();
+
+        for(int i = 0; i < 4; i++)
+        {
+            next = MDX_FieldType<long>::load(got[i], next);
+
+            if(i == 3)
+                continue;
+
+            if(*next != ',')
+                throw MDX_missing_delimiter(',');
+
+            ++next;
+        }
+
+        if(next != arr[q].c_str() + arr[q].size())
+            throw MDX_unexpected_character(*next);
+
+        // goes up to 21 because this is the legacy PGE-X parser initializes the event with that many section settings, then bounds at event.sets.size()
+        if(ignore_me || q >= 21)
+            continue;
+
+        // q cannot be greater than event.sets.size()
+        if(q == event.sets.size())
+            event.sets.push_back(LevelEvent_Sets());
+
+        auto &s = event.sets[q];
+        s.id = static_cast<long>(q);
+        s._pgefl_mdx_priv_legacy_parse = true;
+
+        s.position_left   = got[0];
+        s.position_top    = got[1];
+        s.position_bottom = got[2];
+        s.position_right  = got[3];
+    }
+
+    if(!ignore_me)
+    {
+        // reset all higher sections
+        for(pge_size_t q = arr.size(); q < event.sets.size(); q++)
+        {
+            event.sets[q].position_left = LevelEvent_Sets::LESet_Nothing;
+            event.sets[q].position_top = 0;
+            event.sets[q].position_bottom = 0;
+            event.sets[q].position_right = 0;
+        }
+    }
+
+    return next;
+}
+
 MDX_SETUP_OBJECT(LevelSMBX64Event,
     MDX_FIELD("ET", name);  //Event Title
     MDX_FIELD("MG", msg);  //Event Message
@@ -368,9 +481,9 @@ MDX_SETUP_OBJECT(LevelSMBX64Event,
     MDX_FIELD("LS", layers_show); //Show layers
     MDX_FIELD("LT", layers_toggle); //Toggle layers
     //Legacy values (without SMBX-38A values support)
-    // MDX_FIELD("SM", musicSets)  //Switch music
-    // MDX_FIELD("SB", bgSets)     //Switch background
-    // MDX_FIELD("SS", ssSets)     //Section Size
+    MDX_UNIQUE_FIELD("SM", MDX_LevelEvent_load_legacy_SM);  //Switch music
+    MDX_UNIQUE_FIELD("SB", MDX_LevelEvent_load_legacy_SB);     //Switch background
+    MDX_UNIQUE_FIELD("SS", MDX_LevelEvent_load_legacy_SS);     //Section Size
     //-------------------
     //New values (with SMBX-38A values support)
     MDX_FIELD("SSS", sets); //Section settings in new format
