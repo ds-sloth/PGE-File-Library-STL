@@ -364,7 +364,7 @@ const char* MDX_FieldType<double>::load(double& dest, const char* field_data)
 }
 
 template<>
-const char* MDX_FieldType<PGESTRING>::load(PGESTRING& dest, const char* field_data)
+const char* MDX_FieldType<std::string>::load(std::string& dest, const char* field_data)
 {
     dest.clear();
 
@@ -420,6 +420,19 @@ const char* MDX_FieldType<PGESTRING>::load(PGESTRING& dest, const char* field_da
 
     return cur_pos;
 }
+
+#ifdef PGE_FILES_QT
+template<>
+const char* MDX_FieldType<QString>::load(QString& dest, const char* field_data)
+{
+    std::string dest_utf8;
+
+    const char* ret = MDX_FieldType<std::string>::load(dest_utf8, field_data);
+    dest = QString::fromStdString(dest_utf8);
+
+    return ret;
+}
+#endif
 
 const char* MDX_FieldType<PGELIST<bool>>::load(PGELIST<bool>& dest, const char* field_data)
 {

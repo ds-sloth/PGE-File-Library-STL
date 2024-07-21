@@ -40,6 +40,8 @@
 #include <cstddef>
 #include <cstring>
 
+#include <string>
+
 #include "pge_file_lib_globs.h"
 #include "mdx/mdx_base_field.hpp"
 #include "mdx/mdx_base_section.hpp"
@@ -55,7 +57,11 @@ struct MDX_File
 
     bool load_file(PGE_FileFormats_misc::TextInput& inf, const load_callbacks_t& cb)
     {
-        PGESTRING cur_line;
+#ifdef PGE_FILES_QT
+        QString utf16_cur_line;
+#endif
+
+        std::string cur_line;
 
         try
         {
@@ -63,7 +69,12 @@ struct MDX_File
 
             while(!inf.eof())
             {
+#ifndef PGE_FILES_QT
                 inf.readLine(cur_line);
+#else
+                inf.readLine(utf16_cur_line);
+                cur_line = utf16_cur_line.toStdString();
+#endif
 
                 bool handled = false;
                 for(auto* section : m_sections)
@@ -104,14 +115,20 @@ struct MDX_File
                 return false;
 
             FileFormatsError err;
+
+#ifndef PGE_FILES_QT
             err.ERROR_info = "Failed to parse PGEX file (line ";
-#ifdef PGE_FILES_QT
-            err.ERROR_info += QString::number(inf.getCurrentLineNumber());
-#else
             err.ERROR_info += std::to_string(inf.getCurrentLineNumber());
-#endif
             err.ERROR_info += ")\n";
+
             err.add_exc_info(e, inf.getCurrentLineNumber(), std::move(cur_line));
+#else
+            err.ERROR_info = "Failed to parse PGEX file (line ";
+            err.ERROR_info += QString::number(inf.getCurrentLineNumber());
+            err.ERROR_info += ")\n";
+
+            err.add_exc_info(e, inf.getCurrentLineNumber(), std::move(utf16_cur_line));
+#endif
 
             cb.on_error(cb.userdata, err);
             return false;

@@ -31,6 +31,8 @@
 #include "pge_file_lib_globs.h"
 #include "mdx/mdx_exception.hpp"
 
+#include <string>
+
 /*! \file mdx_base_field.hpp
  *
  *  \brief Contains templates for individual fields
@@ -124,9 +126,14 @@ const char* MDX_FieldType<PGELIST<subtype_t>>::load(PGELIST<subtype_t>& dest, co
 
     while(*cur_pos != ']' && *cur_pos != '\0')
     {
+#ifndef PGE_FILES_QT
+        dest.emplace_back();
+#else
+        dest.push_back(subtype_t());
+#endif
+
         try
         {
-            dest.emplace_back();
             cur_pos = MDX_FieldType<subtype_t>::load(dest.back(), cur_pos);
             cur_pos = MDX_finish_list_item(cur_pos);
         }
@@ -159,9 +166,9 @@ const char* MDX_FieldType_Object<obj_loader_t>::load(typename obj_loader_t::obj_
 {
     dest = typename obj_loader_t::obj_t();
 
-    PGESTRING object_string;
+    std::string object_string;
 
-    const char* next = MDX_FieldType<PGESTRING>::load(object_string, field_data);
+    const char* next = MDX_FieldType<std::string>::load(object_string, field_data);
 
     s_obj_loader.load_object(dest, object_string.c_str());
 
@@ -186,15 +193,19 @@ const char* MDX_FieldType_ObjectList<obj_loader_t>::load(PGELIST<typename obj_lo
 
     cur_pos++;
 
-    PGESTRING object_string;
+    std::string object_string;
 
     while(*cur_pos != ']' && *cur_pos != '\0')
     {
+#ifndef PGE_FILES_QT
         dest.emplace_back();
+#else
+        dest.push_back(typename obj_loader_t::obj_t());
+#endif
 
         try
         {
-            cur_pos = MDX_FieldType<PGESTRING>::load(object_string, cur_pos);
+            cur_pos = MDX_FieldType<std::string>::load(object_string, cur_pos);
             cur_pos = MDX_finish_list_item(cur_pos);
 
             s_obj_loader.load_object(dest.back(), object_string.c_str());

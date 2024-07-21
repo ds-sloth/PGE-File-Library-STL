@@ -40,13 +40,15 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <string>
+
 #include "pge_file_lib_globs.h"
 #include "mdx/mdx_base_field.hpp"
 #include "mdx/mdx_base_object.hpp"
 
-inline void MDX_skip_section(PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line, const char* section_name);
+inline void MDX_skip_section(PGE_FileFormats_misc::TextInput& inf, std::string& cur_line, const char* section_name);
 
-inline bool MDX_line_is_section_end(const PGESTRING& cur_line, const char* section_name)
+inline bool MDX_line_is_section_end(const std::string& cur_line, const char* section_name)
 {
     if(cur_line.size() <= 4)
         return false;
@@ -82,7 +84,7 @@ inline bool MDX_line_is_section_end(const PGESTRING& cur_line, const char* secti
 template<class load_callbacks_t, class save_callbacks_t>
 struct MDX_BaseSection
 {
-    virtual bool try_load(const load_callbacks_t& table, PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line) = 0;
+    virtual bool try_load(const load_callbacks_t& table, PGE_FileFormats_misc::TextInput& inf, std::string& cur_line) = 0;
 };
 
 template<class load_callbacks_t, class save_callbacks_t, class _obj_t>
@@ -115,8 +117,12 @@ public:
     }
 
     /* attempts to match the field name. if successful, returns true and leaves the file pointer following the end of the section. */
-    virtual bool try_load(const load_callbacks_t& cb, PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line)
+    virtual bool try_load(const load_callbacks_t& cb, PGE_FileFormats_misc::TextInput& inf, std::string& cur_line)
     {
+#ifdef PGE_FILES_QT
+        QString utf16_cur_line;
+#endif
+
         // check match
         if(cur_line != m_section_name)
             return false;
@@ -129,7 +135,12 @@ public:
 
         while(true)
         {
+#ifndef PGE_FILES_QT
             inf.readLine(cur_line);
+#else
+            inf.readLine(utf16_cur_line);
+            cur_line = utf16_cur_line.toStdString();
+#endif
 
             // empty line (or EOF)
             if(cur_line.empty())
@@ -165,11 +176,20 @@ public:
     }
 };
 
-inline void MDX_skip_section(PGE_FileFormats_misc::TextInput& inf, PGESTRING& cur_line, const char* section_name)
+inline void MDX_skip_section(PGE_FileFormats_misc::TextInput& inf, std::string& cur_line, const char* section_name)
 {
+#ifdef PGE_FILES_QT
+    QString utf16_cur_line;
+#endif
+
     while(!inf.eof())
     {
+#ifndef PGE_FILES_QT
         inf.readLine(cur_line);
+#else
+        inf.readLine(utf16_cur_line);
+        cur_line = utf16_cur_line.toStdString();
+#endif
 
         if(MDX_line_is_section_end(cur_line, section_name))
             return;
