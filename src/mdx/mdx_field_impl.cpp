@@ -610,23 +610,22 @@ const char* MDX_FieldType<QStringList>::load(QStringList& dest, const char* fiel
 template<>
 bool MDX_FieldType<QStringList>::save(std::string& out, const QStringList& src)
 {
+    if(src.size() == 0)
+        return false;
+
     std::string src_i_utf8;
 
     out.push_back('[');
 
-    size_t size = (size_t)src.size();
-    size_t tail = size - 1;
-    for(size_t i = 0; i < size; i++)
+    for(const auto& s : src)
     {
-        src_utf8 = src[i].toStdString();
+        src_utf8 = s.toStdString();
 
         MDX_FieldType<std::string>::save(out, src_i_utf8);
-
-        if(i != tail)
-            out.push_back(',');
+        out.push_back(',');
     }
 
-    out.push_back(']');
+    out.back() = ']';
 
     return true;
 }

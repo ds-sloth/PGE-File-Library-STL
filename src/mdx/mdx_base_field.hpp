@@ -205,17 +205,24 @@ bool MDX_FieldType<PGELIST<subtype_t>>::save(std::string& out, const PGELIST<sub
 {
     out.push_back('[');
 
-    size_t size = (size_t)src.size();
-    size_t tail = size - 1;
-    for(size_t i = 0; i < size; i++)
+    for(const subtype_t& s : src)
     {
-        if(MDX_FieldType<subtype_t>::save(out, src[i]) && i != tail)
+        if(MDX_FieldType<subtype_t>::save(out, s))
             out.push_back(',');
     }
 
-    out.push_back(']');
-
-    return true;
+    // close the array
+    if(out.back() == ',')
+    {
+        out.back() = ']';
+        return true;
+    }
+    // nothing was written, remove the '['
+    else
+    {
+        out.pop_back();
+        return false;
+    }
 }
 
 template<class obj_loader_t>
@@ -322,24 +329,30 @@ bool MDX_FieldType_ObjectList<obj_loader_t>::save(std::string& out, const PGELIS
 
     out.push_back('[');
 
-    size_t size = (size_t)src.size();
-    size_t tail = size - 1;
-    for(size_t i = 0; i < size; i++)
+    for(const auto& s : src)
     {
         object_string.clear();
 
-        if(s_obj_loader.save_object(object_string, src[i], ref))
+        if(s_obj_loader.save_object(object_string, s, ref))
         {
             MDX_FieldType<std::string>::save(out, object_string);
 
-            if(i != tail)
-                out.push_back(',');
+            out.push_back(',');
         }
     }
 
-    out.push_back(']');
-
-    return true;
+    // close the array
+    if(out.back() == ',')
+    {
+        out.back() = ']';
+        return true;
+    }
+    // nothing was written, remove the '['
+    else
+    {
+        out.pop_back();
+        return false;
+    }
 }
 
 template<class obj_t, class field_t>
