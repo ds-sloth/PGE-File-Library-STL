@@ -73,7 +73,7 @@ protected:
     /* attempts to load the matched field to the destination, and returns the new load pointer following the ';'. */
     virtual const char* do_load(obj_t& dest, const char* field_data) const = 0;
     /* confirms whether the field is non-default. */
-    virtual bool can_save(const obj_t& src) const = 0;
+    virtual bool can_save(const obj_t& src, const obj_t& ref) const = 0;
     /* tries to write the field, and returns false if this is impossible. */
     virtual bool do_save(std::string& out, const obj_t& src) const = 0;
 
@@ -99,9 +99,9 @@ public:
     }
 
     /* confirms whether the field is non-default, and writes it to out if so. */
-    inline bool try_save(std::string& out, const obj_t& src) const
+    inline bool try_save(std::string& out, const obj_t& src, const obj_t& ref) const
     {
-        if(!can_save(src))
+        if(!can_save(src, ref))
             return false;
 
         auto old_size = out.size();
@@ -249,7 +249,7 @@ bool MDX_FieldType_Object<obj_loader_t>::save(std::string& out, const typename o
 {
     std::string object_string;
 
-    if(!s_obj_loader.save_object(object_string, src))
+    if(!s_obj_loader.save_object(object_string, src, typename obj_loader_t::obj_t()))
         return false;
 
     MDX_FieldType<std::string>::save(out, object_string);
@@ -318,6 +318,7 @@ template<class obj_loader_t>
 bool MDX_FieldType_ObjectList<obj_loader_t>::save(std::string& out, const PGELIST<typename obj_loader_t::obj_t>& src)
 {
     std::string object_string;
+    typename obj_loader_t::obj_t ref;
 
     out.push_back('[');
 
@@ -327,7 +328,7 @@ bool MDX_FieldType_ObjectList<obj_loader_t>::save(std::string& out, const PGELIS
     {
         object_string.clear();
 
-        if(s_obj_loader.save_object(object_string, src[i]))
+        if(s_obj_loader.save_object(object_string, src[i], ref))
         {
             MDX_FieldType<std::string>::save(out, object_string);
 
@@ -367,9 +368,9 @@ struct MDX_Field : public MDX_BaseField<obj_t>
         }
     }
 
-    virtual bool can_save(const obj_t& src) const
+    virtual bool can_save(const obj_t& src, const obj_t& ref) const
     {
-        return !MDX_FieldType<field_t>::is_ref(src.*m_field, obj_t().*m_field);
+        return !MDX_FieldType<field_t>::is_ref(src.*m_field, ref.*m_field);
     }
 
     virtual bool do_save(std::string& out, const obj_t& src) const
@@ -435,9 +436,9 @@ struct MDX_UniqueField : public MDX_BaseField<obj_t>
         }
     }
 
-    virtual bool can_save(const obj_t& src) const
+    virtual bool can_save(const obj_t& src, const obj_t& ref) const
     {
-        (void)src;
+        (void)src; (void)ref;
         return (bool)(m_save_func);
     }
 
@@ -474,9 +475,9 @@ struct MDX_NestedField : public MDX_BaseField<obj_t>
         }
     }
 
-    virtual bool can_save(const obj_t& src) const
+    virtual bool can_save(const obj_t& src, const obj_t& ref) const
     {
-        return !MDX_FieldType<field_t>::is_ref(src.*m_substruct.*m_field, obj_t().*m_substruct.*m_field);
+        return !MDX_FieldType<field_t>::is_ref(src.*m_substruct.*m_field, ref.*m_substruct.*m_field);
     }
 
     virtual bool do_save(std::string& out, const obj_t& src) const
@@ -532,8 +533,9 @@ struct MDX_FieldXtra : public MDX_BaseField<obj_t>
         }
     }
 
-    virtual bool can_save(const obj_t& src) const
+    virtual bool can_save(const obj_t& src, const obj_t& ref) const
     {
+        (void)ref;
         return src.meta.custom_params != PGESTRING();
     }
 

@@ -204,6 +204,8 @@ public:
         if(!callback)
             return;
 
+        _obj_t ref;
+
         size_t out_buffer_size_pre = out_buffer.size();
         bool restore = true;
 
@@ -212,7 +214,7 @@ public:
 
         for(size_t index = 0; callback(cb.userdata, m_obj, index); index++)
         {
-            if(!save_object(out_buffer, m_obj))
+            if(!save_object(out_buffer, m_obj, ref))
                 continue;
 
             out_buffer += '\n';

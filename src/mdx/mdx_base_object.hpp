@@ -84,11 +84,11 @@ protected:
         }
     }
 
-    bool save_object(std::string& out, const obj_t& src) const
+    bool save_object(std::string& out, const obj_t& src, const obj_t& ref) const
     {
         bool any_field = false;
         for(const auto* field : m_fields)
-            any_field |= field->try_save(out, src);
+            any_field |= field->try_save(out, src, ref);
 
         return any_field;
     }
