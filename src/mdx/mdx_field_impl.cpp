@@ -512,8 +512,39 @@ const char* MDX_FieldType<std::string>::load(std::string& dest, const char* fiel
 template<>
 bool MDX_FieldType<std::string>::save(std::string& out, const std::string& src)
 {
-    // FIXME
-    out += "\"hello world\"";
+    out += '"';
+
+    for(char c : src)
+    {
+        switch(c)
+        {
+        case '\n':
+            out += '\\';
+            out += 'n';
+            break;
+        case '\r':
+            out += '\\';
+            out += 'r';
+            break;
+        case '\"':
+        case ';':
+        case ':':
+        case '[':
+        case ']':
+        case ',':
+        case '%':
+        case '\\':
+            out += '\\';
+            out += c;
+            break;
+        default:
+            out += c;
+            break;
+        }
+    }
+
+    out += '"';
+
     return true;
 }
 
