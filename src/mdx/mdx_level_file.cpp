@@ -234,7 +234,7 @@ static const char* MDX_LevelEvent_load_controls(LevelSMBX64Event& event, const c
 {
     PGELIST<bool> controls;
 
-    const char* next = MDX_finish_term(MDX_FieldType<PGELIST<bool>>::load(controls, field_data));
+    const char* next = MDX_FieldType<PGELIST<bool>>::load(controls, field_data);
 
 #ifndef PGE_FILES_QT
     controls.resize(12);
@@ -269,7 +269,7 @@ static const char* MDX_LevelEvent_load_autoscroll_path(LevelEvent_Sets& set, con
 {
     PGELIST<long> arr;
 
-    const char* next = MDX_finish_term(MDX_FieldType<PGELIST<long>>::load(arr, field_data));
+    const char* next = MDX_FieldType<PGELIST<long>>::load(arr, field_data);
 
     if(arr.size() % 4)
         throw MDX_bad_term("Invalid Section Autoscroll path data contains non-multiple 4 entries");
@@ -363,7 +363,7 @@ static inline const char* MDX_LevelEvent_load_legacy_SM_SB(LevelSMBX64Event& eve
 {
     PGELIST<std::string> arr;
 
-    const char* next = MDX_finish_term(MDX_FieldType<PGELIST<std::string>>::load(arr, field_data));
+    const char* next = MDX_FieldType<PGELIST<std::string>>::load(arr, field_data);
 
     bool ignore_me = (event.sets.size() >= 1 && !event.sets[0]._pgefl_mdx_priv_legacy_parse);
 
@@ -413,7 +413,7 @@ static const char* MDX_LevelEvent_load_legacy_SS(LevelSMBX64Event& event, const 
 {
     PGELIST<std::string> arr;
 
-    const char* next = MDX_finish_term(MDX_FieldType<PGELIST<std::string>>::load(arr, field_data));
+    const char* next = MDX_FieldType<PGELIST<std::string>>::load(arr, field_data);
 
     bool ignore_me = (event.sets.size() >= 1 && !event.sets[0]._pgefl_mdx_priv_legacy_parse);
 

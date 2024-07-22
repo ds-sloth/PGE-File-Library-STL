@@ -91,7 +91,7 @@ public:
 
         if(field_name[i] == ':')
         {
-            field_name = do_load(dest, field_name + i + 1);
+            field_name = MDX_finish_term(do_load(dest, field_name + i + 1));
             return true;
         }
 
@@ -359,7 +359,7 @@ struct MDX_Field : public MDX_BaseField<obj_t>
     {
         try
         {
-            return MDX_finish_term(MDX_FieldType<field_t>::load(dest.*m_field, field_data));
+            return MDX_FieldType<field_t>::load(dest.*m_field, field_data);
         }
         catch(const MDX_parse_error&)
         {
@@ -388,7 +388,7 @@ struct MDX_NonNegField : public MDX_Field<obj_t, field_t>
     {
         try
         {
-            const char* ret = MDX_finish_term(MDX_FieldType<field_t>::load(dest.*m_field, field_data));
+            const char* ret = MDX_FieldType<field_t>::load(dest.*m_field, field_data);
 
             if(*field_data == '-' || dest.*m_field < 0)
                 throw(MDX_bad_term("Negative value"));
@@ -466,7 +466,7 @@ struct MDX_NestedField : public MDX_BaseField<obj_t>
     {
         try
         {
-            return MDX_finish_term(MDX_FieldType<field_t>::load(dest.*m_substruct.*m_field, field_data));
+            return MDX_FieldType<field_t>::load(dest.*m_substruct.*m_field, field_data);
         }
         catch(const MDX_parse_error&)
         {
@@ -496,7 +496,7 @@ struct MDX_NonNegNestedField : public MDX_NestedField<obj_t, substruct_t, field_
     {
         try
         {
-            const char* ret = MDX_finish_term(MDX_FieldType<field_t>::load(dest.*m_substruct.*m_field, field_data));
+            const char* ret = MDX_FieldType<field_t>::load(dest.*m_substruct.*m_field, field_data);
 
             if(*field_data == '-' || dest.*m_substruct.*m_field < 0)
                 throw(MDX_bad_term("Illegal negative"));
@@ -524,7 +524,7 @@ struct MDX_FieldXtra : public MDX_BaseField<obj_t>
     {
         try
         {
-            return MDX_finish_term(MDX_FieldType<PGESTRING>::load(dest.meta.custom_params, field_data));
+            return MDX_FieldType<PGESTRING>::load(dest.meta.custom_params, field_data);
         }
         catch(const MDX_parse_error&)
         {
