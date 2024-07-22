@@ -83,6 +83,15 @@ protected:
             }
         }
     }
+
+    bool save_object(std::string& out, const obj_t& src) const
+    {
+        bool any_field = false;
+        for(const auto* field : m_fields)
+            any_field |= field->try_save(out, src);
+
+        return any_field;
+    }
 };
 
 template<class _obj_t>

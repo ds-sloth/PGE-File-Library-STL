@@ -36,6 +36,12 @@
 #include <cstddef>
 #include "meta_filedata.h"
 
+#ifdef PGE_FILES_QT
+typedef int     pge_size_t;
+#else
+typedef size_t  pge_size_t;
+#endif
+
 namespace PGE_FileFormats_misc
 {
 
@@ -50,10 +56,11 @@ struct LoadCallbacks
 
 struct SaveCallbacks
 {
-    template<class obj_t> using callback = bool (*)(void* userdata, obj_t& obj, size_t index);
-    using err_callback = void (*)(void* userdata, FileFormatsError& err);
+    template<class obj_t> using callback = bool (*)(const void* userdata, obj_t& obj, pge_size_t index);
+    using err_callback = void (*)(void* err_userdata, FileFormatsError& err);
 
-    void* userdata = nullptr;
+    const void* userdata = nullptr;
+    void* err_userdata = nullptr;
     err_callback on_error = nullptr;
 };
 

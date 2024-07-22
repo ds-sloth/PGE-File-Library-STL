@@ -140,6 +140,33 @@ struct MDX_File
 
         return true;
     }
+
+    bool save_file(PGE_FileFormats_misc::TextOutput& outf, const save_callbacks_t& cb)
+    {
+        std::string out_buffer;
+
+        try
+        {
+            for(auto* section : m_sections)
+                section->do_save(cb, outf, out_buffer);
+        }
+        catch(const std::exception& e)
+        {
+            if(!cb.on_error)
+                return false;
+
+            FileFormatsError err;
+
+            err.ERROR_info = "Failed to save PGEX file\n";
+            err.add_exc_info(e, 0, PGESTRING());
+
+            cb.on_error(cb.err_userdata, err);
+
+            return false;
+        }
+
+        return true;
+    }
 };
 
 #endif // #ifndef MDX_BASE_FILE_HPP

@@ -85,6 +85,7 @@ template<class load_callbacks_t, class save_callbacks_t>
 struct MDX_BaseSection
 {
     virtual bool try_load(const load_callbacks_t& table, PGE_FileFormats_misc::TextInput& inf, std::string& cur_line) = 0;
+    virtual void do_save(const save_callbacks_t& table, PGE_FileFormats_misc::TextOutput& outf, std::string& out_buffer) = 0;
     virtual void reset() {};
 };
 
@@ -92,6 +93,7 @@ template<class load_callbacks_t, class save_callbacks_t, class _obj_t, bool t_co
 struct MDX_Section : public MDX_Object<_obj_t>, public MDX_BaseSection<load_callbacks_t, save_callbacks_t>
 {
     using MDX_Object<_obj_t>::load_object;
+    using MDX_Object<_obj_t>::save_object;
     using obj_t = _obj_t;
 
 private:
@@ -187,6 +189,61 @@ public:
             // unterminated line
             else
                 throw MDX_missing_delimiter(';');
+        }
+    }
+
+    virtual void do_save(const save_callbacks_t& cb, PGE_FileFormats_misc::TextOutput& outf, std::string& out_buffer)
+    {
+#ifdef PGE_FILES_QT
+        QString utf16_out;
+#endif
+
+        // skip if there is no callback registered
+        const save_callback_t callback = cb.*m_save_callback;
+
+        if(!callback)
+            return;
+
+        size_t out_buffer_size_pre = out_buffer.size();
+        bool restore = true;
+
+        out_buffer += m_section_name;
+        out_buffer += '\n';
+
+        for(size_t index = 0; callback(cb.userdata, m_obj, index); index++)
+        {
+            if(!save_object(out_buffer, m_obj))
+                continue;
+
+            out_buffer += '\n';
+            restore = false;
+
+            if(out_buffer.size() > 2048)
+            {
+#ifdef PGE_FILES_QT
+                utf16_out = QString::fromStdString(out_buffer);
+                outf.write(utf16_out);
+#else
+                outf.write(out_buffer);
+#endif
+                out_buffer.clear();
+            }
+        }
+
+        if(restore)
+            out_buffer.resize(out_buffer_size_pre);
+        else
+        {
+            out_buffer += m_section_name;
+            out_buffer += "_END\n";
+
+#ifdef PGE_FILES_QT
+            utf16_out = QString::fromStdString(out_buffer);
+            outf.write(utf16_out);
+#else
+            outf.write(out_buffer);
+#endif
+            out_buffer.clear();
         }
     }
 };

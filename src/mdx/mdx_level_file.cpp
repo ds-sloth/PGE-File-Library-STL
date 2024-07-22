@@ -546,6 +546,12 @@ const char* MDX_FieldType<LevelItemSetup38A::ItemType>::load(LevelItemSetup38A::
 }
 
 template<>
+bool MDX_FieldType<LevelItemSetup38A::ItemType>::save(std::string& out, const LevelItemSetup38A::ItemType& src)
+{
+    return MDX_FieldType<int>::save(out, (int)src);
+}
+
+template<>
 const char* MDX_FieldType<LevelItemSetup38A::Entry>::load(LevelItemSetup38A::Entry& e, const char* field_data)
 {
     std::string got;
@@ -570,6 +576,29 @@ const char* MDX_FieldType<LevelItemSetup38A::Entry>::load(LevelItemSetup38A::Ent
         throw MDX_missing_delimiter('"');
 
     return ret;
+}
+
+template<>
+bool MDX_FieldType<LevelItemSetup38A::Entry>::save(std::string& out, const LevelItemSetup38A::Entry& src)
+{
+    // For total safety, we'd make a substring, store to those, then output that. But we know this won't include any escape chars, so we'll do it manually to avoid extra allocs.
+#if 0
+    std::string sub;
+#else
+    out += '"';
+    std::string& sub = out;
+#endif
+
+    MDX_FieldType<decltype(LevelItemSetup38A::Entry::key)>::save(sub, src.key);
+    sub += '=';
+    MDX_FieldType<decltype(LevelItemSetup38A::Entry::value)>::save(sub, src.value);
+
+#if 0
+    return MDX_FieldType<std::string>::save(out, sub);
+#else
+    out += '"';
+    return true;
+#endif
 }
 
 MDX_SETUP_OBJECT(LevelItemSetup38A,
@@ -613,8 +642,14 @@ struct MDX_LevelFile : MDX_File<LevelLoadCallbacks, LevelSaveCallbacks>
     MDX_SECTION("CUSTOM_ITEMS_38A", LevelItemSetup38A, levelitem38a);
 };
 
-bool MDX_load_level(PGE_FileFormats_misc::TextInput& input, LevelLoadCallbacks& callbacks)
+bool MDX_load_level(PGE_FileFormats_misc::TextInput& input, const LevelLoadCallbacks& callbacks)
 {
     MDX_LevelFile f;
     return f.load_file(input, callbacks);
+}
+
+bool MDX_save_level(PGE_FileFormats_misc::TextOutput& output, const LevelSaveCallbacks& callbacks)
+{
+    MDX_LevelFile f;
+    return f.save_file(output, callbacks);
 }
