@@ -96,7 +96,7 @@ MDX_SETUP_OBJECT(PlayerPoint,
 );
 
 MDX_SETUP_OBJECT(LevelBlock,
-    MDX_FIELD("ID", id); //Block ID
+    MDX_FIELD_NO_SKIP("ID", id); //Block ID
     MDX_FIELD("X", x); // Position X
     MDX_FIELD("Y", y); //Position Y
     MDX_FIELD_NONNEG("W", w); //Width
@@ -120,7 +120,7 @@ MDX_SETUP_OBJECT(LevelBlock,
 );
 
 MDX_SETUP_OBJECT(LevelBGO,
-    MDX_FIELD("ID", id);  //BGO ID
+    MDX_FIELD_NO_SKIP("ID", id);  //BGO ID
     MDX_FIELD("X",  x);  //X Position
     MDX_FIELD("Y",  y);  //Y Position
     MDX_FIELD("ZO", z_offset); //Z Offset
@@ -133,7 +133,7 @@ MDX_SETUP_OBJECT(LevelBGO,
 );
 
 MDX_SETUP_OBJECT(LevelNPC,
-    MDX_FIELD("ID", id); //NPC ID
+    MDX_FIELD_NO_SKIP("ID", id); //NPC ID
     MDX_FIELD("X", x); //X position
     MDX_FIELD("Y", y); //Y position
     MDX_FIELD("D", direct); //Direction
@@ -175,7 +175,7 @@ MDX_SETUP_OBJECT(LevelNPC,
 
 MDX_SETUP_OBJECT(LevelPhysEnv,
     MDX_FIELD_NONNEG("ET", env_type); //Environment type
-    MDX_FIELD("X",  x); //X position
+    MDX_FIELD_NO_SKIP("X",  x); //X position
     MDX_FIELD("Y",  y); //Y position
     MDX_FIELD_NONNEG("W",  w); //Width
     MDX_FIELD_NONNEG("H",  h); //Height
@@ -189,7 +189,7 @@ MDX_SETUP_OBJECT(LevelPhysEnv,
 );
 
 MDX_SETUP_OBJECT(LevelDoor,
-    MDX_FIELD("IX", ix); //Input point
+    MDX_FIELD_NO_SKIP("IX", ix); //Input point
     MDX_FIELD("IY", iy); //Input point
     MDX_FIELD("OX", ox); //Output point
     MDX_FIELD("OY", oy); //Output point
@@ -345,17 +345,18 @@ MDX_SETUP_OBJECT(LevelEvent_Sets,
 MDX_ENABLE_SUB_LIST(LevelEvent_Sets);
 
 MDX_SETUP_OBJECT(LevelEvent_MoveLayer,
+    // only write the move-layer if name is non-empty
     MDX_FIELD("LN", name);
-    MDX_FIELD("SX", speed_x);
-    MDX_FIELD("SXX", expression_x);
-    MDX_FIELD("SY", speed_y);
-    MDX_FIELD("SYX", expression_y);
-    MDX_FIELD_NONNEG("MW", way);
+    MDX_FIELD_NOT_ONLY("SX", speed_x);
+    MDX_FIELD_NOT_ONLY("SXX", expression_x);
+    MDX_FIELD_NOT_ONLY("SY", speed_y);
+    MDX_FIELD_NOT_ONLY("SYX", expression_y);
+    MDX_FIELD_NONNEG_NOT_ONLY("MW", way);
 );
 MDX_ENABLE_SUB_STRUCT(LevelEvent_MoveLayer);
 
 MDX_SETUP_OBJECT(LevelEvent_SpawnNPC,
-    MDX_FIELD_NONNEG("ID", id);
+    MDX_FIELD_NONNEG_NO_SKIP("ID", id);
     MDX_FIELD("SX", x);
     MDX_FIELD("SXX", expression_x);
     MDX_FIELD("SY", y);
@@ -369,7 +370,7 @@ MDX_SETUP_OBJECT(LevelEvent_SpawnNPC,
 MDX_ENABLE_SUB_LIST(LevelEvent_SpawnNPC);
 
 MDX_SETUP_OBJECT(LevelEvent_SpawnEffect,
-    MDX_FIELD_NONNEG("ID", id);
+    MDX_FIELD_NONNEG_NO_SKIP("ID", id);
     MDX_FIELD("SX", x);
     MDX_FIELD("SXX", expression_x);
     MDX_FIELD("SY", y);
@@ -385,8 +386,8 @@ MDX_SETUP_OBJECT(LevelEvent_SpawnEffect,
 MDX_ENABLE_SUB_LIST(LevelEvent_SpawnEffect);
 
 MDX_SETUP_OBJECT(LevelEvent_UpdateVariable,
-    MDX_FIELD("N", name);
-    MDX_FIELD("V", newval);
+    MDX_FIELD_NO_SKIP("N", name);
+    MDX_FIELD_NO_SKIP("V", newval);
 );
 MDX_ENABLE_SUB_LIST(LevelEvent_UpdateVariable);
 
@@ -547,17 +548,17 @@ MDX_SETUP_OBJECT(LevelSMBX64Event,
 );
 
 MDX_SETUP_OBJECT(LevelVariable,
-    MDX_FIELD("N", name); //Variable name
+    MDX_FIELD_NO_SKIP("N", name); //Variable name
     MDX_FIELD("V", value); //Variable value
     MDX_FIELD("G", is_global); //Is global variable
 );
 
 MDX_SETUP_OBJECT(LevelArray,
-    MDX_FIELD("N", name); //Array name
+    MDX_FIELD_NO_SKIP("N", name); //Array name
 );
 
 MDX_SETUP_OBJECT(LevelScript,
-    MDX_FIELD("N", name);  //Variable name
+    MDX_FIELD_NO_SKIP("N", name);  //Variable name
     MDX_FIELD("L", language);  //Variable name
     MDX_FIELD("S", script); //Script text
 );
@@ -633,7 +634,7 @@ bool MDX_FieldType<LevelItemSetup38A::Entry>::save(std::string& out, const Level
 }
 
 MDX_SETUP_OBJECT(LevelItemSetup38A,
-    MDX_FIELD_NONNEG("T",  type); //Type of item
+    MDX_FIELD_NONNEG_NO_SKIP("T",  type); //Type of item
     MDX_FIELD_NONNEG("ID", id);
     MDX_FIELD("D", data); //Variable value
 );
