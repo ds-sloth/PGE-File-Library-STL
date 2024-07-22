@@ -86,9 +86,17 @@ protected:
 
     bool save_object(std::string& out, const obj_t& src, const obj_t& ref) const
     {
+        size_t out_size_pre = out.size();
+
         bool any_field = false;
         for(const auto* field : m_fields)
-            any_field |= field->try_save(out, src, ref);
+        {
+            bool not_only = (field->m_save_mode == MDX_BaseField<obj_t>::SaveMode::not_only);
+            any_field |= field->try_save(out, src, ref) && !not_only;
+        }
+
+        if(!any_field)
+            out.resize(out_size_pre);
 
         return any_field;
     }

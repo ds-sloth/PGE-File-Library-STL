@@ -64,11 +64,19 @@ inline const char* MDX_finish_list_item(const char* line)
 template<class obj_t>
 struct MDX_BaseField
 {
+public:
+    enum class SaveMode
+    {
+        normal,   //!< store if can_save returns true
+        no_skip,  //!< always store
+        not_only, //!< if only these values are non-default, the object will be ignored
+    } m_save_mode = SaveMode::normal;
+
 protected:
     const char* m_field_name;
 
-    MDX_BaseField(const char* field_name)
-        : m_field_name(field_name) {}
+    MDX_BaseField(const char* field_name, SaveMode save_mode = SaveMode::normal)
+        : m_save_mode(save_mode), m_field_name(field_name) {}
 
     /* attempts to load the matched field to the destination, and returns the new load pointer following the ';'. */
     virtual const char* do_load(obj_t& dest, const char* field_data) const = 0;
@@ -101,7 +109,7 @@ public:
     /* confirms whether the field is non-default, and writes it to out if so. */
     inline bool try_save(std::string& out, const obj_t& src, const obj_t& ref) const
     {
-        if(!can_save(src, ref))
+        if(m_save_mode != SaveMode::no_skip && !can_save(src, ref))
             return false;
 
         auto old_size = out.size();
@@ -359,12 +367,13 @@ template<class obj_t, class field_t>
 struct MDX_Field : public MDX_BaseField<obj_t>
 {
     using MDX_BaseField<obj_t>::m_field_name;
+    using SaveMode = typename MDX_BaseField<obj_t>::SaveMode;
 
     field_t obj_t::* m_field = nullptr;
 
     template<class parent_t>
-    MDX_Field(parent_t* parent, const char* field_name, field_t obj_t::* field)
-        : MDX_BaseField<obj_t>(field_name), m_field(field)
+    MDX_Field(parent_t* parent, const char* field_name, field_t obj_t::* field, SaveMode save_mode = SaveMode::normal)
+        : MDX_BaseField<obj_t>(field_name, save_mode), m_field(field)
     {
         parent->m_fields.push_back(this);
     }

@@ -67,7 +67,7 @@ MDX_SETUP_OBJECT(CrashData,
 );
 
 MDX_SETUP_OBJECT(LevelSection,
-    MDX_FIELD_NONNEG("SC", id); //Section ID
+    MDX_FIELD_NONNEG_NOT_ONLY("SC", id); //Section ID
     MDX_FIELD("L",  size_left); //Left side
     MDX_FIELD("R",  size_right);//Right side
     MDX_FIELD("T",  size_top); //Top side
@@ -225,7 +225,7 @@ MDX_SETUP_OBJECT(LevelDoor,
 );
 
 MDX_SETUP_OBJECT(LevelLayer,
-    MDX_FIELD("LR", name);  //Layer name
+    MDX_FIELD_NO_SKIP("LR", name);  //Layer name
     MDX_FIELD("HD", hidden); //Hidden
     MDX_FIELD("LC", locked); //Locked
 );
@@ -290,7 +290,7 @@ static const char* MDX_LevelEvent_load_autoscroll_path(LevelEvent_Sets& set, con
 }
 
 MDX_SETUP_OBJECT(LevelEvent_Sets,
-    MDX_FIELD_NONNEG("ID", id);
+    MDX_FIELD_NONNEG_NOT_ONLY("ID", id);
     MDX_FIELD("SL", position_left);
     MDX_FIELD("ST", position_top);
     MDX_FIELD("SB", position_bottom);
@@ -473,7 +473,7 @@ static const char* MDX_LevelEvent_load_legacy_SS(LevelSMBX64Event& event, const 
 }
 
 MDX_SETUP_OBJECT(LevelSMBX64Event,
-    MDX_FIELD("ET", name);  //Event Title
+    MDX_FIELD_NO_SKIP("ET", name);  //Event Title
     MDX_FIELD("MG", msg);  //Event Message
     MDX_FIELD_NONNEG("SD", sound_id); //Play Sound ID
     MDX_FIELD_NONNEG("EG", end_game); //End game algorithm
