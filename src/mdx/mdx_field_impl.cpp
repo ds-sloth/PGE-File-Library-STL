@@ -25,6 +25,7 @@
  */
 
 #include <cstdlib>
+#include <cfloat>
 #include <limits>
 #include <cmath>
 #include <cstdarg>
@@ -220,6 +221,9 @@ static const char* s_load_double(double& dest, const char* field_data)
 
         field_data++;
 
+        if(value >= std::numeric_limits<double>::max() / 10) [[unlikely]]
+            return ret_error;
+
         value *= 10;
         value += static_cast<double>(c - '0');
     }
@@ -262,6 +266,9 @@ exponent:
     int exponent;
     field_data = s_load_int<int, 1>(exponent, field_data);
     if(field_data == exp_start || field_data - exp_start > allowed_chars)
+        return ret_error;
+
+    if(exponent > DBL_MAX_10_EXP)
         return ret_error;
 
     dest = sign * value * std::pow(10, exponent);
@@ -448,10 +455,15 @@ const char* MDX_FieldType<float>::load(float& dest, const char* field_data)
 {
     double ret;
     const char* str_end = s_load_double(ret, field_data);
-    dest = ret;
 
-    if(str_end == field_data)
+    if(ret > std::numeric_limits<float>::max()
+        || ret < -std::numeric_limits<float>::max()
+        || str_end == field_data)
+    {
         throw MDX_bad_term("Bad float");
+    }
+
+    dest = ret;
 
     return str_end;
 }
