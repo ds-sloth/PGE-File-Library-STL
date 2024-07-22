@@ -250,10 +250,11 @@ static const char* s_load_double(double& dest, const char* field_data)
 exponent:
     field_data++;
     const char* exp_start = field_data;
+    int allowed_chars = (*exp_start == '-') ? 5 : 4;
 
     int exponent;
     field_data = s_load_int<int, 1>(exponent, field_data);
-    if(field_data == exp_start || field_data - exp_start > 4)
+    if(field_data == exp_start || field_data - exp_start > allowed_chars)
         return ret_error;
 
     dest = sign * value * std::pow(10, exponent);
