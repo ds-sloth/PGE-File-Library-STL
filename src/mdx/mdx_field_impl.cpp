@@ -251,6 +251,11 @@ static const char* s_load_double(double& dest, const char* field_data)
 
 exponent:
     field_data++;
+
+    // allow plus sign (but not followed by minus sign)
+    if(field_data[0] == '+' && field_data[1] != '-')
+        field_data++;
+
     const char* exp_start = field_data;
     int allowed_chars = (*exp_start == '-') ? 5 : 4;
 
