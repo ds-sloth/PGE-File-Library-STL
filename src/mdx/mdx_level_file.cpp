@@ -556,7 +556,7 @@ const char* MDX_FieldType<LevelItemSetup38A::Entry>::load(LevelItemSetup38A::Ent
 
     str_data = MDX_FieldType<decltype(LevelItemSetup38A::Entry::key)>::load(e.key, str_data);
 
-    if(e.key < 0)
+    if(e.key < 0 || *str_data_start == '-')
         throw MDX_bad_term("Negative value");
 
     if(*str_data != '=')
