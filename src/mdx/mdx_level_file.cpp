@@ -52,7 +52,7 @@ MDX_SETUP_OBJECT(LevelHead,
 
 MDX_SETUP_OBJECT(Bookmark,
     MDX_FIELD("BM", bookmarkName); //Bookmark name
-    MDX_FIELD("X", x); // Position X
+    MDX_FIELD_NO_SKIP("X", x); // Position X
     MDX_FIELD("Y", y); // Position Y
 );
 
