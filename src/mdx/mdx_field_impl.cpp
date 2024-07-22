@@ -429,7 +429,7 @@ const char* MDX_FieldType<float>::load(float& dest, const char* field_data)
 template<>
 bool MDX_FieldType<float>::save(std::string& out, const float& src)
 {
-    s_sprintf_append(out, "%f", src);
+    s_sprintf_append(out, "%.10g", src);
     return true;
 }
 
@@ -447,7 +447,7 @@ const char* MDX_FieldType<double>::load(double& dest, const char* field_data)
 template<>
 bool MDX_FieldType<double>::save(std::string& out, const double& src)
 {
-    s_sprintf_append(out, "%f", src);
+    s_sprintf_append(out, "%.10g", src);
     return true;
 }
 
