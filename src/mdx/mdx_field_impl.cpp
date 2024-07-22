@@ -29,6 +29,7 @@
 #include <cmath>
 #include <cstdarg>
 #include "mdx/mdx_base_field.hpp"
+#include "mdx/milo_yip/itoa.h"
 
 #include "pge_file_lib_globs.h"
 
@@ -295,7 +296,13 @@ const char* MDX_FieldType<int>::load(int& dest, const char* field_data)
 template<>
 bool MDX_FieldType<int>::save(std::string& out, const int& src)
 {
-    s_sprintf_append(out, "%d", src);
+    out.resize(out.size() + 32);
+    char* dest = &out[out.size() - 32];
+
+    char* end = milo_yip::i32toa((int32_t)src, dest);
+
+    out.resize(out.size() - 32 + end - dest);
+
     return true;
 }
 
@@ -313,7 +320,13 @@ const char* MDX_FieldType<unsigned>::load(unsigned& dest, const char* field_data
 template<>
 bool MDX_FieldType<unsigned>::save(std::string& out, const unsigned& src)
 {
-    s_sprintf_append(out, "%u", src);
+    out.resize(out.size() + 32);
+    char* dest = &out[out.size() - 32];
+
+    char* end = milo_yip::u32toa((uint32_t)src, dest);
+
+    out.resize(out.size() - 32 + end - dest);
+
     return true;
 }
 
@@ -355,7 +368,13 @@ const char* MDX_FieldType<long>::load(long& dest, const char* field_data)
 template<>
 bool MDX_FieldType<long>::save(std::string& out, const long& src)
 {
-    s_sprintf_append(out, "%ld", src);
+    out.resize(out.size() + 32);
+    char* dest = &out[out.size() - 32];
+
+    char* end = milo_yip::i64toa((int64_t)src, dest);
+
+    out.resize(out.size() - 32 + end - dest);
+
     return true;
 }
 
@@ -373,7 +392,13 @@ const char* MDX_FieldType<unsigned long>::load(unsigned long& dest, const char* 
 template<>
 bool MDX_FieldType<unsigned long>::save(std::string& out, const unsigned long& src)
 {
-    s_sprintf_append(out, "%lu", src);
+    out.resize(out.size() + 32);
+    char* dest = &out[out.size() - 32];
+
+    char* end = milo_yip::u64toa((uint64_t)src, dest);
+
+    out.resize(out.size() - 32 + end - dest);
+
     return true;
 }
 
