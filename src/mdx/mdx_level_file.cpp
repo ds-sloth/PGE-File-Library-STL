@@ -265,6 +265,37 @@ static const char* MDX_LevelEvent_load_controls(LevelSMBX64Event& event, const c
     return next;
 }
 
+static bool MDX_LevelEvent_save_controls(std::string& out, const LevelSMBX64Event& event)
+{
+    PGELIST<bool> controls;
+
+    controls.push_back(event.ctrl_up);
+    controls.push_back(event.ctrl_down);
+    controls.push_back(event.ctrl_left);
+    controls.push_back(event.ctrl_right);
+    controls.push_back(event.ctrl_run);
+    controls.push_back(event.ctrl_jump);
+    controls.push_back(event.ctrl_drop);
+    controls.push_back(event.ctrl_start);
+    controls.push_back(event.ctrl_altrun);
+    controls.push_back(event.ctrl_altjump);
+    controls.push_back(event.ctrls_enable);
+    controls.push_back(event.ctrl_lock_keyboard);
+
+    bool addArray = false;
+
+    for(bool control : controls)
+    {
+        if(control)
+            addArray = true;
+    }
+
+    if(!addArray)
+        return false;
+
+    return MDX_FieldType<PGELIST<bool>>::save(out, controls);
+}
+
 static const char* MDX_LevelEvent_load_autoscroll_path(LevelEvent_Sets& set, const char* field_data)
 {
     PGELIST<long> arr;
@@ -305,7 +336,7 @@ MDX_SETUP_OBJECT(LevelEvent_Sets,
     MDX_FIELD("BG", background_id);
     MDX_FIELD("AS", autoscrol);
     MDX_FIELD_NONNEG("AST", autoscroll_style);
-    MDX_UNIQUE_FIELD("ASP", MDX_LevelEvent_load_autoscroll_path);
+    MDX_UNIQUE_FIELD("ASP", MDX_LevelEvent_load_autoscroll_path, nullptr); // FIXME
     MDX_FIELD("AX", autoscrol_x);
     MDX_FIELD("AY", autoscrol_y);
     MDX_FIELD("AXX", expression_autoscrool_x);
@@ -481,9 +512,9 @@ MDX_SETUP_OBJECT(LevelSMBX64Event,
     MDX_FIELD("LS", layers_show); //Show layers
     MDX_FIELD("LT", layers_toggle); //Toggle layers
     //Legacy values (without SMBX-38A values support)
-    MDX_UNIQUE_FIELD("SM", MDX_LevelEvent_load_legacy_SM);  //Switch music
-    MDX_UNIQUE_FIELD("SB", MDX_LevelEvent_load_legacy_SB);     //Switch background
-    MDX_UNIQUE_FIELD("SS", MDX_LevelEvent_load_legacy_SS);     //Section Size
+    MDX_UNIQUE_FIELD("SM", MDX_LevelEvent_load_legacy_SM, nullptr);  //Switch music
+    MDX_UNIQUE_FIELD("SB", MDX_LevelEvent_load_legacy_SB, nullptr);     //Switch background
+    MDX_UNIQUE_FIELD("SS", MDX_LevelEvent_load_legacy_SS, nullptr);     //Section Size
     //-------------------
     //New values (with SMBX-38A values support)
     MDX_FIELD("SSS", sets); //Section settings in new format
@@ -506,7 +537,7 @@ MDX_SETUP_OBJECT(LevelSMBX64Event,
     MDX_FIELD("DS", nosmoke); //Disable smoke
     MDX_FIELD_NONNEG("AU", autostart); //Auto start
     MDX_FIELD("AUC", autostart_condition); //Auto start condition
-    MDX_UNIQUE_FIELD("PC", MDX_LevelEvent_load_controls);
+    MDX_UNIQUE_FIELD("PC", MDX_LevelEvent_load_controls, MDX_LevelEvent_save_controls);
     MDX_FIELD("ML", movelayer);   //Move layer
     MDX_FIELD("MX", layer_speed_x); //Layer motion speed X
     MDX_FIELD("MY", layer_speed_y); //Layer motion speed Y

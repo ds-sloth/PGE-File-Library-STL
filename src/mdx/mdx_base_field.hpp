@@ -437,7 +437,7 @@ struct MDX_UniqueField : public MDX_BaseField<obj_t>
     save_func_t m_save_func = nullptr;
 
     template<class parent_t>
-    MDX_UniqueField(parent_t* parent, const char* field_name, load_func_t load_func, save_func_t save_func = nullptr) // FIXME
+    MDX_UniqueField(parent_t* parent, const char* field_name, load_func_t load_func, save_func_t save_func)
         : MDX_BaseField<obj_t>(field_name), m_load_func(load_func), m_save_func(save_func)
     {
         parent->m_fields.push_back(this);
