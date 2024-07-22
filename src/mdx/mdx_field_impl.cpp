@@ -644,7 +644,7 @@ bool MDX_FieldType<QStringList>::save(std::string& out, const QStringList& src)
 
     for(const auto& s : src)
     {
-        src_utf8 = s.toStdString();
+        src_i_utf8 = s.toStdString();
 
         MDX_FieldType<std::string>::save(out, src_i_utf8);
         out.push_back(',');
