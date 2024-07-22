@@ -62,10 +62,43 @@ static bool s_load_head(void* _FileData, LevelHead& dest)
     return true;
 }
 
+static bool s_save_head(const void* _FileData, LevelHead& dest, pge_size_t index)
+{
+    if(index != 0)
+        return false;
+
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    dest = LevelHead();
+
+    dest.LevelName = FileData.LevelName;
+    dest.stars = FileData.stars;
+    dest.open_level_on_fail = FileData.open_level_on_fail;
+    dest.open_level_on_fail_warpID = FileData.open_level_on_fail_warpID;
+    dest.player_names_overrides = FileData.player_names_overrides;
+    dest.custom_params = FileData.custom_params;
+    dest.configPackId = FileData.meta.configPackId;
+    dest.music_files = FileData.music_files;
+
+    return true;
+}
+
 static bool s_load_bookmark(void* _FileData, Bookmark& dest)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
     FileData.metaData.bookmarks.push_back(std::move(dest));
+
+    return true;
+}
+
+static bool s_save_bookmark(const void* _FileData, Bookmark& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.metaData.bookmarks.size())
+        return false;
+
+    obj = FileData.metaData.bookmarks[index];
 
     return true;
 }
@@ -75,6 +108,18 @@ static bool s_load_crash_data(void* _FileData, CrashData& dest)
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
     FileData.metaData.crash = dest;
     FileData.metaData.crash.used = true;
+
+    return true;
+}
+
+static bool s_save_crash_data(const void* _FileData, CrashData& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(!FileData.metaData.crash.used || index != 0)
+        return false;
+
+    obj = FileData.metaData.crash;
 
     return true;
 }
@@ -109,6 +154,18 @@ static bool s_load_section(void* _FileData, LevelSection& dest)
     return true;
 }
 
+static bool s_save_section(const void* _FileData, LevelSection& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.sections.size())
+        return false;
+
+    obj = FileData.sections[index];
+
+    return true;
+}
+
 static bool s_load_startpoint(void* _FileData, PlayerPoint& player)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
@@ -138,6 +195,18 @@ static bool s_load_startpoint(void* _FileData, PlayerPoint& player)
     return true;
 }
 
+static bool s_save_startpoint(const void* _FileData, PlayerPoint& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.players.size())
+        return false;
+
+    obj = FileData.players[index];
+
+    return true;
+}
+
 static bool s_load_block(void* _FileData, LevelBlock& block)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
@@ -145,6 +214,18 @@ static bool s_load_block(void* _FileData, LevelBlock& block)
     block.meta.array_id = FileData.blocks_array_id++;
     block.meta.index = static_cast<unsigned int>(FileData.blocks.size());
     FileData.blocks.push_back(std::move(block));
+
+    return true;
+}
+
+static bool s_save_block(const void* _FileData, LevelBlock& block, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.blocks.size())
+        return false;
+
+    block = FileData.blocks[index];
 
     return true;
 }
@@ -160,6 +241,18 @@ static bool s_load_bgo(void* _FileData, LevelBGO& bgodata)
     return true;
 }
 
+static bool s_save_bgo(const void* _FileData, LevelBGO& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.bgo.size())
+        return false;
+
+    obj = FileData.bgo[index];
+
+    return true;
+}
+
 static bool s_load_npc(void* _FileData, LevelNPC& npcdata)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
@@ -171,6 +264,18 @@ static bool s_load_npc(void* _FileData, LevelNPC& npcdata)
     return true;
 }
 
+static bool s_save_npc(const void* _FileData, LevelNPC& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.npc.size())
+        return false;
+
+    obj = FileData.npc[index];
+
+    return true;
+}
+
 static bool s_load_phys(void* _FileData, LevelPhysEnv& physiczone)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
@@ -178,6 +283,18 @@ static bool s_load_phys(void* _FileData, LevelPhysEnv& physiczone)
     physiczone.meta.array_id = FileData.physenv_array_id++;
     physiczone.meta.index = static_cast<unsigned int>(FileData.physez.size());
     FileData.physez.push_back(std::move(physiczone));
+
+    return true;
+}
+
+static bool s_save_phys(const void* _FileData, LevelPhysEnv& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.physez.size())
+        return false;
+
+    obj = FileData.physez[index];
 
     return true;
 }
@@ -208,6 +325,18 @@ static bool s_load_warp(void* _FileData, LevelDoor& door)
     return true;
 }
 
+static bool s_save_warp(const void* _FileData, LevelDoor& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.doors.size())
+        return false;
+
+    obj = FileData.doors[index];
+
+    return true;
+}
+
 static bool s_load_layer(void* _FileData, LevelLayer& layer)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
@@ -234,6 +363,18 @@ static bool s_load_layer(void* _FileData, LevelLayer& layer)
         layer.meta.array_id = FileData.layers_array_id++;
         FileData.layers.push_back(std::move(layer));
     }
+
+    return true;
+}
+
+static bool s_save_layer(const void* _FileData, LevelLayer& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.layers.size())
+        return false;
+
+    obj = FileData.layers[index];
 
     return true;
 }
@@ -296,10 +437,34 @@ static bool s_load_event(void* _FileData, LevelSMBX64Event& event)
     return true;
 }
 
+static bool s_save_event(const void* _FileData, LevelSMBX64Event& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.events.size())
+        return false;
+
+    obj = FileData.events[index];
+
+    return true;
+}
+
 static bool s_load_var(void* _FileData, LevelVariable& v)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
     FileData.variables.push_back(std::move(v));
+
+    return true;
+}
+
+static bool s_save_var(const void* _FileData, LevelVariable& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.variables.size())
+        return false;
+
+    obj = FileData.variables[index];
 
     return true;
 }
@@ -312,6 +477,18 @@ static bool s_load_arr(void* _FileData, LevelArray& a)
     return true;
 }
 
+static bool s_save_arr(const void* _FileData, LevelArray& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.arrays.size())
+        return false;
+
+    obj = FileData.arrays[index];
+
+    return true;
+}
+
 static bool s_load_script(void* _FileData, LevelScript& s)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
@@ -320,10 +497,34 @@ static bool s_load_script(void* _FileData, LevelScript& s)
     return true;
 }
 
+static bool s_save_script(const void* _FileData, LevelScript& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.scripts.size())
+        return false;
+
+    obj = FileData.scripts[index];
+
+    return true;
+}
+
 static bool s_load_levelitem38a(void* _FileData, LevelItemSetup38A& customcfg38A)
 {
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
     FileData.custom38A_configs.push_back(std::move(customcfg38A));
+
+    return true;
+}
+
+static bool s_save_levelitem38a(const void* _FileData, LevelItemSetup38A& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.custom38A_configs.size())
+        return false;
+
+    obj = FileData.custom38A_configs[index];
 
     return true;
 }
@@ -366,4 +567,30 @@ bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
     callbacks.userdata = reinterpret_cast<void*>(&FileData);
 
     return MDX_load_level(file, callbacks);
+}
+
+bool MDX_save_level(PGE_FileFormats_misc::TextOutput &file, const LevelData &FileData)
+{
+    LevelSaveCallbacks callbacks;
+
+    callbacks.save_head = s_save_head;
+    callbacks.save_bookmark = s_save_bookmark;
+    callbacks.save_crash_data = s_save_crash_data;
+    callbacks.save_section = s_save_section;
+    callbacks.save_startpoint = s_save_startpoint;
+    callbacks.save_block = s_save_block;
+    callbacks.save_bgo = s_save_bgo;
+    callbacks.save_npc = s_save_npc;
+    callbacks.save_phys = s_save_phys;
+    callbacks.save_warp = s_save_warp;
+    callbacks.save_layer = s_save_layer;
+    callbacks.save_event = s_save_event;
+    callbacks.save_var = s_save_var;
+    callbacks.save_arr = s_save_arr;
+    callbacks.save_script = s_save_script;
+    callbacks.save_levelitem38a = s_save_levelitem38a;
+
+    callbacks.userdata = reinterpret_cast<const void*>(&FileData);
+
+    return MDX_save_level(file, callbacks);
 }

@@ -73,9 +73,9 @@ MDX_SETUP_OBJECT(LevelSection,
     MDX_FIELD("T",  size_top); //Top side
     MDX_FIELD("B",  size_bottom);//Bottom side
     MDX_FIELD("MZ", music_id);//Built-in music ID
+    MDX_FIELD("MF", music_file); //External music file path
     MDX_FIELD("BG", background);//Built-in background ID
     MDX_FIELD("LT", lighting_value);//Lighting value
-    MDX_FIELD("MF", music_file); //External music file path
     MDX_FIELD("ME", music_file_idx); //External music entry from level list
     MDX_FIELD("CS", wrap_h);//Connect sides horizontally
     MDX_FIELD("CSV", wrap_v);//Connect sides vertically
