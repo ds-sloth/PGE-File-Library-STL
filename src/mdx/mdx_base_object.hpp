@@ -39,19 +39,15 @@
  *
  */
 
-template<class _obj_t>
 struct MDX_BaseObject
 {
     template<class obj_loader_t> friend struct MDX_FieldType_ObjectList;
     template<class obj_loader_t> friend struct MDX_FieldType_Object;
 
-    using obj_t = _obj_t;
-
-    template<class field_t> using field = MDX_Field<obj_t, field_t>;
-    std::vector<MDX_BaseField<obj_t>*> m_fields;
+    std::vector<MDX_BaseField*> m_fields;
 
 protected:
-    void load_object(obj_t& dest, const char* line) const
+    void load_object(void* dest, const char* line) const
     {
         const char* cur_data = line;
         size_t next_field = 0;
@@ -84,14 +80,14 @@ protected:
         }
     }
 
-    bool save_object(std::string& out, const obj_t& src, const obj_t& ref) const
+    bool save_object(std::string& out, const void* src, const void* ref) const
     {
         size_t out_size_pre = out.size();
 
         bool any_field = false;
         for(const auto* field : m_fields)
         {
-            bool not_only = (field->m_save_mode == MDX_BaseField<obj_t>::SaveMode::not_only);
+            bool not_only = (field->m_save_mode == MDX_BaseField::SaveMode::not_only);
             any_field |= field->try_save(out, src, ref) && !not_only;
         }
 
@@ -102,7 +98,7 @@ protected:
     }
 };
 
-template<class _obj_t>
+template<class obj_t>
 struct MDX_Object;
 
 #endif // #ifndef MDX_BASE_OBJECT_HPP

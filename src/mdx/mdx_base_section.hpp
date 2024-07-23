@@ -167,7 +167,7 @@ public:
                 if(!t_combine_objects)
                     m_obj = obj_t();
 
-                load_object(m_obj, cur_line.c_str());
+                load_object(&m_obj, cur_line.c_str());
 
                 if(!t_combine_objects)
                 {
@@ -214,7 +214,7 @@ public:
 
         for(size_t index = 0; callback(cb.userdata, m_obj, index); index++)
         {
-            if(!save_object(out_buffer, m_obj, ref))
+            if(!save_object(out_buffer, &m_obj, &ref))
                 continue;
 
             out_buffer += '\n';
