@@ -26,7 +26,7 @@
 
 /*! \file mdx_level_file_rw.cpp
  *
- *  \brief Implements defines PGE-X2 functions for loading a level object
+ *  \brief Implements defines MDX functions for loading a level object
  *
  * This is a new implementation but supports precisely the same format as PGE-X
  *

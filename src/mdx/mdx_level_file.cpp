@@ -26,7 +26,7 @@
 
 /*! \file mdx_level_file.cpp
  *
- *  \brief Implements defines PGE-X2 structures for the level objects and file
+ *  \brief Implements defines MDX structures for the level objects and file
  *
  * This is a new implementation but supports precisely the same format as PGE-X
  *
@@ -37,6 +37,8 @@
 
 #include "mdx/mdx_base_file.hpp"
 #include "mdx/mdx_macros.hpp"
+#include "mdx/mdx_meta_objects.hpp"
+
 #include "mdx/mdx_level_file.h"
 
 MDX_SETUP_OBJECT(LevelHead,
@@ -48,22 +50,6 @@ MDX_SETUP_OBJECT(LevelHead,
     MDX_FIELD("XTRA", custom_params); //Level-wide Extra settings
     MDX_FIELD("CPID", configPackId); //Config pack ID string
     MDX_FIELD("MUS", music_files); // Level-wide list of external music files
-);
-
-MDX_SETUP_OBJECT(Bookmark,
-    MDX_FIELD("BM", bookmarkName); //Bookmark name
-    MDX_FIELD_NO_SKIP("X", x); // Position X
-    MDX_FIELD("Y", y); // Position Y
-);
-
-MDX_SETUP_OBJECT(CrashData,
-    MDX_FIELD("UT", untitled); //Untitled
-    MDX_FIELD("MD", modifyed); //Modyfied
-    MDX_FIELD("FF", fmtID); //Recent File format
-    MDX_FIELD("FV", fmtVer); //Recent File format version
-    MDX_FIELD("N",  filename);  //Filename
-    MDX_FIELD("P",  path);  //Path
-    MDX_FIELD("FP", fullPath);  //Full file Path
 );
 
 MDX_SETUP_OBJECT(LevelSection,
