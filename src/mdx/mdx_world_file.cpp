@@ -89,8 +89,8 @@ MDX_SETUP_OBJECT(WorldAreaRect,
     MDX_FIELD_NO_SKIP("F", flags);  //Flags
     MDX_FIELD("X", x); //X Position
     MDX_FIELD("Y", y); //X Position
-    MDX_FIELD("W", w); //Width
-    MDX_FIELD("H", h); //Height
+    MDX_FIELD_NONNEG("W", w); //Width
+    MDX_FIELD_NONNEG("H", h); //Height
 
     // unused stuff
     MDX_FIELD("MI", music_id); //MUSICBOX ID
