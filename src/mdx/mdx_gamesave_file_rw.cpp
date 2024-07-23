@@ -262,6 +262,7 @@ static bool s_save_userdata(const void* _FileData, saveUserData::DataSection& ob
 bool MDX_load_gamesave(PGE_FileFormats_misc::TextInput &file, GamesaveData &FileData)
 {
     FileData = GamesaveData();
+    FileData.lives = 3;
 
     //Add path data
     PGESTRING filePath = file.getFilePath();
