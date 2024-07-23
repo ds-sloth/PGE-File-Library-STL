@@ -546,6 +546,10 @@ bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
         FileData.meta.path = in_1.dirpath();
     }
 
+    FileData.meta.untitled = false;
+    FileData.meta.modified = false;
+    FileData.meta.ReadFileValid = true;
+
     LevelLoadCallbacks callbacks;
 
     callbacks.on_error = s_on_error;

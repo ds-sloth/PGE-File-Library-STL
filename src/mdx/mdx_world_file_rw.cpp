@@ -301,6 +301,10 @@ bool MDX_load_world(PGE_FileFormats_misc::TextInput &file, WorldData &FileData)
         FileData.meta.path = in_1.dirpath();
     }
 
+    FileData.meta.untitled = false;
+    FileData.meta.modified = false;
+    FileData.meta.ReadFileValid = true;
+
     WorldLoadCallbacks callbacks;
 
     callbacks.on_error = s_on_error;
