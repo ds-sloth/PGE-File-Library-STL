@@ -184,6 +184,16 @@ static const char* s_load_int(int_t& dest, const char* field_data)
     }
 }
 
+const char* MDX_load_int(int& dest, const char* field_data)
+{
+    return s_load_int<int, 1>(dest, field_data);
+}
+
+const char* MDX_load_long(long& dest, const char* field_data)
+{
+    return s_load_int<long, 1>(dest, field_data);
+}
+
 static const char* s_load_double(double& dest, const char* field_data)
 {
     const char* const ret_error = field_data;
