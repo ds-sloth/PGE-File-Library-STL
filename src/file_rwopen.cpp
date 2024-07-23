@@ -32,6 +32,7 @@
 #include "file_formats.h"
 #include "pge_file_lib_private.h"
 #include "mdx/mdx_level_file.h"
+#include "mdx/mdx_world_file.h"
 
 bool FileFormats::OpenLevelFile(const PGESTRING &filePath, LevelData &FileData)
 {
@@ -202,14 +203,29 @@ bool FileFormats::SaveLevelFile(LevelData &FileData,
                                 LevelFileFormat format,
                                 unsigned int formatVersion)
 {
+    PGE_FileFormats_misc::TextFileOutput file;
     FileData.meta.ERROR_info.clear();
+
+    if(!file.open(filePath, true, false, PGE_FileFormats_misc::TextOutput::truncate))
+    {
+        FileData.meta.ERROR_info = "Failed to open file for write";
+        return false;
+    }
 
     switch(format)
     {
     case LVL_PGEX:
     {
         FileData.stars = smbx64CountStars(FileData);
-        if(!FileFormats::WriteExtendedLvlFileF(filePath, FileData))
+        if(FileFormats::g_use_mdx)
+        {
+            if(!MDX_save_level(file, FileData))
+            {
+                FileData.meta.ERROR_info += "Cannot save file " + filePath + ".";
+                return false;
+            }
+        }
+        else if(!FileFormats::WriteExtendedLvlFile(file, FileData))
         {
             FileData.meta.ERROR_info += "Cannot save file " + filePath + ".";
             return false;
@@ -223,7 +239,7 @@ bool FileFormats::SaveLevelFile(LevelData &FileData,
         smbx64LevelPrepare(FileData);
         uint32_t outVer = formatVersion == c_version_default ? c_latest_version_smbx64 : formatVersion;
 
-        if(!FileFormats::WriteSMBX64LvlFileF(filePath, FileData, outVer))
+        if(!FileFormats::WriteSMBX64LvlFile(file, FileData, outVer))
         {
             FileData.meta.ERROR_info += "Cannot save file " + filePath + ".";
             return false;
@@ -244,7 +260,7 @@ bool FileFormats::SaveLevelFile(LevelData &FileData,
     case LVL_SMBX38A:
     {
         uint32_t outVer = formatVersion == c_version_default ? c_latest_version_smbx38a : formatVersion;
-        if(!FileFormats::WriteSMBX38ALvlFileF(filePath, FileData, outVer))
+        if(!FileFormats::WriteSMBX38ALvlFile(file, FileData, outVer))
         {
             FileData.meta.ERROR_info = "Cannot save file " + filePath + ".";
             return false;
@@ -376,6 +392,12 @@ bool FileFormats::OpenWorldFileT(PGE_FileFormats_misc::TextInput &file, WorldDat
         if(!ReadSMBX64WldFile(file, data))
             return false;
     }
+    else if(FileFormats::g_use_mdx)
+    {
+        //Read PGE WLDX File with MDX
+        if(!MDX_load_world(file, data))
+            return false;
+    }
     else
     {
         //Read PGE WLDX File
@@ -463,13 +485,28 @@ bool FileFormats::SaveWorldFile(WorldData &FileData,
                                 FileFormats::WorldFileFormat format,
                                 unsigned int formatVersion)
 {
+    PGE_FileFormats_misc::TextFileOutput file;
     FileData.meta.ERROR_info.clear();
+
+    if(!file.open(filePath, true, false, PGE_FileFormats_misc::TextOutput::truncate))
+    {
+        FileData.meta.ERROR_info = "Failed to open file for write";
+        return false;
+    }
 
     switch(format)
     {
     case WLD_PGEX:
     {
-        if(!FileFormats::WriteExtendedWldFileF(filePath, FileData))
+        if(FileFormats::g_use_mdx)
+        {
+            if(!MDX_save_world(file, FileData))
+            {
+                FileData.meta.ERROR_info += "Cannot save file " + filePath + ".";
+                return false;
+            }
+        }
+        else if(!FileFormats::WriteExtendedWldFile(file, FileData))
         {
             FileData.meta.ERROR_info += "Cannot save file " + filePath + ".";
             return false;
@@ -480,7 +517,7 @@ bool FileFormats::SaveWorldFile(WorldData &FileData,
     case WLD_SMBX64:
     {
         uint32_t outVer = formatVersion == c_version_default ? c_latest_version_smbx64 : formatVersion;
-        if(!FileFormats::WriteSMBX64WldFileF(filePath, FileData, outVer))
+        if(!FileFormats::WriteSMBX64WldFile(file, FileData, outVer))
         {
             FileData.meta.ERROR_info += "Cannot save file " + filePath + ".";
             return false;
@@ -501,7 +538,7 @@ bool FileFormats::SaveWorldFile(WorldData &FileData,
     case WLD_SMBX38A:
     {
         uint32_t outVer = formatVersion == c_version_default ? c_latest_version_smbx38a : formatVersion;
-        if(!FileFormats::WriteSMBX38AWldFileF(filePath, FileData, outVer))
+        if(!FileFormats::WriteSMBX38AWldFile(file, FileData, outVer))
         {
             FileData.meta.ERROR_info += "Cannot save file " + filePath + ".";
             return false;
