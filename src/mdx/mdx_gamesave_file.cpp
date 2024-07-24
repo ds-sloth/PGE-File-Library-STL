@@ -89,7 +89,7 @@ MDX_SETUP_OBJECT(saveLevelInfo,
 
 static const char* MDX_DataSection_load_location(saveUserData::DataSection& s, const char* field_data)
 {
-    return MDX_FieldType<decltype(saveUserData::DataSection::location)>::load(s.location, field_data);
+    return MDX_Value<decltype(saveUserData::DataSection::location)>::load(s.location, field_data);
 }
 
 static bool MDX_DataSection_save_location(std::string& out, const saveUserData::DataSection& s)
@@ -99,16 +99,16 @@ static bool MDX_DataSection_save_location(std::string& out, const saveUserData::
 
     int location_clean = (s.location & saveUserData::DATA_LOCATION_MASK);
 
-    return MDX_FieldType<decltype(saveUserData::DataSection::location)>::save(out, location_clean);
+    return MDX_Value<decltype(saveUserData::DataSection::location)>::save(out, location_clean);
 }
 
 #include "pge_x.h"
 
 template<>
-const char* MDX_FieldType<saveUserData::DataEntry>::load(saveUserData::DataEntry& e, const char* field_data)
+const char* MDX_Value<saveUserData::DataEntry>::load(saveUserData::DataEntry& e, const char* field_data)
 {
     PGESTRING got;
-    const char* ret = MDX_FieldType<PGESTRING>::load(got, field_data);
+    const char* ret = MDX_Value<PGESTRING>::load(got, field_data);
 
     PGESTRINGList dp;
     PGE_SPLITSTRING(dp, got, "=");
@@ -121,23 +121,23 @@ const char* MDX_FieldType<saveUserData::DataEntry>::load(saveUserData::DataEntry
 }
 
 template<>
-bool MDX_FieldType<saveUserData::DataEntry>::save(std::string& out, const saveUserData::DataEntry& src)
+bool MDX_Value<saveUserData::DataEntry>::save(std::string& out, const saveUserData::DataEntry& src)
 {
     std::string sub;
 
     PGESTRING temp = src.key;
     PGE_ReplSTRING_inline(temp, "=", "\\q");
 
-    MDX_FieldType<PGESTRING>::save(sub, temp);
+    MDX_Value<PGESTRING>::save(sub, temp);
 
     sub += '=';
 
     temp = src.value;
     PGE_ReplSTRING_inline(temp, "=", "\\q");
 
-    MDX_FieldType<PGESTRING>::save(sub, temp);
+    MDX_Value<PGESTRING>::save(sub, temp);
 
-    return MDX_FieldType<std::string>::save(out, sub);
+    return MDX_Value<std::string>::save(out, sub);
 }
 
 using DataSection = saveUserData::DataSection;

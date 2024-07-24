@@ -138,7 +138,7 @@ public:
 };
 
 template<class field_t>
-struct MDX_FieldType
+struct MDX_Value
 {
     static const char* load(field_t& dest, const char* field_data);
 
@@ -153,7 +153,7 @@ struct MDX_FieldType
 };
 
 template<class subtype_t>
-struct MDX_FieldType<PGELIST<subtype_t>>
+struct MDX_Value<PGELIST<subtype_t>>
 {
     static const char* load(PGELIST<subtype_t>& dest, const char* field_data);
     static bool save(std::string& out, const PGELIST<subtype_t>& src);
@@ -164,7 +164,7 @@ struct MDX_FieldType<PGELIST<subtype_t>>
 };
 
 template<>
-struct MDX_FieldType<PGELIST<bool>>
+struct MDX_Value<PGELIST<bool>>
 {
     static const char* load(PGELIST<bool>& dest, const char* field_data);
     static bool save(std::string& out, const PGELIST<bool>& src);
@@ -175,7 +175,7 @@ struct MDX_FieldType<PGELIST<bool>>
 };
 
 template<class subtype_t>
-const char* MDX_FieldType<PGELIST<subtype_t>>::load(PGELIST<subtype_t>& dest, const char* field_data)
+const char* MDX_Value<PGELIST<subtype_t>>::load(PGELIST<subtype_t>& dest, const char* field_data)
 {
     dest.clear();
 
@@ -195,7 +195,7 @@ const char* MDX_FieldType<PGELIST<subtype_t>>::load(PGELIST<subtype_t>& dest, co
 
         try
         {
-            cur_pos = MDX_FieldType<subtype_t>::load(dest.back(), cur_pos);
+            cur_pos = MDX_Value<subtype_t>::load(dest.back(), cur_pos);
             cur_pos = MDX_finish_list_item(cur_pos);
         }
         catch(const MDX_parse_error&)
@@ -216,13 +216,13 @@ const char* MDX_FieldType<PGELIST<subtype_t>>::load(PGELIST<subtype_t>& dest, co
 }
 
 template<class subtype_t>
-bool MDX_FieldType<PGELIST<subtype_t>>::save(std::string& out, const PGELIST<subtype_t>& src)
+bool MDX_Value<PGELIST<subtype_t>>::save(std::string& out, const PGELIST<subtype_t>& src)
 {
     out.push_back('[');
 
     for(const subtype_t& s : src)
     {
-        if(MDX_FieldType<subtype_t>::save(out, s))
+        if(MDX_Value<subtype_t>::save(out, s))
             out.push_back(',');
     }
 
@@ -241,7 +241,7 @@ bool MDX_FieldType<PGELIST<subtype_t>>::save(std::string& out, const PGELIST<sub
 }
 
 template<class obj_loader_t>
-struct MDX_FieldType_Object
+struct MDX_Value_Object
 {
     static const obj_loader_t s_obj_loader;
     static const char* load(typename obj_loader_t::obj_t& dest, const char* field_data);
@@ -253,13 +253,13 @@ struct MDX_FieldType_Object
 };
 
 template<class obj_loader_t>
-const char* MDX_FieldType_Object<obj_loader_t>::load(typename obj_loader_t::obj_t& dest, const char* field_data)
+const char* MDX_Value_Object<obj_loader_t>::load(typename obj_loader_t::obj_t& dest, const char* field_data)
 {
     dest = typename obj_loader_t::obj_t();
 
     std::string object_string;
 
-    const char* next = MDX_FieldType<std::string>::load(object_string, field_data);
+    const char* next = MDX_Value<std::string>::load(object_string, field_data);
 
     s_obj_loader.load_object(&dest, object_string.c_str());
 
@@ -267,7 +267,7 @@ const char* MDX_FieldType_Object<obj_loader_t>::load(typename obj_loader_t::obj_
 }
 
 template<class obj_loader_t>
-bool MDX_FieldType_Object<obj_loader_t>::save(std::string& out, const typename obj_loader_t::obj_t& src)
+bool MDX_Value_Object<obj_loader_t>::save(std::string& out, const typename obj_loader_t::obj_t& src)
 {
     const typename obj_loader_t::obj_t ref;
     std::string object_string;
@@ -275,13 +275,13 @@ bool MDX_FieldType_Object<obj_loader_t>::save(std::string& out, const typename o
     if(!s_obj_loader.save_object(object_string, &src, &ref))
         return false;
 
-    MDX_FieldType<std::string>::save(out, object_string);
+    MDX_Value<std::string>::save(out, object_string);
 
     return true;
 }
 
 template<class obj_loader_t>
-struct MDX_FieldType_ObjectList
+struct MDX_Value_ObjectList
 {
     static const obj_loader_t s_obj_loader;
     static const char* load(PGELIST<typename obj_loader_t::obj_t>& dest, const char* field_data);
@@ -293,7 +293,7 @@ struct MDX_FieldType_ObjectList
 };
 
 template<class obj_loader_t>
-const char* MDX_FieldType_ObjectList<obj_loader_t>::load(PGELIST<typename obj_loader_t::obj_t>& dest, const char* field_data)
+const char* MDX_Value_ObjectList<obj_loader_t>::load(PGELIST<typename obj_loader_t::obj_t>& dest, const char* field_data)
 {
     dest.clear();
 
@@ -315,7 +315,7 @@ const char* MDX_FieldType_ObjectList<obj_loader_t>::load(PGELIST<typename obj_lo
 
         try
         {
-            cur_pos = MDX_FieldType<std::string>::load(object_string, cur_pos);
+            cur_pos = MDX_Value<std::string>::load(object_string, cur_pos);
             cur_pos = MDX_finish_list_item(cur_pos);
 
             s_obj_loader.load_object(&dest.back(), object_string.c_str());
@@ -338,7 +338,7 @@ const char* MDX_FieldType_ObjectList<obj_loader_t>::load(PGELIST<typename obj_lo
 }
 
 template<class obj_loader_t>
-bool MDX_FieldType_ObjectList<obj_loader_t>::save(std::string& out, const PGELIST<typename obj_loader_t::obj_t>& src)
+bool MDX_Value_ObjectList<obj_loader_t>::save(std::string& out, const PGELIST<typename obj_loader_t::obj_t>& src)
 {
     std::string object_string;
     typename obj_loader_t::obj_t ref;
@@ -351,7 +351,7 @@ bool MDX_FieldType_ObjectList<obj_loader_t>::save(std::string& out, const PGELIS
 
         if(s_obj_loader.save_object(object_string, &s, &ref))
         {
-            MDX_FieldType<std::string>::save(out, object_string);
+            MDX_Value<std::string>::save(out, object_string);
 
             out.push_back(',');
         }
@@ -386,7 +386,7 @@ struct MDX_Field : public MDX_BaseField /* <obj_t> */
     {
         obj_t& dest = *reinterpret_cast<obj_t*>(_dest);
 
-        return MDX_FieldType<field_t>::load(dest.*m_field, field_data);
+        return MDX_Value<field_t>::load(dest.*m_field, field_data);
     }
 
     virtual bool can_save(const void* _src, const void* _ref) const
@@ -394,14 +394,14 @@ struct MDX_Field : public MDX_BaseField /* <obj_t> */
         const obj_t& src = *reinterpret_cast<const obj_t*>(_src);
         const obj_t& ref = *reinterpret_cast<const obj_t*>(_ref);
 
-        return !MDX_FieldType<field_t>::is_ref(src.*m_field, ref.*m_field);
+        return !MDX_Value<field_t>::is_ref(src.*m_field, ref.*m_field);
     }
 
     virtual bool do_save(std::string& out, const void* _src) const
     {
         const obj_t& src = *reinterpret_cast<const obj_t*>(_src);
 
-        return MDX_FieldType<field_t>::save(out, src.*m_field);
+        return MDX_Value<field_t>::save(out, src.*m_field);
     }
 };
 
@@ -415,7 +415,7 @@ struct MDX_NonNegField : public MDX_Field<obj_t, field_t>
     {
         obj_t& dest = *reinterpret_cast<obj_t*>(_dest);
 
-        const char* ret = MDX_FieldType<field_t>::load(dest.*m_field, field_data);
+        const char* ret = MDX_Value<field_t>::load(dest.*m_field, field_data);
 
         if(*field_data == '-' || dest.*m_field < 0)
             throw(MDX_bad_term("Negative value"));
@@ -477,7 +477,7 @@ struct MDX_NestedField : public MDX_BaseField
     {
         obj_t& dest = *reinterpret_cast<obj_t*>(_dest);
 
-        return MDX_FieldType<field_t>::load(dest.*m_substruct.*m_field, field_data);
+        return MDX_Value<field_t>::load(dest.*m_substruct.*m_field, field_data);
     }
 
     virtual bool can_save(const void* _src, const void* _ref) const
@@ -485,14 +485,14 @@ struct MDX_NestedField : public MDX_BaseField
         const obj_t& src = *reinterpret_cast<const obj_t*>(_src);
         const obj_t& ref = *reinterpret_cast<const obj_t*>(_ref);
 
-        return !MDX_FieldType<field_t>::is_ref(src.*m_substruct.*m_field, ref.*m_substruct.*m_field);
+        return !MDX_Value<field_t>::is_ref(src.*m_substruct.*m_field, ref.*m_substruct.*m_field);
     }
 
     virtual bool do_save(std::string& out, const void* _src) const
     {
         const obj_t& src = *reinterpret_cast<const obj_t*>(_src);
 
-        return MDX_FieldType<field_t>::save(out, src.*m_substruct.*m_field);
+        return MDX_Value<field_t>::save(out, src.*m_substruct.*m_field);
     }
 };
 
@@ -507,7 +507,7 @@ struct MDX_NonNegNestedField : public MDX_NestedField<obj_t, substruct_t, field_
     {
         obj_t& dest = *reinterpret_cast<obj_t*>(_dest);
 
-        const char* ret = MDX_FieldType<field_t>::load(dest.*m_substruct.*m_field, field_data);
+        const char* ret = MDX_Value<field_t>::load(dest.*m_substruct.*m_field, field_data);
 
         if(*field_data == '-' || dest.*m_substruct.*m_field < 0)
             throw(MDX_bad_term("Illegal negative"));
@@ -525,7 +525,7 @@ struct MDX_FieldXtra : public MDX_BaseField /* <obj_t> */
     virtual const char* do_load(void* _dest, const char* field_data) const
     {
         obj_t& dest = *reinterpret_cast<obj_t*>(_dest);
-        return MDX_FieldType<PGESTRING>::load(dest.meta.custom_params, field_data);
+        return MDX_Value<PGESTRING>::load(dest.meta.custom_params, field_data);
     }
 
     virtual bool can_save(const void* _src, const void* ref) const
@@ -540,7 +540,7 @@ struct MDX_FieldXtra : public MDX_BaseField /* <obj_t> */
     {
         const obj_t& src = *reinterpret_cast<const obj_t*>(_src);
 
-        return MDX_FieldType<PGESTRING>::save(out, src.meta.custom_params);
+        return MDX_Value<PGESTRING>::save(out, src.meta.custom_params);
     }
 };
 

@@ -312,7 +312,7 @@ static void s_sprintf_append(std::string& out, const char* format, ...)
 }
 
 template<>
-const char* MDX_FieldType<int>::load(int& dest, const char* field_data)
+const char* MDX_Value<int>::load(int& dest, const char* field_data)
 {
     const char* str_end = s_load_int<int, 1>(dest, field_data);
 
@@ -323,7 +323,7 @@ const char* MDX_FieldType<int>::load(int& dest, const char* field_data)
 }
 
 template<>
-bool MDX_FieldType<int>::save(std::string& out, const int& src)
+bool MDX_Value<int>::save(std::string& out, const int& src)
 {
     out.resize(out.size() + 32);
     char* dest = &out[out.size() - 32];
@@ -336,7 +336,7 @@ bool MDX_FieldType<int>::save(std::string& out, const int& src)
 }
 
 template<>
-const char* MDX_FieldType<unsigned>::load(unsigned& dest, const char* field_data)
+const char* MDX_Value<unsigned>::load(unsigned& dest, const char* field_data)
 {
     const char* str_end = s_load_uint(dest, field_data);
 
@@ -347,7 +347,7 @@ const char* MDX_FieldType<unsigned>::load(unsigned& dest, const char* field_data
 }
 
 template<>
-bool MDX_FieldType<unsigned>::save(std::string& out, const unsigned& src)
+bool MDX_Value<unsigned>::save(std::string& out, const unsigned& src)
 {
     out.resize(out.size() + 32);
     char* dest = &out[out.size() - 32];
@@ -360,7 +360,7 @@ bool MDX_FieldType<unsigned>::save(std::string& out, const unsigned& src)
 }
 
 template<>
-const char* MDX_FieldType<bool>::load(bool& dest, const char* field_data)
+const char* MDX_Value<bool>::load(bool& dest, const char* field_data)
 {
     if(*field_data == '1')
         dest = true;
@@ -373,7 +373,7 @@ const char* MDX_FieldType<bool>::load(bool& dest, const char* field_data)
 }
 
 template<>
-bool MDX_FieldType<bool>::save(std::string& out, const bool& src)
+bool MDX_Value<bool>::save(std::string& out, const bool& src)
 {
     if(src)
         out += '1';
@@ -384,7 +384,7 @@ bool MDX_FieldType<bool>::save(std::string& out, const bool& src)
 }
 
 template<>
-const char* MDX_FieldType<long>::load(long& dest, const char* field_data)
+const char* MDX_Value<long>::load(long& dest, const char* field_data)
 {
     const char* str_end = s_load_int<long, 1>(dest, field_data);
 
@@ -395,7 +395,7 @@ const char* MDX_FieldType<long>::load(long& dest, const char* field_data)
 }
 
 template<>
-bool MDX_FieldType<long>::save(std::string& out, const long& src)
+bool MDX_Value<long>::save(std::string& out, const long& src)
 {
     out.resize(out.size() + 32);
     char* dest = &out[out.size() - 32];
@@ -408,7 +408,7 @@ bool MDX_FieldType<long>::save(std::string& out, const long& src)
 }
 
 template<>
-const char* MDX_FieldType<unsigned long>::load(unsigned long& dest, const char* field_data)
+const char* MDX_Value<unsigned long>::load(unsigned long& dest, const char* field_data)
 {
     const char* str_end = s_load_uint(dest, field_data);
 
@@ -419,7 +419,7 @@ const char* MDX_FieldType<unsigned long>::load(unsigned long& dest, const char* 
 }
 
 template<>
-bool MDX_FieldType<unsigned long>::save(std::string& out, const unsigned long& src)
+bool MDX_Value<unsigned long>::save(std::string& out, const unsigned long& src)
 {
     out.resize(out.size() + 32);
     char* dest = &out[out.size() - 32];
@@ -432,7 +432,7 @@ bool MDX_FieldType<unsigned long>::save(std::string& out, const unsigned long& s
 }
 
 template<>
-const char* MDX_FieldType<long long>::load(long long& dest, const char* field_data)
+const char* MDX_Value<long long>::load(long long& dest, const char* field_data)
 {
     const char* str_end = s_load_int<long long, 1>(dest, field_data);
 
@@ -443,14 +443,14 @@ const char* MDX_FieldType<long long>::load(long long& dest, const char* field_da
 }
 
 template<>
-bool MDX_FieldType<long long>::save(std::string& out, const long long& src)
+bool MDX_Value<long long>::save(std::string& out, const long long& src)
 {
     s_sprintf_append(out, "%lld", src);
     return true;
 }
 
 template<>
-const char* MDX_FieldType<unsigned long long>::load(unsigned long long& dest, const char* field_data)
+const char* MDX_Value<unsigned long long>::load(unsigned long long& dest, const char* field_data)
 {
     const char* str_end = s_load_uint(dest, field_data);
 
@@ -461,14 +461,14 @@ const char* MDX_FieldType<unsigned long long>::load(unsigned long long& dest, co
 }
 
 template<>
-bool MDX_FieldType<unsigned long long>::save(std::string& out, const unsigned long long& src)
+bool MDX_Value<unsigned long long>::save(std::string& out, const unsigned long long& src)
 {
     s_sprintf_append(out, "%llu", src);
     return true;
 }
 
 template<>
-const char* MDX_FieldType<float>::load(float& dest, const char* field_data)
+const char* MDX_Value<float>::load(float& dest, const char* field_data)
 {
     double ret;
     const char* str_end = s_load_double(ret, field_data);
@@ -486,14 +486,14 @@ const char* MDX_FieldType<float>::load(float& dest, const char* field_data)
 }
 
 template<>
-bool MDX_FieldType<float>::save(std::string& out, const float& src)
+bool MDX_Value<float>::save(std::string& out, const float& src)
 {
     s_sprintf_append(out, "%.10g", src);
     return true;
 }
 
 template<>
-const char* MDX_FieldType<double>::load(double& dest, const char* field_data)
+const char* MDX_Value<double>::load(double& dest, const char* field_data)
 {
     const char* str_end = s_load_double(dest, field_data);
 
@@ -504,14 +504,14 @@ const char* MDX_FieldType<double>::load(double& dest, const char* field_data)
 }
 
 template<>
-bool MDX_FieldType<double>::save(std::string& out, const double& src)
+bool MDX_Value<double>::save(std::string& out, const double& src)
 {
     s_sprintf_append(out, "%.10g", src);
     return true;
 }
 
 template<>
-const char* MDX_FieldType<std::string>::load(std::string& dest, const char* field_data)
+const char* MDX_Value<std::string>::load(std::string& dest, const char* field_data)
 {
     dest.clear();
 
@@ -569,7 +569,7 @@ const char* MDX_FieldType<std::string>::load(std::string& dest, const char* fiel
 }
 
 template<>
-bool MDX_FieldType<std::string>::save(std::string& out, const std::string& src)
+bool MDX_Value<std::string>::save(std::string& out, const std::string& src)
 {
     out += '"';
 
@@ -609,26 +609,26 @@ bool MDX_FieldType<std::string>::save(std::string& out, const std::string& src)
 
 #ifdef PGE_FILES_QT
 template<>
-const char* MDX_FieldType<QString>::load(QString& dest, const char* field_data)
+const char* MDX_Value<QString>::load(QString& dest, const char* field_data)
 {
     std::string dest_utf8;
 
-    const char* ret = MDX_FieldType<std::string>::load(dest_utf8, field_data);
+    const char* ret = MDX_Value<std::string>::load(dest_utf8, field_data);
     dest = QString::fromStdString(dest_utf8);
 
     return ret;
 }
 
 template<>
-bool MDX_FieldType<QString>::save(std::string& out, const QString& src)
+bool MDX_Value<QString>::save(std::string& out, const QString& src)
 {
     std::string src_utf8 = src.toStdString();
 
-    return MDX_FieldType<std::string>::save(out, src_utf8);
+    return MDX_Value<std::string>::save(out, src_utf8);
 }
 
 template<>
-const char* MDX_FieldType<QStringList>::load(QStringList& dest, const char* field_data)
+const char* MDX_Value<QStringList>::load(QStringList& dest, const char* field_data)
 {
     dest.clear();
 
@@ -644,7 +644,7 @@ const char* MDX_FieldType<QStringList>::load(QStringList& dest, const char* fiel
     {
         try
         {
-            cur_pos = MDX_FieldType<std::string>::load(got_utf8, cur_pos);
+            cur_pos = MDX_Value<std::string>::load(got_utf8, cur_pos);
             cur_pos = MDX_finish_list_item(cur_pos);
         }
         catch(const MDX_parse_error&)
@@ -667,7 +667,7 @@ const char* MDX_FieldType<QStringList>::load(QStringList& dest, const char* fiel
 }
 
 template<>
-bool MDX_FieldType<QStringList>::save(std::string& out, const QStringList& src)
+bool MDX_Value<QStringList>::save(std::string& out, const QStringList& src)
 {
     if(src.size() == 0)
         return false;
@@ -680,7 +680,7 @@ bool MDX_FieldType<QStringList>::save(std::string& out, const QStringList& src)
     {
         src_i_utf8 = s.toStdString();
 
-        MDX_FieldType<std::string>::save(out, src_i_utf8);
+        MDX_Value<std::string>::save(out, src_i_utf8);
         out.push_back(',');
     }
 
@@ -690,7 +690,7 @@ bool MDX_FieldType<QStringList>::save(std::string& out, const QStringList& src)
 }
 #endif
 
-const char* MDX_FieldType<PGELIST<bool>>::load(PGELIST<bool>& dest, const char* field_data)
+const char* MDX_Value<PGELIST<bool>>::load(PGELIST<bool>& dest, const char* field_data)
 {
     dest.clear();
 
@@ -711,7 +711,7 @@ const char* MDX_FieldType<PGELIST<bool>>::load(PGELIST<bool>& dest, const char* 
     return cur_pos;
 }
 
-bool MDX_FieldType<PGELIST<bool>>::save(std::string& out, const PGELIST<bool>& src)
+bool MDX_Value<PGELIST<bool>>::save(std::string& out, const PGELIST<bool>& src)
 {
     for(bool i : src)
         out += (i) ? '1' : '0';

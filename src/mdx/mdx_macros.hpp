@@ -69,15 +69,15 @@ struct MDX_Object<OBJ_T> : MDX_BaseObject \
 }; \
 
 #define MDX_ENABLE_SUB_LIST(OBJ_T) template<> \
-struct MDX_FieldType<PGELIST<OBJ_T>> : public MDX_FieldType_ObjectList<MDX_Object<OBJ_T>> {}; \
+struct MDX_Value<PGELIST<OBJ_T>> : public MDX_Value_ObjectList<MDX_Object<OBJ_T>> {}; \
 \
 template<> \
-const MDX_Object<OBJ_T> MDX_FieldType_ObjectList<MDX_Object<OBJ_T>>::s_obj_loader{}; \
+const MDX_Object<OBJ_T> MDX_Value_ObjectList<MDX_Object<OBJ_T>>::s_obj_loader{}; \
 
 #define MDX_ENABLE_SUB_STRUCT(OBJ_T) template<> \
-struct MDX_FieldType<OBJ_T> : public MDX_FieldType_Object<MDX_Object<OBJ_T>> {}; \
+struct MDX_Value<OBJ_T> : public MDX_Value_Object<MDX_Object<OBJ_T>> {}; \
 \
 template<> \
-const MDX_Object<OBJ_T> MDX_FieldType_Object<MDX_Object<OBJ_T>>::s_obj_loader{} \
+const MDX_Object<OBJ_T> MDX_Value_Object<MDX_Object<OBJ_T>>::s_obj_loader{} \
 
 #endif // #ifndef MDX_MACROS_HPP

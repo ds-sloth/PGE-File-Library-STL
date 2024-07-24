@@ -220,7 +220,7 @@ static const char* MDX_LevelEvent_load_controls(LevelSMBX64Event& event, const c
 {
     PGELIST<bool> controls;
 
-    const char* next = MDX_FieldType<PGELIST<bool>>::load(controls, field_data);
+    const char* next = MDX_Value<PGELIST<bool>>::load(controls, field_data);
 
 #ifndef PGE_FILES_QT
     controls.resize(12);
@@ -279,14 +279,14 @@ static bool MDX_LevelEvent_save_controls(std::string& out, const LevelSMBX64Even
     if(!addArray)
         return false;
 
-    return MDX_FieldType<PGELIST<bool>>::save(out, controls);
+    return MDX_Value<PGELIST<bool>>::save(out, controls);
 }
 
 static const char* MDX_LevelEvent_load_autoscroll_path(LevelEvent_Sets& set, const char* field_data)
 {
     PGELIST<long> arr;
 
-    const char* next = MDX_FieldType<PGELIST<long>>::load(arr, field_data);
+    const char* next = MDX_Value<PGELIST<long>>::load(arr, field_data);
 
     if(arr.size() % 4)
         throw MDX_bad_term("Invalid Section Autoscroll path data contains non-multiple 4 entries");
@@ -381,7 +381,7 @@ static inline const char* MDX_LevelEvent_load_legacy_SM_SB(LevelSMBX64Event& eve
 {
     PGELIST<std::string> arr;
 
-    const char* next = MDX_FieldType<PGELIST<std::string>>::load(arr, field_data);
+    const char* next = MDX_Value<PGELIST<std::string>>::load(arr, field_data);
 
     bool ignore_me = (event.sets.size() >= 1 && !event.sets[0]._pgefl_mdx_priv_legacy_parse);
 
@@ -389,7 +389,7 @@ static inline const char* MDX_LevelEvent_load_legacy_SM_SB(LevelSMBX64Event& eve
     {
         // validate input even if it will be ignored
         long got;
-        const char* end = MDX_FieldType<long>::load(got, arr[q].c_str());
+        const char* end = MDX_Value<long>::load(got, arr[q].c_str());
         if(end != arr[q].c_str() + arr[q].size())
             throw MDX_unexpected_character(*end);
 
@@ -431,7 +431,7 @@ static const char* MDX_LevelEvent_load_legacy_SS(LevelSMBX64Event& event, const 
 {
     PGELIST<std::string> arr;
 
-    const char* next = MDX_FieldType<PGELIST<std::string>>::load(arr, field_data);
+    const char* next = MDX_Value<PGELIST<std::string>>::load(arr, field_data);
 
     bool ignore_me = (event.sets.size() >= 1 && !event.sets[0]._pgefl_mdx_priv_legacy_parse);
 
@@ -443,7 +443,7 @@ static const char* MDX_LevelEvent_load_legacy_SS(LevelSMBX64Event& event, const 
 
         for(int i = 0; i < 4; i++)
         {
-            next = MDX_FieldType<long>::load(got[i], next);
+            next = MDX_Value<long>::load(got[i], next);
 
             if(i == 3)
                 continue;
@@ -550,10 +550,10 @@ MDX_SETUP_OBJECT(LevelScript,
 );
 
 template<>
-const char* MDX_FieldType<LevelItemSetup38A::ItemType>::load(LevelItemSetup38A::ItemType& dest, const char* field_data)
+const char* MDX_Value<LevelItemSetup38A::ItemType>::load(LevelItemSetup38A::ItemType& dest, const char* field_data)
 {
     int got = 0;
-    const char* ret = MDX_FieldType<int>::load(got, field_data);
+    const char* ret = MDX_Value<int>::load(got, field_data);
 
     if(got < LevelItemSetup38A::UNKNOWN || got >= LevelItemSetup38A::ITEM_TYPE_MAX)
         throw MDX_bad_term("Bad type");
@@ -564,21 +564,21 @@ const char* MDX_FieldType<LevelItemSetup38A::ItemType>::load(LevelItemSetup38A::
 }
 
 template<>
-bool MDX_FieldType<LevelItemSetup38A::ItemType>::save(std::string& out, const LevelItemSetup38A::ItemType& src)
+bool MDX_Value<LevelItemSetup38A::ItemType>::save(std::string& out, const LevelItemSetup38A::ItemType& src)
 {
-    return MDX_FieldType<int>::save(out, (int)src);
+    return MDX_Value<int>::save(out, (int)src);
 }
 
 template<>
-const char* MDX_FieldType<LevelItemSetup38A::Entry>::load(LevelItemSetup38A::Entry& e, const char* field_data)
+const char* MDX_Value<LevelItemSetup38A::Entry>::load(LevelItemSetup38A::Entry& e, const char* field_data)
 {
     std::string got;
-    const char* ret = MDX_FieldType<std::string>::load(got, field_data);
+    const char* ret = MDX_Value<std::string>::load(got, field_data);
 
     const char* const str_data_start = got.c_str();
     const char* str_data = str_data_start;
 
-    str_data = MDX_FieldType<decltype(LevelItemSetup38A::Entry::key)>::load(e.key, str_data);
+    str_data = MDX_Value<decltype(LevelItemSetup38A::Entry::key)>::load(e.key, str_data);
 
     if(e.key < 0 || *str_data_start == '-')
         throw MDX_bad_term("Negative value");
@@ -588,7 +588,7 @@ const char* MDX_FieldType<LevelItemSetup38A::Entry>::load(LevelItemSetup38A::Ent
 
     str_data++;
 
-    str_data = MDX_FieldType<decltype(LevelItemSetup38A::Entry::value)>::load(e.value, str_data);
+    str_data = MDX_Value<decltype(LevelItemSetup38A::Entry::value)>::load(e.value, str_data);
 
     if((size_t)(str_data - str_data_start) != got.size())
         throw MDX_missing_delimiter('"');
@@ -597,7 +597,7 @@ const char* MDX_FieldType<LevelItemSetup38A::Entry>::load(LevelItemSetup38A::Ent
 }
 
 template<>
-bool MDX_FieldType<LevelItemSetup38A::Entry>::save(std::string& out, const LevelItemSetup38A::Entry& src)
+bool MDX_Value<LevelItemSetup38A::Entry>::save(std::string& out, const LevelItemSetup38A::Entry& src)
 {
     // For total safety, we'd make a substring, store to those, then output that. But we know this won't include any escape chars, so we'll do it manually to avoid extra allocs.
 #if 0
@@ -607,12 +607,12 @@ bool MDX_FieldType<LevelItemSetup38A::Entry>::save(std::string& out, const Level
     std::string& sub = out;
 #endif
 
-    MDX_FieldType<decltype(LevelItemSetup38A::Entry::key)>::save(sub, src.key);
+    MDX_Value<decltype(LevelItemSetup38A::Entry::key)>::save(sub, src.key);
     sub += '=';
-    MDX_FieldType<decltype(LevelItemSetup38A::Entry::value)>::save(sub, src.value);
+    MDX_Value<decltype(LevelItemSetup38A::Entry::value)>::save(sub, src.value);
 
 #if 0
-    return MDX_FieldType<std::string>::save(out, sub);
+    return MDX_Value<std::string>::save(out, sub);
 #else
     out += '"';
     return true;
