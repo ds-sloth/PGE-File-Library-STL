@@ -35,73 +35,11 @@
 
 #include "pge_file_lib_globs.h"
 
-/*! \file mdx_field_impl.cpp
+/*! \file mdx_value.cpp
  *
- *  \brief Contains code to load specific field types
+ *  \brief Contains code to save/load specific values
  *
  */
-
-MDX_BaseField::MDX_BaseField(MDX_BaseObject* parent, const char* field_name, SaveMode save_mode)
-    : m_save_mode(save_mode), m_field_name(field_name)
-{
-    parent->m_fields.push_back(this);
-}
-
-const char* MDX_skip_term(const char* line)
-{
-    bool escape = false;
-    const char* tag_begin = line;
-    const char* tag_end = nullptr;
-
-    try
-    {
-        while(true)
-        {
-            if(*line == '\0')
-            {
-                if(tag_end)
-                    throw MDX_missing_delimiter(';');
-                else
-                    throw MDX_missing_delimiter(':');
-            }
-            else if(escape)
-            {
-                // ignore character
-                escape = false;
-            }
-            else if(*line == ';')
-            {
-                if(!tag_end)
-                    throw MDX_missing_delimiter(':');
-                else
-                    return line + 1;
-            }
-            else if(*line == ':')
-            {
-                if(!tag_end)
-                    tag_end = line;
-                else
-                    throw MDX_unexpected_character(':');
-            }
-            else if(*line == '\\')
-            {
-                if(!tag_end)
-                    throw MDX_unexpected_character('\\');
-                else
-                    escape = true;
-            }
-
-            line++;
-        }
-    }
-    catch(...)
-    {
-        if(tag_end)
-            std::throw_with_nested(MDX_bad_field(tag_begin, tag_end - tag_begin));
-        else
-            std::throw_with_nested(MDX_bad_field(tag_begin, line - tag_begin));
-    }
-}
 
 template<class uint_t>
 static const char* s_load_uint(uint_t& dest, const char* field_data)

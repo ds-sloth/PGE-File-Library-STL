@@ -25,41 +25,24 @@
  */
 
 #pragma once
-#ifndef MDX_BASE_FIELD_HPP
-#define MDX_BASE_FIELD_HPP
+#ifndef MDX_FIELD_H
+#define MDX_FIELD_H
 
 #include "pge_file_lib_globs.h"
 #include "mdx/common/mdx_exception.h"
+#include "mdx/common/mdx_value.h"
 
 #include <string>
 
-/*! \file mdx_base_field.hpp
+/*! \file mdx_field.h
  *
- *  \brief Contains templates for individual fields
+ *  \brief Code to represent single fields (marker:value pairs)
  *
  * This is a new implementation but supports precisely the same format as PGE-X
  *
  */
 
-const char* MDX_skip_term(const char* line);
-
-inline const char* MDX_finish_term(const char* line)
-{
-    if(*line != ';')
-        throw MDX_missing_delimiter(';');
-
-    return line + 1;
-}
-
-inline const char* MDX_finish_list_item(const char* line)
-{
-    if(*line == ']')
-        return line;
-    else if(*line == ',')
-        return line + 1;
-    else
-        throw MDX_missing_delimiter(',');
-}
+const char* MDX_skip_field(const char* line);
 
 struct MDX_BaseObject;
 
@@ -87,295 +70,17 @@ protected:
 
 public:
     /* attempts to match the field name. if successful, returns true and modifies the load pointer. */
-    inline bool try_load(void* dest, const char*& field_name) const
-    {
-        int i;
-
-        for(i = 0; m_field_name[i] != '\0'; i++)
-        {
-            if(field_name[i] != m_field_name[i])
-                return false;
-        }
-
-        if(field_name[i] == ':')
-        {
-            try
-            {
-                field_name = MDX_finish_term(do_load(dest, field_name + i + 1));
-            }
-            catch(const MDX_parse_error&)
-            {
-                std::throw_with_nested(MDX_bad_field(m_field_name));
-            }
-            return true;
-        }
-
-        return false;
-    }
+    bool try_load(void* dest, const char*& field_name) const;
 
     /* confirms whether the field is non-default, and writes it to out if so. */
-    inline bool try_save(std::string& out, const void* src, const void* ref) const
-    {
-        if(m_save_mode != SaveMode::no_skip && !can_save(src, ref))
-            return false;
-
-        auto old_size = out.size();
-
-        out += m_field_name;
-        out += ':';
-
-        bool do_skip = !do_save(out, src);
-        if(do_skip)
-        {
-            out.resize(old_size);
-            return false;
-        }
-
-        out += ';';
-
-        return true;
-    }
+    bool try_save(std::string& out, const void* src, const void* ref) const;
 };
-
-template<class field_t>
-struct MDX_Value
-{
-    static const char* load(field_t& dest, const char* field_data);
-
-    /* tries to save the field, and returns false (restoring out to its original state) if this is impossible */
-    static bool save(std::string& out, const field_t& src);
-
-    /* checks if src matches a reference (which is assumed to be a default value) */
-    static bool is_ref(const field_t& src, const field_t& reference)
-    {
-        return src == reference;
-    }
-};
-
-template<class subtype_t>
-struct MDX_Value<PGELIST<subtype_t>>
-{
-    static const char* load(PGELIST<subtype_t>& dest, const char* field_data);
-    static bool save(std::string& out, const PGELIST<subtype_t>& src);
-    static bool is_ref(const PGELIST<subtype_t>& src, const PGELIST<subtype_t>& /*reference*/)
-    {
-        return src.size() == 0;
-    }
-};
-
-template<>
-struct MDX_Value<PGELIST<bool>>
-{
-    static const char* load(PGELIST<bool>& dest, const char* field_data);
-    static bool save(std::string& out, const PGELIST<bool>& src);
-    static bool is_ref(const PGELIST<bool>& src, const PGELIST<bool>& /*reference*/)
-    {
-        return src.size() == 0;
-    }
-};
-
-template<class subtype_t>
-const char* MDX_Value<PGELIST<subtype_t>>::load(PGELIST<subtype_t>& dest, const char* field_data)
-{
-    dest.clear();
-
-    const char* cur_pos = field_data;
-    if(*cur_pos != '[')
-        throw MDX_missing_delimiter('[');
-
-    cur_pos++;
-
-    while(*cur_pos != ']' && *cur_pos != '\0')
-    {
-#ifndef PGE_FILES_QT
-        dest.emplace_back();
-#else
-        dest.push_back(subtype_t());
-#endif
-
-        try
-        {
-            cur_pos = MDX_Value<subtype_t>::load(dest.back(), cur_pos);
-            cur_pos = MDX_finish_list_item(cur_pos);
-        }
-        catch(const MDX_parse_error&)
-        {
-            std::throw_with_nested(MDX_bad_array(dest.size()));
-        }
-    }
-
-    if(*(cur_pos - 1) == ',')
-        throw MDX_unexpected_character(']');
-
-    if(*cur_pos != ']')
-        throw MDX_missing_delimiter(']');
-
-    cur_pos++;
-
-    return cur_pos;
-}
-
-template<class subtype_t>
-bool MDX_Value<PGELIST<subtype_t>>::save(std::string& out, const PGELIST<subtype_t>& src)
-{
-    out.push_back('[');
-
-    for(const subtype_t& s : src)
-    {
-        if(MDX_Value<subtype_t>::save(out, s))
-            out.push_back(',');
-    }
-
-    // close the array
-    if(out.back() == ',')
-    {
-        out.back() = ']';
-        return true;
-    }
-    // nothing was written, remove the '['
-    else
-    {
-        out.pop_back();
-        return false;
-    }
-}
-
-template<class obj_loader_t>
-struct MDX_Value_Object
-{
-    static const obj_loader_t s_obj_loader;
-    static const char* load(typename obj_loader_t::obj_t& dest, const char* field_data);
-    static bool save(std::string& out, const typename obj_loader_t::obj_t& src);
-    static bool is_ref(const PGELIST<bool>& src, const PGELIST<bool>& /*reference*/)
-    {
-        return false;
-    }
-};
-
-template<class obj_loader_t>
-const char* MDX_Value_Object<obj_loader_t>::load(typename obj_loader_t::obj_t& dest, const char* field_data)
-{
-    dest = typename obj_loader_t::obj_t();
-
-    std::string object_string;
-
-    const char* next = MDX_Value<std::string>::load(object_string, field_data);
-
-    s_obj_loader.load_object(&dest, object_string.c_str());
-
-    return next;
-}
-
-template<class obj_loader_t>
-bool MDX_Value_Object<obj_loader_t>::save(std::string& out, const typename obj_loader_t::obj_t& src)
-{
-    const typename obj_loader_t::obj_t ref;
-    std::string object_string;
-
-    if(!s_obj_loader.save_object(object_string, &src, &ref))
-        return false;
-
-    MDX_Value<std::string>::save(out, object_string);
-
-    return true;
-}
-
-template<class obj_loader_t>
-struct MDX_Value_ObjectList
-{
-    static const obj_loader_t s_obj_loader;
-    static const char* load(PGELIST<typename obj_loader_t::obj_t>& dest, const char* field_data);
-    static bool save(std::string& out, const PGELIST<typename obj_loader_t::obj_t>& src);
-    static bool is_ref(const PGELIST<typename obj_loader_t::obj_t>& src, const PGELIST<typename obj_loader_t::obj_t>& /*reference*/)
-    {
-        return (src.size() == 0);
-    }
-};
-
-template<class obj_loader_t>
-const char* MDX_Value_ObjectList<obj_loader_t>::load(PGELIST<typename obj_loader_t::obj_t>& dest, const char* field_data)
-{
-    dest.clear();
-
-    const char* cur_pos = field_data;
-    if(*cur_pos != '[')
-        throw MDX_missing_delimiter('[');
-
-    cur_pos++;
-
-    std::string object_string;
-
-    while(*cur_pos != ']' && *cur_pos != '\0')
-    {
-#ifndef PGE_FILES_QT
-        dest.emplace_back();
-#else
-        dest.push_back(typename obj_loader_t::obj_t());
-#endif
-
-        try
-        {
-            cur_pos = MDX_Value<std::string>::load(object_string, cur_pos);
-            cur_pos = MDX_finish_list_item(cur_pos);
-
-            s_obj_loader.load_object(&dest.back(), object_string.c_str());
-        }
-        catch(const MDX_parse_error&)
-        {
-            std::throw_with_nested(MDX_bad_array(dest.size()));
-        }
-    }
-
-    if(*(cur_pos - 1) == ',')
-        throw MDX_unexpected_character(']');
-
-    if(*cur_pos != ']')
-        throw MDX_missing_delimiter(']');
-
-    cur_pos++;
-
-    return cur_pos;
-}
-
-template<class obj_loader_t>
-bool MDX_Value_ObjectList<obj_loader_t>::save(std::string& out, const PGELIST<typename obj_loader_t::obj_t>& src)
-{
-    std::string object_string;
-    typename obj_loader_t::obj_t ref;
-
-    out.push_back('[');
-
-    for(const auto& s : src)
-    {
-        object_string.clear();
-
-        if(s_obj_loader.save_object(object_string, &s, &ref))
-        {
-            MDX_Value<std::string>::save(out, object_string);
-
-            out.push_back(',');
-        }
-    }
-
-    // close the array
-    if(out.back() == ',')
-    {
-        out.back() = ']';
-        return true;
-    }
-    // nothing was written, remove the '['
-    else
-    {
-        out.pop_back();
-        return false;
-    }
-}
 
 template<class obj_t, class field_t>
-struct MDX_Field : public MDX_BaseField /* <obj_t> */
+struct MDX_Field : public MDX_BaseField
 {
-    using MDX_BaseField/*<obj_t>*/::m_field_name;
-    using SaveMode = typename MDX_BaseField/*<obj_t>*/::SaveMode;
+    using MDX_BaseField::m_field_name;
+    using SaveMode = typename MDX_BaseField::SaveMode;
 
     field_t obj_t::* const m_field = nullptr;
 
@@ -425,7 +130,7 @@ struct MDX_NonNegField : public MDX_Field<obj_t, field_t>
 };
 
 template<class obj_t>
-struct MDX_UniqueField : public MDX_BaseField /* <obj_t> */
+struct MDX_UniqueField : public MDX_BaseField
 {
     using MDX_BaseField::m_field_name;
 
@@ -517,7 +222,7 @@ struct MDX_NonNegNestedField : public MDX_NestedField<obj_t, substruct_t, field_
 };
 
 template<class obj_t>
-struct MDX_FieldXtra : public MDX_BaseField /* <obj_t> */
+struct MDX_FieldXtra : public MDX_BaseField
 {
     MDX_FieldXtra(MDX_BaseObject* parent)
         : MDX_BaseField(parent, "XTRA") {}
@@ -544,4 +249,4 @@ struct MDX_FieldXtra : public MDX_BaseField /* <obj_t> */
     }
 };
 
-#endif // #ifndef MDX_BASE_FIELD_HPP
+#endif // #ifndef MDX_FIELD_H

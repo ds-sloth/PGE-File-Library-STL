@@ -74,7 +74,7 @@ protected:
                 // couldn't find field
                 if(try_field == next_field)
                 {
-                    cur_data = MDX_skip_term(cur_data);
+                    cur_data = MDX_skip_field(cur_data);
                     break;
                 }
             }
