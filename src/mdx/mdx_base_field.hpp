@@ -61,6 +61,8 @@ inline const char* MDX_finish_list_item(const char* line)
         throw MDX_missing_delimiter(',');
 }
 
+struct MDX_BaseObject;
+
 struct MDX_BaseField
 {
 public:
@@ -72,10 +74,9 @@ public:
     } m_save_mode = SaveMode::normal;
 
 protected:
-    const char* m_field_name;
+    const char* const m_field_name;
 
-    MDX_BaseField(const char* field_name, SaveMode save_mode = SaveMode::normal)
-        : m_save_mode(save_mode), m_field_name(field_name) {}
+    MDX_BaseField(MDX_BaseObject* parent, const char* field_name, SaveMode save_mode = SaveMode::normal);
 
     /* attempts to load the matched field to the destination, and returns the new load pointer following the ';'. */
     virtual const char* do_load(void* dest, const char* field_data) const = 0;
@@ -376,14 +377,10 @@ struct MDX_Field : public MDX_BaseField /* <obj_t> */
     using MDX_BaseField/*<obj_t>*/::m_field_name;
     using SaveMode = typename MDX_BaseField/*<obj_t>*/::SaveMode;
 
-    field_t obj_t::* m_field = nullptr;
+    field_t obj_t::* const m_field = nullptr;
 
-    template<class parent_t>
-    MDX_Field(parent_t* parent, const char* field_name, field_t obj_t::* field, SaveMode save_mode = SaveMode::normal)
-        : MDX_BaseField/*<obj_t>*/(field_name, save_mode), m_field(field)
-    {
-        parent->m_fields.push_back(this);
-    }
+    MDX_Field(MDX_BaseObject* parent, const char* field_name, field_t obj_t::* field, SaveMode save_mode = SaveMode::normal)
+        : MDX_BaseField(parent, field_name, save_mode), m_field(field) {}
 
     virtual const char* do_load(void* _dest, const char* field_data) const
     {
@@ -438,12 +435,8 @@ struct MDX_UniqueField : public MDX_BaseField /* <obj_t> */
     load_func_t m_load_func = nullptr;
     save_func_t m_save_func = nullptr;
 
-    template<class parent_t>
-    MDX_UniqueField(parent_t* parent, const char* field_name, load_func_t load_func, save_func_t save_func)
-        : MDX_BaseField/*<obj_t>*/(field_name), m_load_func(load_func), m_save_func(save_func)
-    {
-        parent->m_fields.push_back(this);
-    }
+    MDX_UniqueField(MDX_BaseObject* parent, const char* field_name, load_func_t load_func, save_func_t save_func)
+        : MDX_BaseField(parent, field_name), m_load_func(load_func), m_save_func(save_func) {}
 
     virtual const char* do_load(void* _dest, const char* field_data) const
     {
@@ -470,19 +463,15 @@ struct MDX_UniqueField : public MDX_BaseField /* <obj_t> */
 };
 
 template<class obj_t, class substruct_t, class field_t>
-struct MDX_NestedField : public MDX_BaseField /* <obj_t> */
+struct MDX_NestedField : public MDX_BaseField
 {
     using MDX_BaseField::m_field_name;
 
-    substruct_t obj_t::* m_substruct = nullptr;
-    field_t substruct_t::* m_field = nullptr;
+    substruct_t obj_t::* const m_substruct = nullptr;
+    field_t substruct_t::* const m_field = nullptr;
 
-    template<class parent_t>
-    MDX_NestedField(parent_t* parent, const char* field_name, substruct_t obj_t::* substruct, field_t substruct_t::* field)
-        : MDX_BaseField/*<obj_t>*/(field_name), m_substruct(substruct), m_field(field)
-    {
-        parent->m_fields.push_back(this);
-    }
+    MDX_NestedField(MDX_BaseObject* parent, const char* field_name, substruct_t obj_t::* substruct, field_t substruct_t::* field)
+        : MDX_BaseField(parent, field_name), m_substruct(substruct), m_field(field) {}
 
     virtual const char* do_load(void* _dest, const char* field_data) const
     {
@@ -530,12 +519,8 @@ struct MDX_NonNegNestedField : public MDX_NestedField<obj_t, substruct_t, field_
 template<class obj_t>
 struct MDX_FieldXtra : public MDX_BaseField /* <obj_t> */
 {
-    template<class parent_t>
-    MDX_FieldXtra(parent_t* parent)
-        : MDX_BaseField/*<obj_t>*/("XTRA")
-    {
-        parent->m_fields.push_back(this);
-    }
+    MDX_FieldXtra(MDX_BaseObject* parent)
+        : MDX_BaseField(parent, "XTRA") {}
 
     virtual const char* do_load(void* _dest, const char* field_data) const
     {

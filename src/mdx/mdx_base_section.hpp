@@ -81,52 +81,28 @@ inline bool MDX_line_is_section_end(const std::string& cur_line, const char* sec
     return true;
 }
 
-template<class load_callbacks_t, class save_callbacks_t>
 struct MDX_BaseSection
 {
-    virtual bool try_load(const load_callbacks_t& table, PGE_FileFormats_misc::TextInput& inf, std::string& cur_line) = 0;
-    virtual void do_save(const save_callbacks_t& table, PGE_FileFormats_misc::TextOutput& outf, std::string& out_buffer) = 0;
-    virtual void reset() {};
-};
+protected:
 
-template<class load_callbacks_t, class save_callbacks_t, class _obj_t, bool t_combine_objects = false>
-struct MDX_Section : public MDX_Object<_obj_t>, public MDX_BaseSection<load_callbacks_t, save_callbacks_t>
-{
-    using MDX_Object<_obj_t>::load_object;
-    using MDX_Object<_obj_t>::save_object;
-    using obj_t = _obj_t;
+    const char* const m_section_name = "";
+    const MDX_BaseObject& m_obj_loader;
+    void* const m_obj_ptr;
+    const void* const m_ref_ptr;
+    bool m_combine_objects = false;
 
-private:
-    // private fields for load-time
-    obj_t m_obj;
+    MDX_BaseSection(const char* section_name, bool combine_objects, const MDX_BaseObject& obj_loader, void* obj_ptr, const void* ref_ptr) : m_section_name(section_name), m_obj_loader(obj_loader), m_obj_ptr(obj_ptr), m_ref_ptr(ref_ptr), m_combine_objects(combine_objects) {}
 
-    using load_callback_t = typename load_callbacks_t::template callback<obj_t>;
-    using save_callback_t = typename save_callbacks_t::template callback<obj_t>;
+    virtual bool has_load_callback(const void* load_callbacks_table) const = 0;
+    virtual bool has_save_callback(const void* save_callbacks_table) const = 0;
 
-    typedef load_callback_t load_callbacks_t::* load_callback_ptr_t;
-    typedef save_callback_t save_callbacks_t::* save_callback_ptr_t;
-
-    const char* m_section_name = "";
-
-    load_callback_ptr_t m_load_callback = nullptr;
-    save_callback_ptr_t m_save_callback = nullptr;
+    virtual bool load_callback(const void* load_callbacks_table) = 0;
+    virtual bool save_callback(const void* save_callbacks_table, size_t index) = 0;
 
 public:
-    template<class parent_t>
-    MDX_Section(parent_t* parent, const char* section_name, load_callback_ptr_t load_callback, save_callback_ptr_t save_callback)
-        : m_section_name(section_name), m_load_callback(load_callback), m_save_callback(save_callback)
-    {
-        parent->m_sections.push_back(this);
-    }
-
-    virtual void reset()
-    {
-        if(t_combine_objects)
-            m_obj = obj_t();
-    }
 
     /* attempts to match the field name. if successful, returns true and leaves the file pointer following the end of the section. */
-    virtual bool try_load(const load_callbacks_t& cb, PGE_FileFormats_misc::TextInput& inf, std::string& cur_line)
+    bool try_load(const void* cb, PGE_FileFormats_misc::TextInput& inf, std::string& cur_line)
     {
 #ifdef PGE_FILES_QT
         QString utf16_cur_line;
@@ -137,9 +113,7 @@ public:
             return false;
 
         // skip if there is no callback registered
-        const load_callback_t callback = cb.*m_load_callback;
-
-        if(!callback)
+        if(!has_load_callback(cb))
             return false;
 
         while(true)
@@ -164,14 +138,14 @@ public:
             // ordinary line
             else if(*(cur_line.end() - 1) == ';')
             {
-                if(!t_combine_objects)
-                    m_obj = obj_t();
+                if(!m_combine_objects)
+                    reset();
 
-                load_object(&m_obj, cur_line.c_str());
+                m_obj_loader.load_object(m_obj_ptr, cur_line.c_str());
 
-                if(!t_combine_objects)
+                if(!m_combine_objects)
                 {
-                    if(!callback(cb.userdata, m_obj))
+                    if(!load_callback(cb))
                     {
                         MDX_skip_section(inf, cur_line, m_section_name);
                         return true;
@@ -181,8 +155,8 @@ public:
             // section end line
             else if(MDX_line_is_section_end(cur_line, m_section_name))
             {
-                if(t_combine_objects)
-                    callback(cb.userdata, m_obj);
+                if(m_combine_objects)
+                    load_callback(cb);
 
                 return true;
             }
@@ -192,19 +166,15 @@ public:
         }
     }
 
-    virtual void do_save(const save_callbacks_t& cb, PGE_FileFormats_misc::TextOutput& outf, std::string& out_buffer)
+    void do_save(const void* cb, PGE_FileFormats_misc::TextOutput& outf, std::string& out_buffer)
     {
 #ifdef PGE_FILES_QT
         QString utf16_out;
 #endif
 
         // skip if there is no callback registered
-        const save_callback_t callback = cb.*m_save_callback;
-
-        if(!callback)
+        if(!has_save_callback(cb))
             return;
-
-        _obj_t ref;
 
         size_t out_buffer_size_pre = out_buffer.size();
         bool restore = true;
@@ -212,9 +182,9 @@ public:
         out_buffer += m_section_name;
         out_buffer += '\n';
 
-        for(size_t index = 0; callback(cb.userdata, m_obj, index); index++)
+        for(size_t index = 0; save_callback(cb, index); index++)
         {
-            if(!save_object(out_buffer, &m_obj, &ref))
+            if(!m_obj_loader.save_object(out_buffer, m_obj_ptr, m_ref_ptr))
                 continue;
 
             out_buffer += '\n';
@@ -247,6 +217,69 @@ public:
 #endif
             out_buffer.clear();
         }
+    }
+
+public:
+    virtual void reset() = 0;
+};
+
+template<class load_callbacks_t, class save_callbacks_t, class _obj_t>
+struct MDX_Section : public MDX_BaseSection
+{
+    using obj_t = _obj_t;
+
+private:
+    // private fields for load-time
+    MDX_Object<_obj_t> m_obj_loader;
+
+    obj_t m_obj{};
+    const obj_t m_ref{};
+
+    using load_callback_t = typename load_callbacks_t::template callback<obj_t>;
+    using save_callback_t = typename save_callbacks_t::template callback<obj_t>;
+
+    typedef load_callback_t load_callbacks_t::* const load_callback_ptr_t;
+    typedef save_callback_t save_callbacks_t::* const save_callback_ptr_t;
+
+    load_callback_ptr_t m_load_callback = nullptr;
+    save_callback_ptr_t m_save_callback = nullptr;
+
+protected:
+    virtual bool has_load_callback(const void* load_callbacks_table) const
+    {
+        const auto& cb = *reinterpret_cast<const load_callbacks_t*>(load_callbacks_table);
+        return cb.*m_load_callback;
+    }
+
+    virtual bool has_save_callback(const void* save_callbacks_table) const
+    {
+        const auto& cb = *reinterpret_cast<const save_callbacks_t*>(save_callbacks_table);
+        return cb.*m_save_callback;
+    }
+
+    virtual bool load_callback(const void* load_callbacks_table)
+    {
+        const auto& cb = *reinterpret_cast<const load_callbacks_t*>(load_callbacks_table);
+        return (cb.*m_load_callback)(cb.userdata, m_obj);
+    }
+
+    virtual bool save_callback(const void* save_callbacks_table, size_t index)
+    {
+        const auto& cb = *reinterpret_cast<const save_callbacks_t*>(save_callbacks_table);
+        return (cb.*m_save_callback)(cb.userdata, m_obj, index);
+    }
+
+public:
+    template<class parent_t>
+    MDX_Section(parent_t* parent, const char* section_name, bool combine_objects, load_callback_ptr_t load_callback, save_callback_ptr_t save_callback)
+        : MDX_BaseSection(section_name, combine_objects, m_obj_loader, &m_obj, &m_ref), m_load_callback(load_callback), m_save_callback(save_callback)
+    {
+        parent->m_sections.push_back(this);
+    }
+
+    virtual void reset()
+    {
+        m_obj = obj_t();
     }
 };
 

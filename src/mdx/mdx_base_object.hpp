@@ -43,6 +43,7 @@ struct MDX_BaseObject
 {
     template<class obj_loader_t> friend struct MDX_FieldType_ObjectList;
     template<class obj_loader_t> friend struct MDX_FieldType_Object;
+    friend struct MDX_BaseSection;
 
     std::vector<MDX_BaseField*> m_fields;
 

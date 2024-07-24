@@ -52,9 +52,8 @@ struct MDX_File
     using load_callbacks_t = _load_callbacks_t;
     using save_callbacks_t = _save_callbacks_t;
     template<class obj_t> using section = MDX_Section<load_callbacks_t, save_callbacks_t, obj_t>;
-    template<class obj_t> using section_single = MDX_Section<load_callbacks_t, save_callbacks_t, obj_t, true>;
 
-    std::vector<MDX_BaseSection<load_callbacks_t, save_callbacks_t>*> m_sections;
+    std::vector<MDX_BaseSection*> m_sections;
 
     bool load_file(PGE_FileFormats_misc::TextInput& inf, const load_callbacks_t& cb)
     {
@@ -83,7 +82,7 @@ struct MDX_File
                 bool handled = false;
                 for(auto* section : m_sections)
                 {
-                    if(section->try_load(cb, inf, cur_line))
+                    if(section->try_load(&cb, inf, cur_line))
                     {
                         handled = true;
                         break;
@@ -148,7 +147,7 @@ struct MDX_File
         try
         {
             for(auto* section : m_sections)
-                section->do_save(cb, outf, out_buffer);
+                section->do_save(&cb, outf, out_buffer);
         }
         catch(const std::exception& e)
         {

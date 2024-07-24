@@ -30,6 +30,7 @@
 #include <cmath>
 #include <cstdarg>
 #include "mdx/mdx_base_field.hpp"
+#include "mdx/mdx_base_object.hpp"
 #include "mdx/milo_yip/itoa.h"
 
 #include "pge_file_lib_globs.h"
@@ -39,6 +40,12 @@
  *  \brief Contains code to load specific field types
  *
  */
+
+MDX_BaseField::MDX_BaseField(MDX_BaseObject* parent, const char* field_name, SaveMode save_mode)
+    : m_save_mode(save_mode), m_field_name(field_name)
+{
+    parent->m_fields.push_back(this);
+}
 
 const char* MDX_skip_term(const char* line)
 {
