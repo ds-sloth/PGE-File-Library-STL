@@ -24,50 +24,41 @@
  * SOFTWARE.
  */
 
-#pragma once
-#ifndef MDX_VALUE_H
-#define MDX_VALUE_H
 
-#include <string>
-
-#include "pge_file_lib_globs.h"
-
-/*! \file mdx_value.h
+/*! \file mdx_value_boollist.cpp
  *
- *  \brief Code to support saving/loading values
- *
- * This is a new implementation but supports precisely the same format as PGE-X
+ *  \brief Contains code to save/load the special boolean list
  *
  */
 
-template<class value_t>
-struct MDX_Value
+#include "mdx/common/mdx_value.h"
+#include "mdx/common/mdx_exception.h"
+
+const char* MDX_Value<PGELIST<bool>>::load(PGELIST<bool>& dest, const char* field_data)
 {
-    static const char* load(value_t& dest, const char* field_data);
+    dest.clear();
 
-    /* tries to save the field, and returns false (restoring out to its original state) if this is impossible */
-    static bool save(std::string& out, const value_t& src);
+    const char* cur_pos = field_data;
 
-    /* checks if src matches a reference (which is assumed to be a default value) */
-    static bool is_ref(const value_t& src, const value_t& reference)
+    while(*cur_pos != ';' && *cur_pos != '\0')
     {
-        return src == reference;
-    }
-};
+        if(*cur_pos == '1')
+            dest.push_back(true);
+        else if(*cur_pos == '0')
+            dest.push_back(false);
+        else
+            throw(MDX_bad_array(dest.size() + 1));
 
-template<>
-struct MDX_Value<PGELIST<bool>>
+        cur_pos++;
+    }
+
+    return cur_pos;
+}
+
+bool MDX_Value<PGELIST<bool>>::save(std::string& out, const PGELIST<bool>& src)
 {
-    static const char* load(PGELIST<bool>& dest, const char* field_data);
-    static bool save(std::string& out, const PGELIST<bool>& src);
-    static bool is_ref(const PGELIST<bool>& src, const PGELIST<bool>& /*reference*/)
-    {
-        return src.size() == 0;
-    }
-};
+    for(bool i : src)
+        out += (i) ? '1' : '0';
 
-#include "mdx/common/value/mdx_value_list.hpp"
-#include "mdx/common/value/mdx_value_object.hpp"
-#include "mdx/common/value/mdx_value_objectlist.hpp"
-
-#endif // #ifndef MDX_VALUE_H
+    return true;
+}
