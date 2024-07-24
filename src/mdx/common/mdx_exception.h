@@ -24,6 +24,12 @@
  * SOFTWARE.
  */
 
+/*! \file mdx_exception.h
+ *
+ *  \brief Defines a set of exceptions used to interrupt parsing in MDX
+ *
+ */
+
 #pragma once
 #ifndef MDX_EXCEPTION_HPP
 #define MDX_EXCEPTION_HPP

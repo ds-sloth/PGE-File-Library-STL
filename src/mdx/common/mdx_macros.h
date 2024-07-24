@@ -25,10 +25,10 @@
  */
 
 #pragma once
-#ifndef MDX_MACROS_HPP
-#define MDX_MACROS_HPP
+#ifndef MDX_MACROS_H
+#define MDX_MACROS_H
 
-/*! \file mdx_macros.hpp
+/*! \file mdx_macros.h
  *
  *  \brief Unpleasant macros used for declarative syntax
  *
@@ -80,4 +80,4 @@ struct MDX_Value<OBJ_T> : public MDX_Value_Object<MDX_Object<OBJ_T>> {}; \
 template<> \
 const MDX_Object<OBJ_T> MDX_Value_Object<MDX_Object<OBJ_T>>::s_obj_loader{} \
 
-#endif // #ifndef MDX_MACROS_HPP
+#endif // #ifndef MDX_MACROS_H

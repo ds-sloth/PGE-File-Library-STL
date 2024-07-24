@@ -25,18 +25,20 @@
  */
 
 #pragma once
-#ifndef MDX_BASE_OBJECT_H
-#define MDX_BASE_OBJECT_H
-
-#include <vector>
+#ifndef MDX_OBJECT_H
+#define MDX_OBJECT_H
 
 /*! \file mdx_object.h
  *
- *  \brief Contains templates for objects
+ *  \brief Code to represent objects using sequences of fields
+ *
+ * Used as rows in sections or items in object arrays
  *
  * This is a new implementation but supports precisely the same format as PGE-X
  *
  */
+
+#include <vector>
 
 struct MDX_BaseObject
 {
@@ -53,7 +55,9 @@ protected:
     bool save_object(std::string& out, const void* src, const void* ref) const;
 };
 
+/* This gets defined by the user for each object type, and then gets used by sections or item lists.
+   In those contents it is sometimes called obj_loader_t. */
 template<class obj_t>
 struct MDX_Object;
 
-#endif // #ifndef MDX_BASE_OBJECT_HPP
+#endif // #ifndef MDX_OBJECT_H

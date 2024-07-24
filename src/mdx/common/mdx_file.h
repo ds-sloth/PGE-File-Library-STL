@@ -25,12 +25,12 @@
  */
 
 #pragma once
-#ifndef MDX_BASE_FILE_H
-#define MDX_BASE_FILE_H
+#ifndef MDX_FILE_H
+#define MDX_FILE_H
 
 /*! \file mdx_file.h
  *
- *  \brief Contains templates for file formats
+ *  \brief Code representing entire PGE-X files
  *
  * This is a new implementation but supports precisely the same format as PGE-X
  *
@@ -75,4 +75,4 @@ struct MDX_File : public MDX_BaseFile
     }
 };
 
-#endif // #ifndef MDX_BASE_FILE_HPP
+#endif // #ifndef MDX_FILE_H

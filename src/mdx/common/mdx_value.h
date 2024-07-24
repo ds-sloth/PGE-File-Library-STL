@@ -34,7 +34,7 @@
 
 /*! \file mdx_value.h
  *
- *  \brief Code to support saving/loading values
+ *  \brief Code to support saving/loading values (also known as "data" in PGE-X)
  *
  * This is a new implementation but supports precisely the same format as PGE-X
  *

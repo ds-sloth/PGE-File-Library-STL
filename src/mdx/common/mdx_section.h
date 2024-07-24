@@ -25,12 +25,12 @@
  */
 
 #pragma once
-#ifndef MDX_BASE_SECTION_H
-#define MDX_BASE_SECTION_H
+#ifndef MDX_SECTION_H
+#define MDX_SECTION_H
 
 /*! \file mdx_section.h
  *
- *  \brief Contains templates for file sections
+ *  \brief Code to represent sections of PGE-X files
  *
  * This is a new implementation but supports precisely the same format as PGE-X
  *
@@ -129,4 +129,4 @@ public:
     }
 };
 
-#endif // #ifndef MDX_BASE_SECTION_H
+#endif // #ifndef MDX_SECTION_H

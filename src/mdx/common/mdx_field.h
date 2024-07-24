@@ -24,6 +24,14 @@
  * SOFTWARE.
  */
 
+/*! \file mdx_field.h
+ *
+ *  \brief Code to represent single fields (marker:value pairs)
+ *
+ * This is a new implementation but supports precisely the same format as PGE-X
+ *
+ */
+
 #pragma once
 #ifndef MDX_FIELD_H
 #define MDX_FIELD_H
@@ -34,13 +42,6 @@
 
 #include <string>
 
-/*! \file mdx_field.h
- *
- *  \brief Code to represent single fields (marker:value pairs)
- *
- * This is a new implementation but supports precisely the same format as PGE-X
- *
- */
 
 const char* MDX_skip_field(const char* line);
 

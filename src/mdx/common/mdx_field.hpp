@@ -24,11 +24,6 @@
  * SOFTWARE.
  */
 
-#include "mdx/common/mdx_field.h"
-#include "mdx/common/mdx_object.h"
-
-#include "pge_file_lib_globs.h"
-
 /*! \file mdx_field.hpp
  *
  *  \brief Code to represent single fields (marker:value pairs)
@@ -38,6 +33,15 @@
  * This is a new implementation but supports precisely the same format as PGE-X
  *
  */
+
+#pragma once
+#ifndef PGE_FIELD_HPP
+#define PGE_FIELD_HPP
+
+#include "mdx/common/mdx_field.h"
+#include "mdx/common/mdx_object.h"
+
+#include "pge_file_lib_globs.h"
 
 
 inline const char* MDX_skip_field(const char* line)
@@ -158,3 +162,5 @@ inline bool MDX_BaseField::try_save(std::string& out, const void* src, const voi
 
     return true;
 }
+
+#endif // #ifndef PGE_FIELD_HPP
