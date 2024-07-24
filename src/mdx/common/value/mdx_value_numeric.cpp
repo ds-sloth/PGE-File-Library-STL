@@ -37,7 +37,7 @@
 #include <cstdarg>
 #include "mdx/common/mdx_value.h"
 #include "mdx/common/mdx_exception.h"
-#include "mdx/common/milo_yip/itoa.h"
+#include "mdx/common/value/milo_yip/itoa.h"
 
 /******************************
  * private utility functions *
