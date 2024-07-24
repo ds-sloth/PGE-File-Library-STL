@@ -249,4 +249,6 @@ struct MDX_FieldXtra : public MDX_BaseField
     }
 };
 
+#include "mdx/common/mdx_field.hpp"
+
 #endif // #ifndef MDX_FIELD_H

@@ -29,16 +29,18 @@
 
 #include "pge_file_lib_globs.h"
 
-/*! \file mdx_field.cpp
+/*! \file mdx_field.hpp
  *
  *  \brief Code to represent single fields (marker:value pairs)
+ *
+ * Written as an hpp because inlining these significantly improves performance.
  *
  * This is a new implementation but supports precisely the same format as PGE-X
  *
  */
 
 
-const char* MDX_skip_field(const char* line)
+inline const char* MDX_skip_field(const char* line)
 {
     bool escape = false;
     const char* tag_begin = line;
@@ -103,13 +105,13 @@ inline const char* MDX_finish_term(const char* line)
 }
 
 
-MDX_BaseField::MDX_BaseField(MDX_BaseObject* parent, const char* field_name, SaveMode save_mode)
+inline MDX_BaseField::MDX_BaseField(MDX_BaseObject* parent, const char* field_name, SaveMode save_mode)
     : m_save_mode(save_mode), m_field_name(field_name)
 {
     parent->m_fields.push_back(this);
 }
 
-bool MDX_BaseField::try_load(void* dest, const char*& field_name) const
+inline bool MDX_BaseField::try_load(void* dest, const char*& field_name) const
 {
     int i;
 
@@ -135,7 +137,7 @@ bool MDX_BaseField::try_load(void* dest, const char*& field_name) const
     return false;
 }
 
-bool MDX_BaseField::try_save(std::string& out, const void* src, const void* ref) const
+inline bool MDX_BaseField::try_save(std::string& out, const void* src, const void* ref) const
 {
     if(m_save_mode != SaveMode::no_skip && !can_save(src, ref))
         return false;
