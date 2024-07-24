@@ -38,6 +38,7 @@
 
 bool MDX_load_world(PGE_FileFormats_misc::TextInput& input, const WorldLoadCallbacks& callbacks);
 bool MDX_load_world(PGE_FileFormats_misc::TextInput &file, WorldData &FileData);
+bool MDX_load_world_header(PGE_FileFormats_misc::TextInput &file, WorldData &FileData);
 
 bool MDX_save_world(PGE_FileFormats_misc::TextOutput& output, const WorldSaveCallbacks& callbacks);
 bool MDX_save_world(PGE_FileFormats_misc::TextOutput &file, const WorldData &FileData);

@@ -50,6 +50,9 @@ public:
     virtual const char* what() const noexcept;
 };
 
+// way that callbacks may fully terminate parse process without any error
+class MDX_callback_interrupt : public MDX_parse_error {};
+
 // misc error for MDX parsing
 class MDX_parse_error_misc : public MDX_parse_error
 {

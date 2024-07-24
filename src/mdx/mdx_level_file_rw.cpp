@@ -62,6 +62,12 @@ static bool s_load_head(void* _FileData, LevelHead& dest)
     return true;
 }
 
+static bool s_load_head_only(void* _FileData, LevelHead& dest)
+{
+    s_load_head(_FileData, dest);
+    throw MDX_callback_interrupt();
+}
+
 static bool s_save_head(const void* _FileData, LevelHead& dest, pge_size_t index)
 {
     if(index != 0)
@@ -570,6 +576,36 @@ bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
     callbacks.load_arr = s_load_arr;
     callbacks.load_script = s_load_script;
     callbacks.load_levelitem38a = s_load_levelitem38a;
+
+    callbacks.userdata = reinterpret_cast<void*>(&FileData);
+
+    return MDX_load_level(file, callbacks);
+}
+
+bool MDX_load_level_header(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
+{
+    LevelHead h;
+    s_load_head(&FileData, h);
+    FileData.meta.RecentFormat = LevelData::PGEX;
+
+    //Add path data
+    PGESTRING filePath = file.getFilePath();
+    if(!IsEmpty(filePath))
+    {
+        PGE_FileFormats_misc::FileInfo  in_1(filePath);
+        FileData.meta.filename = in_1.basename();
+        FileData.meta.path = in_1.dirpath();
+    }
+
+    FileData.meta.untitled = false;
+    FileData.meta.modified = false;
+    FileData.meta.ReadFileValid = true;
+
+    LevelLoadCallbacks callbacks;
+
+    callbacks.on_error = s_on_error;
+
+    callbacks.load_head = s_load_head_only;
 
     callbacks.userdata = reinterpret_cast<void*>(&FileData);
 

@@ -69,6 +69,12 @@ static bool s_load_head(void* _FileData, WorldHead& dest)
     return true;
 }
 
+static bool s_load_head_only(void* _FileData, WorldHead& dest)
+{
+    s_load_head(_FileData, dest);
+    throw MDX_callback_interrupt();
+}
+
 static bool s_save_head(const void* _FileData, WorldHead& dest, pge_size_t index)
 {
     if(index != 0)
@@ -318,6 +324,36 @@ bool MDX_load_world(PGE_FileFormats_misc::TextInput &file, WorldData &FileData)
     callbacks.load_music = s_load_music;
     callbacks.load_arearect = s_load_arearect;
     callbacks.load_level = s_load_level;
+
+    callbacks.userdata = reinterpret_cast<void*>(&FileData);
+
+    return MDX_load_world(file, callbacks);
+}
+
+bool MDX_load_world_header(PGE_FileFormats_misc::TextInput &file, WorldData &FileData)
+{
+    WorldHead h;
+    s_load_head(&FileData, h);
+    FileData.meta.RecentFormat = LevelData::PGEX;
+
+    //Add path data
+    PGESTRING filePath = file.getFilePath();
+    if(!IsEmpty(filePath))
+    {
+        PGE_FileFormats_misc::FileInfo  in_1(filePath);
+        FileData.meta.filename = in_1.basename();
+        FileData.meta.path = in_1.dirpath();
+    }
+
+    FileData.meta.untitled = false;
+    FileData.meta.modified = false;
+    FileData.meta.ReadFileValid = true;
+
+    WorldLoadCallbacks callbacks;
+
+    callbacks.on_error = s_on_error;
+
+    callbacks.load_head = s_load_head_only;
 
     callbacks.userdata = reinterpret_cast<void*>(&FileData);
 

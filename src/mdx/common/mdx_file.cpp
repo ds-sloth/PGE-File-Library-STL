@@ -93,6 +93,10 @@ bool MDX_BaseFile::load_file(PGE_FileFormats_misc::TextInput& inf, const PGE_Fil
             }
         }
     }
+    catch(const MDX_callback_interrupt& i)
+    {
+        // NOT actually a problem
+    }
     catch(const std::exception& e)
     {
         if(!cb.on_error)

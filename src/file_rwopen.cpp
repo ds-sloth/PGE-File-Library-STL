@@ -190,6 +190,11 @@ bool FileFormats::OpenLevelFileHeaderT(PGE_FileFormats_misc::TextInput &file, Le
         //Read SMBX LVL File
         return ReadSMBX64LvlFileHeaderT(file, data);
     }
+    else if(g_use_mdx)
+    {
+        //Read PGE LVLX File with MDX
+        return MDX_load_level_header(file, data);
+    }
     else
     {
         //Read PGE LVLX File
@@ -472,6 +477,11 @@ bool FileFormats::OpenWorldFileHeaderT(PGE_FileFormats_misc::TextInput &file, Wo
         }
         //Read SMBX WLD File
         return ReadSMBX64WldFileHeaderT(file, data);
+    }
+    else if(g_use_mdx)
+    {
+        //Read PGE WLDX File with MDX
+        return MDX_load_world_header(file, data);
     }
     else
     {
