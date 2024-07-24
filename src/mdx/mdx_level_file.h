@@ -43,4 +43,8 @@ bool MDX_load_level_header(PGE_FileFormats_misc::TextInput &file, LevelData &Fil
 bool MDX_save_level(PGE_FileFormats_misc::TextOutput& output, const LevelSaveCallbacks& callbacks);
 bool MDX_save_level(PGE_FileFormats_misc::TextOutput &file, const LevelData &FileData);
 
+LevelLoadCallbacks PGEFL_make_load_callbacks(LevelData& target);
+LevelLoadCallbacks PGEFL_make_header_load_callbacks(LevelData& target);
+LevelSaveCallbacks PGEFL_make_save_callbacks(const LevelData& target);
+
 #endif // #ifndef MDX_LEVEL_FILE_H

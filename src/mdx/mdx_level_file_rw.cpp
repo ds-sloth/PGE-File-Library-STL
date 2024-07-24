@@ -558,6 +558,11 @@ bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
     FileData.meta.modified = false;
     FileData.meta.ReadFileValid = true;
 
+    return MDX_load_level(file, PGEFL_make_load_callbacks(FileData));
+}
+
+LevelLoadCallbacks PGEFL_make_load_callbacks(LevelData& target)
+{
     LevelLoadCallbacks callbacks;
 
     callbacks.on_error = s_on_error;
@@ -579,9 +584,9 @@ bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
     callbacks.load_script = s_load_script;
     callbacks.load_levelitem38a = s_load_levelitem38a;
 
-    callbacks.userdata = reinterpret_cast<void*>(&FileData);
+    callbacks.userdata = reinterpret_cast<void*>(&target);
 
-    return MDX_load_level(file, callbacks);
+    return callbacks;
 }
 
 bool MDX_load_level_header(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
@@ -603,18 +608,23 @@ bool MDX_load_level_header(PGE_FileFormats_misc::TextInput &file, LevelData &Fil
     FileData.meta.modified = false;
     FileData.meta.ReadFileValid = true;
 
+    return MDX_load_level(file, PGEFL_make_header_load_callbacks(FileData));
+}
+
+LevelLoadCallbacks PGEFL_make_header_load_callbacks(LevelData& target)
+{
     LevelLoadCallbacks callbacks;
 
     callbacks.on_error = s_on_error;
 
     callbacks.load_head = s_load_head_only;
 
-    callbacks.userdata = reinterpret_cast<void*>(&FileData);
+    callbacks.userdata = reinterpret_cast<void*>(&target);
 
-    return MDX_load_level(file, callbacks);
+    return callbacks;
 }
 
-bool MDX_save_level(PGE_FileFormats_misc::TextOutput &file, const LevelData &FileData)
+LevelSaveCallbacks PGEFL_make_save_callbacks(const LevelData& target)
 {
     LevelSaveCallbacks callbacks;
 
@@ -635,7 +645,12 @@ bool MDX_save_level(PGE_FileFormats_misc::TextOutput &file, const LevelData &Fil
     callbacks.save_script = s_save_script;
     callbacks.save_levelitem38a = s_save_levelitem38a;
 
-    callbacks.userdata = reinterpret_cast<const void*>(&FileData);
+    callbacks.userdata = reinterpret_cast<const void*>(&target);
 
-    return MDX_save_level(file, callbacks);
+    return callbacks;
+}
+
+bool MDX_save_level(PGE_FileFormats_misc::TextOutput &file, const LevelData &FileData)
+{
+    return MDX_save_level(file, PGEFL_make_save_callbacks(FileData));
 }
