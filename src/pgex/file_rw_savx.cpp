@@ -28,6 +28,7 @@
 #include "file_strlist.h"
 #include "pge_x.h"
 #include "pgex/pge_x_macro.h"
+#include "mdx/mdx_gamesave_file.h"
 
 #ifdef PGE_FILES_QT
 #include <QDir>
@@ -51,7 +52,10 @@ bool FileFormats::ReadExtendedSaveFileF(const PGESTRING &filePath, GamesaveData 
         return false;
     }
 
-    return ReadExtendedSaveFile(file, FileData);
+    if(g_use_mdx)
+        return MDX_load_gamesave(file, FileData);
+    else
+        return ReadExtendedSaveFile(file, FileData);
 }
 
 bool FileFormats::ReadExtendedSaveFileRaw(PGESTRING &rawdata, const PGESTRING &filePath, GamesaveData &FileData)
@@ -68,7 +72,10 @@ bool FileFormats::ReadExtendedSaveFileRaw(PGESTRING &rawdata, const PGESTRING &f
         return false;
     }
 
-    return ReadExtendedSaveFile(file, FileData);
+    if(g_use_mdx)
+        return MDX_load_gamesave(file, FileData);
+    else
+        return ReadExtendedSaveFile(file, FileData);
 }
 
 bool FileFormats::ReadExtendedSaveFile(PGE_FileFormats_misc::TextInput &in, GamesaveData &FileData)
@@ -332,7 +339,10 @@ bool FileFormats::WriteExtendedSaveFileF(const PGESTRING &filePath, GamesaveData
         return false;
     }
 
-    return WriteExtendedSaveFile(file, FileData);
+    if(g_use_mdx)
+        return MDX_save_gamesave(file, FileData);
+    else
+        return WriteExtendedSaveFile(file, FileData);
 }
 
 bool FileFormats::WriteExtendedSaveFileRaw(GamesaveData &FileData, PGESTRING &rawdata)
@@ -346,7 +356,10 @@ bool FileFormats::WriteExtendedSaveFileRaw(GamesaveData &FileData, PGESTRING &ra
         return false;
     }
 
-    return WriteExtendedSaveFile(file, FileData);
+    if(g_use_mdx)
+        return MDX_save_gamesave(file, FileData);
+    else
+        return WriteExtendedSaveFile(file, FileData);
 }
 
 bool FileFormats::WriteExtendedSaveFile(PGE_FileFormats_misc::TextOutput &out, GamesaveData &FileData)

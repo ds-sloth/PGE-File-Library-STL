@@ -26,9 +26,6 @@
 
 #include "smbx64.h"
 
-namespace PGEFL
-{
-
 namespace smbx64Format
 {
     //const char *uint_vc = "0123456789";
@@ -207,5 +204,3 @@ bool SMBX64::IsQuotedString(const PGESTRING &in)
 #undef QStrGOOD
 #undef QStrBAD
 }
-
-} //namespace PGEFL

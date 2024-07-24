@@ -31,26 +31,53 @@
 #include "pgex/pge_x_macro.h"
 #include <cfloat>
 
-namespace PGEFL
-{
-
-namespace PGEX
-{
-
 //*********************************************************
 //****************READ FILE FORMAT*************************
 //*********************************************************
-bool ReadExtendedLvlFileHeader(PGE_FileFormats_misc::TextInput &inf, LevelLoadCallbacks &cb)
+bool FileFormats::ReadExtendedLvlFileHeader(const PGESTRING &filePath, LevelData &FileData)
 {
-  PGESTRING line;
+    CreateLevelHeader(FileData);
+    FileData.meta.RecentFormat = LevelData::PGEX;
+    PGE_FileFormats_misc::TextFileInput inf;
+
+    if(!inf.open(filePath, true))
+    {
+        FileData.meta.ERROR_info = "Can't open file";
+        FileData.meta.ReadFileValid = false;
+        return false;
+    }
+
+    return ReadExtendedLvlFileHeaderT(inf, FileData);
+}
+
+bool FileFormats::ReadExtendedLvlFileHeaderRaw(PGESTRING &rawdata, const PGESTRING &filePath, LevelData &FileData)
+{
+    CreateLevelHeader(FileData);
+    FileData.meta.RecentFormat = LevelData::PGEX;
+    PGE_FileFormats_misc::RawTextInput inf;
+
+    if(!inf.open(&rawdata, filePath))
+    {
+        FileData.meta.ERROR_info = "Can't open file";
+        FileData.meta.ReadFileValid = false;
+        return false;
+    }
+
+    return ReadExtendedLvlFileHeaderT(inf, FileData);
+}
+
+bool FileFormats::ReadExtendedLvlFileHeaderT(PGE_FileFormats_misc::TextInput &inf, LevelData &FileData)
+{
   // indented 2 spaces to avoid large diff hunk
   try
   {
+    PGESTRING line;
     int str_count = 0;
     bool valid = false;
-    LevelHead head;
-    head.RecentFormat = LevelData::PGEX;
-
+    PGE_FileFormats_misc::FileInfo in_1(inf.getFilePath());
+    FileData.meta.filename = in_1.basename();
+    FileData.meta.path = in_1.dirpath();
+    FileData.meta.RecentFormat = LevelData::PGEX;
 #define NextLine(line) str_count++; inf.readLine(line);
 
     //Find level header part
@@ -92,56 +119,56 @@ bool ReadExtendedLvlFileHeader(PGE_FileFormats_misc::TextInput &inf, LevelLoadCa
             if(val[0] == "TL") //Level Title
             {
                 if(PGEFile::IsQoutedString(val[1]))
-                    head.LevelName = PGEFile::X2STRING(val[1]);
+                    FileData.LevelName = PGEFile::X2STRING(val[1]);
                 else
                     goto bad_file;
             }
             else if(val[0] == "SZ") //Starz number
             {
                 if(PGEFile::IsIntU(val[1]))
-                    head.stars = toInt(val[1]);
+                    FileData.stars = toInt(val[1]);
                 else
                     goto bad_file;
             }
             else if(val[0] == "DL") //Open Level on player's fail
             {
                 if(PGEFile::IsQoutedString(val[1]))
-                    head.open_level_on_fail = PGEFile::X2STRING(val[1]);
+                    FileData.open_level_on_fail = PGEFile::X2STRING(val[1]);
                 else
                     goto bad_file;
             }
             else if(val[0] == "DE") //Target WarpID of fail-level entrace
             {
                 if(PGEFile::IsIntU(val[1]))
-                    head.open_level_on_fail_warpID = toUInt(val[1]);
+                    FileData.open_level_on_fail_warpID = toUInt(val[1]);
                 else
                     goto bad_file;
             }
             else if(val[0] == "NO") //Overrides of player names
             {
                 if(PGEFile::IsStringArray(val[1]))
-                    head.player_names_overrides = PGEFile::X2STRArr(val[1]);
+                    FileData.player_names_overrides = PGEFile::X2STRArr(val[1]);
                 else
                     goto bad_file;
             }
             else if(val[0] == "XTRA") //Extra settings
             {
                 if(PGEFile::IsQoutedString(val[1]))
-                    head.custom_params = PGEFile::X2STRING(val[1]);
+                    FileData.custom_params = PGEFile::X2STRING(val[1]);
                 else
                     goto bad_file;
             }
             else if(val[0] == "CPID") //Config pack ID string
             {
                 if(PGEFile::IsQoutedString(val[1]))
-                    head.configPackId = PGEFile::X2STRING(val[1]);
+                    FileData.meta.configPackId = PGEFile::X2STRING(val[1]);
                 else
                     goto bad_file;
             }
             else if(val[0] == "MUS") // Level-wide list of external music files
             {
                 if(PGEFile::IsStringArray(val[1]))
-                    head.music_files = PGEFile::X2STRArr(val[1]);
+                    FileData.music_files = PGEFile::X2STRArr(val[1]);
                 else
                     goto bad_file;
             }
@@ -149,54 +176,88 @@ bool ReadExtendedLvlFileHeader(PGE_FileFormats_misc::TextInput &inf, LevelLoadCa
     }
 
 skipHeaderParse:
-    if(cb.load_head)
-        cb.load_head(cb.userdata, head);
-
+    FileData.CurSection = 0;
+    FileData.playmusic = false;
+    FileData.meta.ReadFileValid = true;
     return true;
 
 bad_file:
-    if(cb.on_error)
-    {
-        FileFormatsError error;
-        error.ERROR_info = "Invalid file format";
-        error.ERROR_linenum = inf.getCurrentLineNumber();
-        error.ERROR_linedata = std::move(line);
-        PGE_CutLength(error.ERROR_linedata, 50);
-        PGE_FilterBinary(error.ERROR_linedata);
-        cb.on_error(cb.userdata, error);
-    }
+    FileData.meta.ERROR_info = "Invalid file format";
+    FileData.meta.ERROR_linenum = static_cast<long>(str_count);
+    FileData.meta.ERROR_linedata = line;
+    FileData.meta.ReadFileValid = false;
+    PGE_CutLength(FileData.meta.ERROR_linedata, 50);
+    PGE_FilterBinary(FileData.meta.ERROR_linedata);
     return false;
-  }
-  catch(const PGE_FileFormats_misc::callback_interrupt& e)
-  {
-    return true;
   }
   catch(const std::exception& e)
   {
-    if(cb.on_error)
-    {
-        FileFormatsError error;
-        error.ERROR_info.clear();
-        error.add_exc_info(e, inf.getCurrentLineNumber(), std::move(line));
-        cb.on_error(cb.userdata, error);
-    }
-
+    FileData.meta.ERROR_info = e.what();
+    FileData.meta.ERROR_linedata.clear();
+    FileData.meta.ERROR_linenum = -1;
+    FileData.meta.ReadFileValid = false;
     return false;
   }
 }
 
 
-bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks &cb)
+
+bool FileFormats::ReadExtendedLvlFileF(const PGESTRING &filePath, LevelData &FileData)
 {
-  PGESTRING line;  /*Current Line data*/
+    FileData.meta.ERROR_info.clear();
+    PGE_FileFormats_misc::TextFileInput file;
+
+    if(!file.open(filePath, true))
+    {
+        FileData.meta.ERROR_info = "Failed to open file for read";
+        FileData.meta.ERROR_linedata.clear();
+        FileData.meta.ERROR_linenum = -1;
+        FileData.meta.ReadFileValid = false;
+        return false;
+    }
+
+    return ReadExtendedLvlFile(file, FileData);
+}
+
+bool FileFormats::ReadExtendedLvlFileRaw(PGESTRING &rawdata, const PGESTRING &filePath,  LevelData &FileData)
+{
+    FileData.meta.ERROR_info.clear();
+    PGE_FileFormats_misc::RawTextInput file;
+
+    if(!file.open(&rawdata, filePath))
+    {
+        FileData.meta.ERROR_info = "Failed to open raw string for read";
+        FileData.meta.ERROR_linedata.clear();
+        FileData.meta.ERROR_linenum = -1;
+        FileData.meta.ReadFileValid = false;
+        return false;
+    }
+
+    return ReadExtendedLvlFile(file, FileData);
+}
+
+bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelData &FileData)
+{
   // indented 2 spaces to avoid large diff hunk
   try
   {
     PGESTRING errorString;
     PGESTRING filePath = in.getFilePath();
+    PGESTRING line;  /*Current Line data*/
+    //LevelData FileData;
+    CreateLevelData(FileData);
+    FileData.meta.RecentFormat = LevelData::PGEX;
 
-    LevelHead head;
-    CrashData crash;
+    //Add path data
+    if(!IsEmpty(filePath))
+    {
+        PGE_FileFormats_misc::FileInfo  in_1(filePath);
+        FileData.meta.filename = in_1.basename();
+        FileData.meta.path = in_1.dirpath();
+    }
+
+    FileData.meta.untitled = false;
+    FileData.meta.modified = false;
     LevelSection lvl_section;
     PlayerPoint player;
     LevelBlock block;
@@ -225,19 +286,16 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                 PGEX_Values() //Look markers and values
                 {
                     PGEX_ValueBegin()
-                    PGEX_StrVal("TL", head.LevelName) //Level Title
-                    PGEX_USIntVal("SZ", head.stars) //Starz number
-                    PGEX_StrVal("DL", head.open_level_on_fail) //Open level on fail
-                    PGEX_UIntVal("DE", head.open_level_on_fail_warpID) //Open level's warpID on fail
-                    PGEX_StrArrVal("NO", head.player_names_overrides) //Overrides of player names
-                    PGEX_StrVal("XTRA", head.custom_params) //Level-wide Extra settings
-                    PGEX_StrVal("CPID", head.configPackId)//Config pack ID string
-                    PGEX_StrArrVal("MUS", head.music_files)// Level-wide list of external music files
+                    PGEX_StrVal("TL", FileData.LevelName) //Level Title
+                    PGEX_USIntVal("SZ", FileData.stars) //Starz number
+                    PGEX_StrVal("DL", FileData.open_level_on_fail) //Open level on fail
+                    PGEX_UIntVal("DE", FileData.open_level_on_fail_warpID) //Open level's warpID on fail
+                    PGEX_StrArrVal("NO", FileData.player_names_overrides) //Overrides of player names
+                    PGEX_StrVal("XTRA", FileData.custom_params) //Level-wide Extra settings
+                    PGEX_StrVal("CPID", FileData.meta.configPackId)//Config pack ID string
+                    PGEX_StrArrVal("MUS", FileData.music_files)// Level-wide list of external music files
                 }
             }
-
-            if(cb.load_head)
-                cb.load_head(cb.userdata, head);
         }//HEADER
         ///////////////////////////////MetaDATA/////////////////////////////////////////////
         PGEX_Section("META_BOOKMARKS")
@@ -257,9 +315,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                     PGEX_FloatVal("X", meta_bookmark.x) // Position X
                     PGEX_FloatVal("Y", meta_bookmark.y) // Position Y
                 }
-
-                if(cb.load_bookmark)
-                    cb.load_bookmark(cb.userdata, meta_bookmark);
+                FileData.metaData.bookmarks.push_back(meta_bookmark);
             }
         }
         ////////////////////////meta bookmarks////////////////////////
@@ -269,22 +325,19 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
             PGEX_Items()
             {
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
-                crash.used = true;
+                FileData.metaData.crash.used = true;
                 PGEX_Values() //Look markers and values
                 {
                     PGEX_ValueBegin()
-                    PGEX_BoolVal("UT", crash.untitled) //Untitled
-                    PGEX_BoolVal("MD", crash.modifyed) //Modyfied
-                    PGEX_SIntVal("FF", crash.fmtID) //Recent File format
-                    PGEX_UIntVal("FV", crash.fmtVer) //Recent File format version
-                    PGEX_StrVal("N",  crash.filename)  //Filename
-                    PGEX_StrVal("P",  crash.path)  //Path
-                    PGEX_StrVal("FP", crash.fullPath)  //Full file Path
+                    PGEX_BoolVal("UT", FileData.metaData.crash.untitled) //Untitled
+                    PGEX_BoolVal("MD", FileData.metaData.crash.modifyed) //Modyfied
+                    PGEX_SIntVal("FF", FileData.metaData.crash.fmtID) //Recent File format
+                    PGEX_UIntVal("FV", FileData.metaData.crash.fmtVer) //Recent File format version
+                    PGEX_StrVal("N",  FileData.metaData.crash.filename)  //Filename
+                    PGEX_StrVal("P",  FileData.metaData.crash.path)  //Path
+                    PGEX_StrVal("FP", FileData.metaData.crash.fullPath)  //Full file Path
                 }
             }
-
-            if(cb.load_crash_data)
-                cb.load_crash_data(cb.userdata, crash);
         }//meta sys crash
         ///////////////////////////////MetaDATA//End////////////////////////////////////////
         ///////////////////SECTION//////////////////////
@@ -294,7 +347,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
             PGEX_Items()
             {
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
-                lvl_section = FileFormats::CreateLvlSection();
+                lvl_section = CreateLvlSection();
                 PGEX_Values() //Look markers and values
                 {
                     PGEX_ValueBegin()
@@ -318,9 +371,31 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                     PGEX_BoolVal("UW", lvl_section.underwater)//Underwater bit
                     PGEX_StrVal("XTRA", lvl_section.custom_params)//Custom JSON data tree
                 }
+                lvl_section.PositionX = lvl_section.size_left - 10;
+                lvl_section.PositionY = lvl_section.size_top - 10;
 
-                if(cb.load_section)
-                    cb.load_section(cb.userdata, lvl_section);
+                //add captured value into array
+                pge_size_t sections_count = FileData.sections.size();
+
+                if(lvl_section.id < 0 || lvl_section.id > 1000)
+                {
+                    errorString = "Negative section ID";
+                    goto badfile;
+                }
+
+                if(lvl_section.id >= static_cast<int>(sections_count))
+                {
+                    pge_size_t needToAdd = static_cast<pge_size_t>(lvl_section.id) - (FileData.sections.size() - 1);
+                    while(needToAdd > 0)
+                    {
+                        LevelSection dummySct = CreateLvlSection();
+                        dummySct.id = (int)FileData.sections.size();
+                        FileData.sections.push_back(dummySct);
+                        needToAdd--;
+                    }
+                }
+
+                FileData.sections[static_cast<pge_size_t>(lvl_section.id)] = lvl_section;
             }
         }//SECTION
         ///////////////////STARTPOINT//////////////////////
@@ -330,7 +405,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
             PGEX_Items()
             {
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
-                player = FileFormats::CreateLvlPlayerPoint();
+                player = CreateLvlPlayerPoint();
                 PGEX_Values() //Look markers and values
                 {
                     PGEX_ValueBegin()
@@ -339,9 +414,27 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                     PGEX_SLongVal("Y", player.y)
                     PGEX_SIntVal("D",  player.direction)
                 }
+                //add captured value into array
+                bool found = false;
+                pge_size_t q = 0;
+                pge_size_t playersCount = FileData.players.size();
+                for(q = 0; q < playersCount; q++)
+                {
+                    if(FileData.players[q].id == player.id)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
 
-                if(cb.load_startpoint)
-                    cb.load_startpoint(cb.userdata, player);
+                PlayerPoint sz = CreateLvlPlayerPoint(player.id);
+                player.w = sz.w;
+                player.h = sz.h;
+
+                if(found)
+                    FileData.players[q] = player;
+                else
+                    FileData.players.push_back(player);
             }
         }//STARTPOINT
         ///////////////////BLOCK//////////////////////
@@ -351,7 +444,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
             PGEX_Items()
             {
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
-                block = FileFormats::CreateLvlBlock();
+                block = CreateLvlBlock();
                 PGEX_Values() //Look markers and values
                 {
                     PGEX_ValueBegin()
@@ -377,9 +470,9 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                     PGEX_StrVal("EE", block.event_emptylayer) //Hit event slot
                     PGEX_StrVal("XTRA", block.meta.custom_params)//Custom JSON data tree
                 }
-
-                if(cb.load_block)
-                    cb.load_block(cb.userdata, block);
+                block.meta.array_id = FileData.blocks_array_id++;
+                block.meta.index = static_cast<unsigned int>(FileData.blocks.size());
+                FileData.blocks.push_back(block);
             }
         }//BLOCK
         ///////////////////BGO//////////////////////
@@ -389,7 +482,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
             PGEX_Items()
             {
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
-                bgodata = FileFormats::CreateLvlBgo();
+                bgodata = CreateLvlBgo();
                 PGEX_Values() //Look markers and values
                 {
                     PGEX_ValueBegin()
@@ -404,9 +497,9 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                     PGEX_StrVal("LR", bgodata.layer)   //Layer name
                     PGEX_StrVal("XTRA", bgodata.meta.custom_params)//Custom JSON data tree
                 }
-
-                if(cb.load_bgo)
-                    cb.load_bgo(cb.userdata, bgodata);
+                bgodata.meta.array_id = FileData.bgo_array_id++;
+                bgodata.meta.index = static_cast<unsigned int>(FileData.bgo.size());
+                FileData.bgo.push_back(bgodata);
             }
         }//BGO
         ///////////////////NPC//////////////////////
@@ -416,7 +509,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
             PGEX_Items()
             {
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
-                npcdata = FileFormats::CreateLvlNpc();
+                npcdata = CreateLvlNpc();
                 PGEX_Values() //Look markers and values
                 {
                     PGEX_ValueBegin()
@@ -459,9 +552,9 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                     PGEX_StrVal("EF", npcdata.event_nextframe)//Evemt slot "Trigger every frame"
                     PGEX_StrVal("XTRA", npcdata.meta.custom_params)//Custom JSON data tree
                 }
-
-                if(cb.load_npc)
-                    cb.load_npc(cb.userdata, npcdata);
+                npcdata.meta.array_id = FileData.npc_array_id++;
+                npcdata.meta.index = static_cast<unsigned int>(FileData.npc.size());
+                FileData.npc.push_back(npcdata);
             }
         }//TILES
         ///////////////////PHYSICS//////////////////////
@@ -471,7 +564,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
             PGEX_Items()
             {
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
-                physiczone = FileFormats::CreateLvlPhysEnv();
+                physiczone = CreateLvlPhysEnv();
                 PGEX_Values() //Look markers and values
                 {
                     PGEX_ValueBegin()
@@ -488,9 +581,9 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                     PGEX_StrVal("EO",  physiczone.touch_event) //Touch event/script
                     PGEX_StrVal("XTRA", physiczone.meta.custom_params)//Custom JSON data tree
                 }
-
-                if(cb.load_phys)
-                    cb.load_phys(cb.userdata, physiczone);
+                physiczone.meta.array_id = FileData.physenv_array_id++;
+                physiczone.meta.index = static_cast<unsigned int>(FileData.physez.size());
+                FileData.physez.push_back(physiczone);
             }
         }//PHYSICS
         ///////////////////DOORS//////////////////////
@@ -500,7 +593,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
             PGEX_Items()
             {
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
-                door = FileFormats::CreateLvlWarp();
+                door = CreateLvlWarp();
                 PGEX_Values() //Look markers and values
                 {
                     PGEX_ValueBegin()
@@ -538,9 +631,24 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                     PGEX_BoolVal("TW", door.two_way) //Two-way warp
                     PGEX_StrVal("XTRA", door.meta.custom_params)//Custom JSON data tree
                 }
+                door.isSetIn = (!door.lvl_i);
+                door.isSetOut = (!door.lvl_o || (door.lvl_i));
 
-                if(cb.load_warp)
-                    cb.load_warp(cb.userdata, door);
+                if(!door.isSetIn && door.isSetOut)
+                {
+                    door.ix = door.ox;
+                    door.iy = door.oy;
+                }
+
+                if(!door.isSetOut && door.isSetIn)
+                {
+                    door.ox = door.ix;
+                    door.oy = door.iy;
+                }
+
+                door.meta.array_id = FileData.doors_array_id++;
+                door.meta.index = static_cast<unsigned int>(FileData.doors.size());
+                FileData.doors.push_back(door);
             }
         }//DOORS
         ///////////////////LAYERS//////////////////////
@@ -550,7 +658,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
             PGEX_Items()
             {
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
-                layer = FileFormats::CreateLvlLayer();
+                layer = CreateLvlLayer();
                 PGEX_Values() //Look markers and values
                 {
                     PGEX_ValueBegin()
@@ -558,9 +666,28 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                     PGEX_BoolVal("HD", layer.hidden) //Hidden
                     PGEX_BoolVal("LC", layer.locked) //Locked
                 }
+                //add captured value into array
+                bool found = false;
+                pge_size_t q = 0;
+                for(q = 0; q < FileData.layers.size(); q++)
+                {
+                    if(FileData.layers[q].name == layer.name)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
 
-                if(cb.load_layer)
-                    cb.load_layer(cb.userdata, layer);
+                if(found)
+                {
+                    layer.meta.array_id = FileData.layers[q].meta.array_id;
+                    FileData.layers[q] = layer;
+                }
+                else
+                {
+                    layer.meta.array_id = FileData.layers_array_id++;
+                    FileData.layers.push_back(layer);
+                }
             }
         }//LAYERS
         //EVENTS comming soon
@@ -593,7 +720,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
             PGEX_Items()
             {
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
-                event = FileFormats::CreateLvlEvent();
+                event = CreateLvlEvent();
                 PGESTRINGList musicSets;
                 pge_size_t musicSets_begin = 0;
                 PGESTRINGList bgSets;
@@ -880,8 +1007,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                         if(i < (pge_size_t)newSectionSettingsSets_begin)
                             continue;
 
-                        // removed this logic (duplicated in the event load callback)
-#if 0
+                        // TODO: remove this logic (duplicated in the load callback)
                         if(
                             ((sectionSet.id < 0) || (sectionSet.id >= static_cast<long>(event.sets.size())))
                         )//Append sections
@@ -904,8 +1030,6 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                         }
 
                         event.sets[static_cast<pge_size_t>(sectionSet.id)] = sectionSet;
-#endif
-                        event.sets.push_back(sectionSet);
                     }//for section settings entries
 
                     // skip over (but validate) legacy arrays
@@ -1394,9 +1518,29 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                 if(cs >= 11) event.ctrls_enable = controls[10];
                 if(cs >= 12) event.ctrl_lock_keyboard = controls[11];
                 // SMBX-38A end
+                //add captured value into array
+                bool found = false;
+                pge_size_t q = 0;
 
-                if(cb.load_event)
-                    cb.load_event(cb.userdata, event);
+                for(q = 0; q < FileData.events.size(); q++)
+                {
+                    if(FileData.events[q].name == event.name)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if(found)
+                {
+                    event.meta.array_id = FileData.events[q].meta.array_id;
+                    FileData.events[q] = event;
+                }
+                else
+                {
+                    event.meta.array_id = FileData.events_array_id++;
+                    FileData.events.push_back(event);
+                }
             }
         }//EVENTS_CLASSIC
         ///////////////////VARIABLES//////////////////////
@@ -1406,7 +1550,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
             PGEX_Items()
             {
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
-                variable = FileFormats::CreateLvlVariable("unknown");
+                variable = CreateLvlVariable("unknown");
                 PGEX_Values() //Look markers and values
                 {
                     PGEX_ValueBegin()
@@ -1414,9 +1558,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                     PGEX_StrVal("V", variable.value) //Variable value
                     PGEX_BoolVal("G", variable.is_global) //Is global variable
                 }
-
-                if(cb.load_var)
-                    cb.load_var(cb.userdata, variable);
+                FileData.variables.push_back(variable);
             }
         }//VARIABLES
         ///////////////////ARRAYS//////////////////////
@@ -1432,9 +1574,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                     PGEX_ValueBegin()
                     PGEX_StrVal("N", array_field.name) //Variable name
                 }
-
-                if(cb.load_arr)
-                    cb.load_arr(cb.userdata, array_field);
+                FileData.arrays.push_back(array_field);
             }
         }//ARRAYS
         ///////////////////SCRIPTS//////////////////////
@@ -1444,7 +1584,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
             PGEX_Items()
             {
                 PGEX_ItemBegin(PGEFile::PGEX_Struct)
-                script = FileFormats::CreateLvlScript("unknown", LevelScript::LANG_LUA);
+                script = CreateLvlScript("unknown", LevelScript::LANG_LUA);
                 PGEX_Values() //Look markers and values
                 {
                     PGEX_ValueBegin()
@@ -1464,8 +1604,7 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                     script.language = LevelScript::LANG_LUA; //LUA by default if any other language code!
                 }
 
-                if(cb.load_script)
-                    cb.load_script(cb.userdata, script);
+                FileData.variables.push_back(variable);
             }
         }//SCRIPTS
         ///////////////////CUSTOM ITEM CONFIGS (38A)//////////////////////
@@ -1520,44 +1659,30 @@ bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks
                     customcfg38A.data.push_back(e);
                 }
                 customcfg38A.type = (LevelItemSetup38A::ItemType)type;
-
-                if(cb.load_levelitem38a)
-                    cb.load_levelitem38a(cb.userdata, customcfg38A);
+                FileData.custom38A_configs.push_back(customcfg38A);
             }
         }//CUSTOM_ITEMS_38A
     }
     ///////////////////////////////////////EndFile///////////////////////////////////////
     errorString.clear(); //If no errors, clear string;
+    FileData.meta.ReadFileValid = true;
     return true;
 
 badfile:    //If file format is not correct
-    if(cb.on_error)
-    {
-        FileFormatsError error;
-        error.ERROR_info = errorString;
-        error.ERROR_linenum = in.getCurrentLineNumber();
-        error.ERROR_linedata = std::move(line);
-        PGE_CutLength(error.ERROR_linedata, 50);
-        PGE_FilterBinary(error.ERROR_linedata);
-        cb.on_error(cb.userdata, error);
-    }
-
+    FileData.meta.ERROR_info = errorString;
+    FileData.meta.ERROR_linenum = in.getCurrentLineNumber();
+    FileData.meta.ERROR_linedata = std::move(line);
+    FileData.meta.ReadFileValid = false;
+    PGE_CutLength(FileData.meta.ERROR_linedata, 50);
+    PGE_FilterBinary(FileData.meta.ERROR_linedata);
     return false;
-  }
-  catch(const PGE_FileFormats_misc::callback_interrupt& e)
-  {
-    return true;
   }
   catch(const std::exception& e)
   {
-    if(cb.on_error)
-    {
-        FileFormatsError error;
-        error.ERROR_info.clear();
-        error.add_exc_info(e, in.getCurrentLineNumber(), std::move(line));
-        cb.on_error(cb.userdata, error);
-    }
-
+    FileData.meta.ERROR_info = e.what();
+    FileData.meta.ERROR_linedata.clear();
+    FileData.meta.ERROR_linenum = -1;
+    FileData.meta.ReadFileValid = false;
     return false;
   }
 }
@@ -1567,7 +1692,36 @@ badfile:    //If file format is not correct
 //*********************************************************
 //****************WRITE FILE FORMAT************************
 //*********************************************************
-bool WriteExtendedLvlFile(PGE_FileFormats_misc::TextOutput &out, LevelData &FileData)
+
+bool FileFormats::WriteExtendedLvlFileF(const PGESTRING &filePath, LevelData &FileData)
+{
+    FileData.meta.ERROR_info.clear();
+    PGE_FileFormats_misc::TextFileOutput file;
+
+    if(!file.open(filePath, true, false, PGE_FileFormats_misc::TextOutput::truncate))
+    {
+        FileData.meta.ERROR_info = "Failed to open file for write";
+        return false;
+    }
+
+    return WriteExtendedLvlFile(file, FileData);
+}
+
+bool FileFormats::WriteExtendedLvlFileRaw(LevelData &FileData, PGESTRING &rawdata)
+{
+    FileData.meta.ERROR_info.clear();
+    PGE_FileFormats_misc::RawTextOutput file;
+
+    if(!file.open(&rawdata, PGE_FileFormats_misc::TextOutput::truncate))
+    {
+        FileData.meta.ERROR_info = "Failed to open raw string for write";
+        return false;
+    }
+
+    return WriteExtendedLvlFile(file, FileData);
+}
+
+bool FileFormats::WriteExtendedLvlFile(PGE_FileFormats_misc::TextOutput &out, LevelData &FileData)
 {
     pge_size_t i;
     FileData.meta.RecentFormat = LevelData::PGEX;
@@ -1764,7 +1918,7 @@ bool WriteExtendedLvlFile(PGE_FileFormats_misc::TextOutput &out, LevelData &File
     if(!FileData.blocks.empty())
     {
         out << "BLOCK\n";
-        LevelBlock defBlock = FileFormats::CreateLvlBlock();
+        LevelBlock defBlock = CreateLvlBlock();
 
         for(const LevelBlock &blk : FileData.blocks)
         {
@@ -1831,7 +1985,7 @@ bool WriteExtendedLvlFile(PGE_FileFormats_misc::TextOutput &out, LevelData &File
     if(!FileData.bgo.empty())
     {
         out << "BGO\n";
-        LevelBGO defBGO = FileFormats::CreateLvlBgo();
+        LevelBGO defBGO = CreateLvlBgo();
 
         for(const LevelBGO &bgo : FileData.bgo)
         {
@@ -1863,7 +2017,7 @@ bool WriteExtendedLvlFile(PGE_FileFormats_misc::TextOutput &out, LevelData &File
     if(!FileData.npc.empty())
     {
         out << "NPC\n";
-        LevelNPC defNPC = FileFormats::CreateLvlNpc();
+        LevelNPC defNPC = CreateLvlNpc();
 
         for(const LevelNPC &npc : FileData.npc)
         {
@@ -1959,7 +2113,7 @@ bool WriteExtendedLvlFile(PGE_FileFormats_misc::TextOutput &out, LevelData &File
     if(!FileData.physez.empty())
     {
         out << "PHYSICS\n";
-        LevelPhysEnv defPhys = FileFormats::CreateLvlPhysEnv();
+        LevelPhysEnv defPhys = CreateLvlPhysEnv();
 
         for(const LevelPhysEnv &physEnv : FileData.physez)
         {
@@ -1996,7 +2150,7 @@ bool WriteExtendedLvlFile(PGE_FileFormats_misc::TextOutput &out, LevelData &File
     if(!FileData.doors.empty())
     {
         out << "DOORS\n";
-        LevelDoor defDoor = FileFormats::CreateLvlWarp();
+        LevelDoor defDoor = CreateLvlWarp();
 
         for(const LevelDoor &warp : FileData.doors)
         {
@@ -2604,7 +2758,3 @@ bool WriteExtendedLvlFile(PGE_FileFormats_misc::TextOutput &out, LevelData &File
 
     return true;
 }
-
-} // namespace PGEX
-
-} // namespace PGEFL

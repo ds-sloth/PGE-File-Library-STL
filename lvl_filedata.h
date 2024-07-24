@@ -1003,25 +1003,6 @@ struct LevelHead
     PGESTRING custom_params;
     PGESTRING configPackId;
     PGELIST<PGESTRING> music_files;
-
-    struct MusicOverrider
-    {
-        enum Type {
-            LEVEL   = 0,
-            SPECIAL = 1
-        };
-        Type        type = Type::LEVEL;
-        uint32_t    id = 0;
-        PGESTRING   fileName;
-    };
-
-    //! Override default musics
-    PGELIST<MusicOverrider > music_overrides;
-
-    //! Recently used (open or save) file format
-    int RecentFormat = 0;
-    //! Recently used format version (for SMBX1...64 files only)
-    unsigned int RecentFormatVersion = 0;
 };
 
 /*!
@@ -1064,7 +1045,16 @@ struct LevelData
     //! JSON-like string with a custom properties (without master brackets, like "param":"value,["subparam":value])
     PGESTRING custom_params;
 
-    using MusicOverrider = LevelHead::MusicOverrider;
+    struct MusicOverrider
+    {
+        enum Type {
+            LEVEL   = 0,
+            SPECIAL = 1
+        };
+        Type        type = Type::LEVEL;
+        uint32_t    id = 0;
+        PGESTRING   fileName;
+    };
 
     //! Override default musics
     PGELIST<MusicOverrider > music_overrides;

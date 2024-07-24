@@ -27,6 +27,7 @@
 #include "file_formats.h"
 #include "pge_file_lib_private.h"
 #include "pge_x.h"
+#include "mdx/mdx_meta_file.h"
 
 //*********************************************************
 //****************READ FILE FORMAT*************************
@@ -46,7 +47,10 @@ bool FileFormats::ReadNonSMBX64MetaDataF(const PGESTRING &filePath, MetaData &Fi
         return false;
     }
 
-    return ReadNonSMBX64MetaDataFile(file, FileData);
+    if(g_use_mdx)
+        return MDX_load_meta(file, FileData);
+    else
+        return ReadNonSMBX64MetaDataFile(file, FileData);
 }
 
 bool FileFormats::ReadNonSMBX64MetaDataRaw(PGESTRING &rawdata, const PGESTRING &filePath, MetaData &FileData)
@@ -63,7 +67,10 @@ bool FileFormats::ReadNonSMBX64MetaDataRaw(PGESTRING &rawdata, const PGESTRING &
         return false;
     }
 
-    return ReadNonSMBX64MetaDataFile(file, FileData);
+    if(g_use_mdx)
+        return MDX_load_meta(file, FileData);
+    else
+        return ReadNonSMBX64MetaDataFile(file, FileData);
 }
 
 bool FileFormats::ReadNonSMBX64MetaDataFile(PGE_FileFormats_misc::TextInput &in, MetaData &FileData)
@@ -191,7 +198,10 @@ bool FileFormats::WriteNonSMBX64MetaDataF(const PGESTRING &filePath, MetaData &m
         return false;
     }
 
-    return WriteNonSMBX64MetaData(file, metaData);
+    if(g_use_mdx)
+        return MDX_save_meta(file, metaData);
+    else
+        return WriteNonSMBX64MetaData(file, metaData);
 }
 
 bool FileFormats::WriteNonSMBX64MetaDataRaw(MetaData &metaData, PGESTRING &rawdata)
@@ -205,7 +215,10 @@ bool FileFormats::WriteNonSMBX64MetaDataRaw(MetaData &metaData, PGESTRING &rawda
         return false;
     }
 
-    return WriteNonSMBX64MetaData(file, metaData);
+    if(g_use_mdx)
+        return MDX_save_meta(file, metaData);
+    else
+        return WriteNonSMBX64MetaData(file, metaData);
 }
 
 bool FileFormats::WriteNonSMBX64MetaData(PGE_FileFormats_misc::TextOutput &out, MetaData &metaData)

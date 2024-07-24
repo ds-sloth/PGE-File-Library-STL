@@ -27,8 +27,6 @@
 #include "file_formats.h"
 #include "smbx64.h"
 
-using namespace PGEFL;
-
 #include <functional>
 
 //*********************************************************

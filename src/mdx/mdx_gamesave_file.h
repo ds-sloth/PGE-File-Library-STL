@@ -37,6 +37,9 @@
 #include "save_filedata.h"
 
 bool MDX_load_gamesave(PGE_FileFormats_misc::TextInput& input, const GamesaveLoadCallbacks& callbacks);
+bool MDX_load_gamesave(PGE_FileFormats_misc::TextInput &file, GamesaveData &FileData);
+
 bool MDX_save_gamesave(PGE_FileFormats_misc::TextOutput& output, const GamesaveSaveCallbacks& callbacks);
+bool MDX_save_gamesave(PGE_FileFormats_misc::TextOutput &file, const GamesaveData &FileData);
 
 #endif // #ifndef MDX_GAMESAVE_FILE_H

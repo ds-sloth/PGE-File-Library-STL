@@ -39,6 +39,12 @@ const char* MDX_parse_error::what() const noexcept
     return "MDX_parse_error";
 }
 
+// primitive error denoting that a term is malformed
+const char* MDX_callback_error::what() const noexcept
+{
+    return m_message;
+}
+
 // misc error for MDX parsing
 const char* MDX_parse_error_misc::what() const noexcept
 {

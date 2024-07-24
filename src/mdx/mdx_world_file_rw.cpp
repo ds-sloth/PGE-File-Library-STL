@@ -38,13 +38,6 @@
 #include "pge_file_lib_private.h"
 #include "pge_file_lib_globs.h"
 
-namespace PGEFL
-{
-
-namespace DOM
-
-{
-
 static void s_on_error(void* _FileData, FileFormatsError& err)
 {
     WorldData& FileData = *reinterpret_cast<WorldData*>(_FileData);
@@ -79,7 +72,7 @@ static bool s_load_head(void* _FileData, WorldHead& dest)
 static bool s_load_head_only(void* _FileData, WorldHead& dest)
 {
     s_load_head(_FileData, dest);
-    throw PGE_FileFormats_misc::callback_interrupt();
+    throw MDX_callback_interrupt();
 }
 
 static bool s_save_head(const void* _FileData, WorldHead& dest, pge_size_t index)
@@ -300,7 +293,7 @@ static bool s_save_level(const void* _FileData, WorldLevelTile& obj, pge_size_t 
     return true;
 }
 
-bool load_world(PGE_FileFormats_misc::TextInput &file, WorldData &FileData, int format)
+bool MDX_load_world(PGE_FileFormats_misc::TextInput &file, WorldData &FileData)
 {
     FileFormats::CreateWorldData(FileData);
     FileData.meta.RecentFormat = WorldData::PGEX;
@@ -337,7 +330,7 @@ bool load_world(PGE_FileFormats_misc::TextInput &file, WorldData &FileData, int 
     return MDX_load_world(file, callbacks);
 }
 
-bool load_world_header(PGE_FileFormats_misc::TextInput &file, WorldData &FileData, int format)
+bool MDX_load_world_header(PGE_FileFormats_misc::TextInput &file, WorldData &FileData)
 {
     WorldHead h;
     s_load_head(&FileData, h);
@@ -367,7 +360,7 @@ bool load_world_header(PGE_FileFormats_misc::TextInput &file, WorldData &FileDat
     return MDX_load_world(file, callbacks);
 }
 
-bool save_world(PGE_FileFormats_misc::TextOutput &file, const WorldData &FileData, int format)
+bool MDX_save_world(PGE_FileFormats_misc::TextOutput &file, const WorldData &FileData)
 {
     WorldSaveCallbacks callbacks;
 
@@ -385,7 +378,3 @@ bool save_world(PGE_FileFormats_misc::TextOutput &file, const WorldData &FileDat
 
     return MDX_save_world(file, callbacks);
 }
-
-} // namespace DOM
-
-} // namespace PGEFL

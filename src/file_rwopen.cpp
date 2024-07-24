@@ -31,6 +31,8 @@
 
 #include "file_formats.h"
 #include "pge_file_lib_private.h"
+#include "mdx/mdx_level_file.h"
+#include "mdx/mdx_world_file.h"
 
 bool FileFormats::OpenLevelFile(const PGESTRING &filePath, LevelData &FileData)
 {
@@ -109,6 +111,12 @@ bool FileFormats::OpenLevelFileT(PGE_FileFormats_misc::TextInput &file, LevelDat
         if(!ReadSMBX64LvlFile(file, FileData))
             return false;
     }
+    else if(FileFormats::g_use_mdx)
+    {
+        //Read PGE LVLX File with MDX
+        if(!MDX_load_level(file, FileData))
+            return false;
+    }
     else
     {
         //Read PGE LVLX File
@@ -182,6 +190,11 @@ bool FileFormats::OpenLevelFileHeaderT(PGE_FileFormats_misc::TextInput &file, Le
         //Read SMBX LVL File
         return ReadSMBX64LvlFileHeaderT(file, data);
     }
+    else if(g_use_mdx)
+    {
+        //Read PGE LVLX File with MDX
+        return MDX_load_level_header(file, data);
+    }
     else
     {
         //Read PGE LVLX File
@@ -209,7 +222,15 @@ bool FileFormats::SaveLevelFile(LevelData &FileData,
     case LVL_PGEX:
     {
         FileData.stars = smbx64CountStars(FileData);
-        if(!FileFormats::WriteExtendedLvlFile(file, FileData))
+        if(FileFormats::g_use_mdx)
+        {
+            if(!MDX_save_level(file, FileData))
+            {
+                FileData.meta.ERROR_info += "Cannot save file " + filePath + ".";
+                return false;
+            }
+        }
+        else if(!FileFormats::WriteExtendedLvlFile(file, FileData))
         {
             FileData.meta.ERROR_info += "Cannot save file " + filePath + ".";
             return false;
@@ -376,6 +397,12 @@ bool FileFormats::OpenWorldFileT(PGE_FileFormats_misc::TextInput &file, WorldDat
         if(!ReadSMBX64WldFile(file, data))
             return false;
     }
+    else if(FileFormats::g_use_mdx)
+    {
+        //Read PGE WLDX File with MDX
+        if(!MDX_load_world(file, data))
+            return false;
+    }
     else
     {
         //Read PGE WLDX File
@@ -451,6 +478,11 @@ bool FileFormats::OpenWorldFileHeaderT(PGE_FileFormats_misc::TextInput &file, Wo
         //Read SMBX WLD File
         return ReadSMBX64WldFileHeaderT(file, data);
     }
+    else if(g_use_mdx)
+    {
+        //Read PGE WLDX File with MDX
+        return MDX_load_world_header(file, data);
+    }
     else
     {
         //Read PGE WLDX File
@@ -476,7 +508,15 @@ bool FileFormats::SaveWorldFile(WorldData &FileData,
     {
     case WLD_PGEX:
     {
-        if(!FileFormats::WriteExtendedWldFile(file, FileData))
+        if(FileFormats::g_use_mdx)
+        {
+            if(!MDX_save_world(file, FileData))
+            {
+                FileData.meta.ERROR_info += "Cannot save file " + filePath + ".";
+                return false;
+            }
+        }
+        else if(!FileFormats::WriteExtendedWldFile(file, FileData))
         {
             FileData.meta.ERROR_info += "Cannot save file " + filePath + ".";
             return false;

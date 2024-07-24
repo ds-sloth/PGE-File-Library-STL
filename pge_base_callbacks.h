@@ -34,7 +34,6 @@
 #define PGE_BASE_CALLBACKS_H
 
 #include <cstddef>
-#include <exception>
 
 #ifdef PGE_FILES_QT
 typedef int     pge_size_t;
@@ -46,22 +45,6 @@ struct FileFormatsError;
 
 namespace PGE_FileFormats_misc
 {
-
-// error that callbacks may raise when unpacking object
-class callback_error : std::exception
-{
-    const char* const m_message = nullptr;
-public:
-    callback_error(const char* message) noexcept : m_message(message) {}
-    virtual const char* what() const noexcept
-    {
-        return m_message;
-    }
-};
-
-// way that callbacks may fully terminate parse process without any error
-class callback_interrupt : std::exception {};
-
 
 struct LoadCallbacks
 {
