@@ -25,48 +25,22 @@
  */
 
 /*!
- *  \file pge_base_callbacks.h
- *  \brief Contains base structures used for PGE-FL's callbacks
+ *  \file mdx_meta_file.h
+ *  \brief Contains data structure definitions for the MDX meta (bookmarks) loader
  */
 
 #pragma once
-#ifndef PGE_BASE_CALLBACKS_H
-#define PGE_BASE_CALLBACKS_H
+#ifndef MDX_META_FILE_H
+#define MDX_META_FILE_H
 
-#include <cstddef>
+#include "pge_file_lib_globs.h"
+#include "meta_filedata.h"
 
-#ifdef PGE_FILES_QT
-typedef int     pge_size_t;
-#else
-typedef size_t  pge_size_t;
-#endif
+bool MDX_load_meta(PGE_FileFormats_misc::TextInput& input, const MetaLoadCallbacks& callbacks);
+bool MDX_load_meta(PGE_FileFormats_misc::TextInput &file, MetaData &FileData);
+bool MDX_load_meta_header(PGE_FileFormats_misc::TextInput &file, MetaData &FileData);
 
-struct FileFormatsError;
+bool MDX_save_meta(PGE_FileFormats_misc::TextOutput& output, const MetaSaveCallbacks& callbacks);
+bool MDX_save_meta(PGE_FileFormats_misc::TextOutput &file, const MetaData &FileData);
 
-namespace PGE_FileFormats_misc
-{
-
-struct LoadCallbacks
-{
-    template<class obj_t> using callback = bool (*)(void* userdata, obj_t& obj);
-    using err_callback = void (*)(void* userdata, FileFormatsError& err);
-
-    void* userdata = nullptr;
-    err_callback on_error = nullptr;
-};
-
-struct SaveCallbacks
-{
-    template<class obj_t> using callback = bool (*)(const void* userdata, obj_t& obj, pge_size_t index);
-    using err_callback = void (*)(void* err_userdata, FileFormatsError& err);
-
-    const void* userdata = nullptr;
-    void* err_userdata = nullptr;
-    err_callback on_error = nullptr;
-};
-
-}
-
-#include "meta_filedata.h" // def'n of FileFormatsError
-
-#endif // #ifndef PGE_BASE_CALLBACKS_H
+#endif // #ifndef MDX_META_FILE_H
