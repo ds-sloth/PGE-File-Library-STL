@@ -59,6 +59,8 @@ static bool s_load_head(void* _FileData, LevelHead& dest)
     FileData.meta.configPackId = dest.configPackId;
     FileData.music_files = dest.music_files;
 
+    FileData.music_overrides = dest.music_overrides;
+
     return true;
 }
 
