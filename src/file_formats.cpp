@@ -30,8 +30,7 @@
 
 #include "file_formats.h"
 
-// bool FileFormats::g_use_mdx = false;
-constexpr bool FileFormats::g_use_mdx;
+bool FileFormats::g_use_mdx = false;
 
 PGESTRING FileFormats::removeQuotes(const PGESTRING &str)
 {
