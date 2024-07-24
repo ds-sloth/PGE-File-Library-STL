@@ -72,7 +72,7 @@ static bool s_load_head(void* _FileData, WorldHead& dest)
 static bool s_load_head_only(void* _FileData, WorldHead& dest)
 {
     s_load_head(_FileData, dest);
-    throw MDX_callback_interrupt();
+    throw PGE_FileFormats_misc::callback_interrupt();
 }
 
 static bool s_save_head(const void* _FileData, WorldHead& dest, pge_size_t index)

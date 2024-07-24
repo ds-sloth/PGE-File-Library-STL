@@ -65,7 +65,7 @@ static bool s_load_head(void* _FileData, LevelHead& dest)
 static bool s_load_head_only(void* _FileData, LevelHead& dest)
 {
     s_load_head(_FileData, dest);
-    throw MDX_callback_interrupt();
+    throw PGE_FileFormats_misc::callback_interrupt();
 }
 
 static bool s_save_head(const void* _FileData, LevelHead& dest, pge_size_t index)
@@ -141,7 +141,7 @@ static bool s_load_section(void* _FileData, LevelSection& dest)
     pge_size_t sections_count = FileData.sections.size();
 
     if(dest.id < 0 || dest.id > 1000)
-        throw MDX_callback_error("Invalid section ID");
+        throw PGE_FileFormats_misc::callback_error("Invalid section ID");
 
     if(dest.id >= static_cast<int>(sections_count))
     {
@@ -398,7 +398,7 @@ static bool s_load_event(void* _FileData, LevelSMBX64Event& event)
         )//Append sections
         {
             if(sectionSet.id < 0 || sectionSet.id > 1000)
-                throw MDX_callback_error("Invalid section ID");
+                throw PGE_FileFormats_misc::callback_error("Invalid section ID");
 
             long last = static_cast<long>(padded_sets.size() - 1);
 
@@ -518,7 +518,7 @@ static bool s_save_script(const void* _FileData, LevelScript& obj, pge_size_t in
 static bool s_load_levelitem38a(void* _FileData, LevelItemSetup38A& customcfg38A)
 {
     if(customcfg38A.type < 0)
-        throw MDX_callback_error("Invalid 38A ID");
+        throw PGE_FileFormats_misc::callback_error("Invalid 38A ID");
 
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
     FileData.custom38A_configs.push_back(std::move(customcfg38A));
