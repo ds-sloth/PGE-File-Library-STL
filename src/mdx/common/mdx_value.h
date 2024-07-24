@@ -66,6 +66,18 @@ struct MDX_Value<PGELIST<bool>>
     }
 };
 
+template<class value_t>
+inline const char* MDX_load_value(value_t& dest, const char* field_data)
+{
+    return MDX_Value<value_t>::load(dest, field_data);
+}
+
+template<class value_t>
+inline bool MDX_save_value(std::string& out, const value_t& src)
+{
+    return MDX_Value<value_t>::save(out, src);
+}
+
 #include "mdx/common/value/mdx_value_list.hpp"
 #include "mdx/common/value/mdx_value_object.hpp"
 #include "mdx/common/value/mdx_value_objectlist.hpp"

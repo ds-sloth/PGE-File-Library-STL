@@ -59,7 +59,7 @@ const char* MDX_Value_Object<obj_loader_t>::load(typename obj_loader_t::obj_t& d
 
     std::string object_string;
 
-    const char* next = MDX_Value<std::string>::load(object_string, field_data);
+    const char* next = MDX_load_value(object_string, field_data);
 
     s_obj_loader.load_object(&dest, object_string.c_str());
 
@@ -75,7 +75,7 @@ bool MDX_Value_Object<obj_loader_t>::save(std::string& out, const typename obj_l
     if(!s_obj_loader.save_object(object_string, &src, &ref))
         return false;
 
-    MDX_Value<std::string>::save(out, object_string);
+    MDX_save_value(out, object_string);
 
     return true;
 }

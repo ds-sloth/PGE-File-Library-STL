@@ -140,7 +140,7 @@ const char* MDX_Value<QString>::load(QString& dest, const char* field_data)
 {
     std::string dest_utf8;
 
-    const char* ret = MDX_Value<std::string>::load(dest_utf8, field_data);
+    const char* ret = MDX_load_value(dest_utf8, field_data);
     dest = QString::fromStdString(dest_utf8);
 
     return ret;
@@ -151,6 +151,6 @@ bool MDX_Value<QString>::save(std::string& out, const QString& src)
 {
     std::string src_utf8 = src.toStdString();
 
-    return MDX_Value<std::string>::save(out, src_utf8);
+    return MDX_save_value(out, src_utf8);
 }
 #endif

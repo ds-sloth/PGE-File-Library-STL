@@ -76,7 +76,7 @@ const char* MDX_Value_ObjectList<obj_loader_t>::load(PGELIST<typename obj_loader
 
         try
         {
-            cur_pos = MDX_Value<std::string>::load(object_string, cur_pos);
+            cur_pos = MDX_load_value(object_string, cur_pos);
             cur_pos = MDX_finish_list_item(cur_pos);
 
             s_obj_loader.load_object(&dest.back(), object_string.c_str());
@@ -112,7 +112,7 @@ bool MDX_Value_ObjectList<obj_loader_t>::save(std::string& out, const PGELIST<ty
 
         if(s_obj_loader.save_object(object_string, &s, &ref))
         {
-            MDX_Value<std::string>::save(out, object_string);
+            MDX_save_value(out, object_string);
 
             out.push_back(',');
         }

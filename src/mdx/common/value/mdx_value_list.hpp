@@ -85,7 +85,7 @@ const char* MDX_Value<PGELIST<subtype_t>>::load(PGELIST<subtype_t>& dest, const 
 
         try
         {
-            cur_pos = MDX_Value<subtype_t>::load(dest.back(), cur_pos);
+            cur_pos = MDX_load_value(dest.back(), cur_pos);
             cur_pos = MDX_finish_list_item(cur_pos);
         }
         catch(const MDX_parse_error&)
@@ -112,7 +112,7 @@ bool MDX_Value<PGELIST<subtype_t>>::save(std::string& out, const PGELIST<subtype
 
     for(const subtype_t& s : src)
     {
-        if(MDX_Value<subtype_t>::save(out, s))
+        if(MDX_save_value(out, s))
             out.push_back(',');
     }
 

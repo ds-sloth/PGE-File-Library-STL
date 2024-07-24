@@ -91,7 +91,7 @@ struct MDX_Field : public MDX_BaseField
     {
         obj_t& dest = *reinterpret_cast<obj_t*>(_dest);
 
-        return MDX_Value<field_t>::load(dest.*m_field, field_data);
+        return MDX_load_value(dest.*m_field, field_data);
     }
 
     virtual bool can_save(const void* _src, const void* _ref) const
@@ -106,7 +106,7 @@ struct MDX_Field : public MDX_BaseField
     {
         const obj_t& src = *reinterpret_cast<const obj_t*>(_src);
 
-        return MDX_Value<field_t>::save(out, src.*m_field);
+        return MDX_save_value(out, src.*m_field);
     }
 };
 
@@ -120,7 +120,7 @@ struct MDX_NonNegField : public MDX_Field<obj_t, field_t>
     {
         obj_t& dest = *reinterpret_cast<obj_t*>(_dest);
 
-        const char* ret = MDX_Value<field_t>::load(dest.*m_field, field_data);
+        const char* ret = MDX_load_value(dest.*m_field, field_data);
 
         if(*field_data == '-' || dest.*m_field < 0)
             throw(MDX_bad_term("Negative value"));
@@ -182,7 +182,7 @@ struct MDX_NestedField : public MDX_BaseField
     {
         obj_t& dest = *reinterpret_cast<obj_t*>(_dest);
 
-        return MDX_Value<field_t>::load(dest.*m_substruct.*m_field, field_data);
+        return MDX_load_value(dest.*m_substruct.*m_field, field_data);
     }
 
     virtual bool can_save(const void* _src, const void* _ref) const
@@ -197,7 +197,7 @@ struct MDX_NestedField : public MDX_BaseField
     {
         const obj_t& src = *reinterpret_cast<const obj_t*>(_src);
 
-        return MDX_Value<field_t>::save(out, src.*m_substruct.*m_field);
+        return MDX_save_value(out, src.*m_substruct.*m_field);
     }
 };
 
@@ -212,7 +212,7 @@ struct MDX_NonNegNestedField : public MDX_NestedField<obj_t, substruct_t, field_
     {
         obj_t& dest = *reinterpret_cast<obj_t*>(_dest);
 
-        const char* ret = MDX_Value<field_t>::load(dest.*m_substruct.*m_field, field_data);
+        const char* ret = MDX_load_value(dest.*m_substruct.*m_field, field_data);
 
         if(*field_data == '-' || dest.*m_substruct.*m_field < 0)
             throw(MDX_bad_term("Illegal negative"));
@@ -230,7 +230,7 @@ struct MDX_FieldXtra : public MDX_BaseField
     virtual const char* do_load(void* _dest, const char* field_data) const
     {
         obj_t& dest = *reinterpret_cast<obj_t*>(_dest);
-        return MDX_Value<PGESTRING>::load(dest.meta.custom_params, field_data);
+        return MDX_load_value(dest.meta.custom_params, field_data);
     }
 
     virtual bool can_save(const void* _src, const void* ref) const
@@ -245,7 +245,7 @@ struct MDX_FieldXtra : public MDX_BaseField
     {
         const obj_t& src = *reinterpret_cast<const obj_t*>(_src);
 
-        return MDX_Value<PGESTRING>::save(out, src.meta.custom_params);
+        return MDX_save_value(out, src.meta.custom_params);
     }
 };
 

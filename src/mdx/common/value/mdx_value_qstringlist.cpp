@@ -56,7 +56,7 @@ const char* MDX_Value<QStringList>::load(QStringList& dest, const char* field_da
     {
         try
         {
-            cur_pos = MDX_Value<std::string>::load(got_utf8, cur_pos);
+            cur_pos = MDX_load_value(got_utf8, cur_pos);
             cur_pos = MDX_finish_list_item(cur_pos);
         }
         catch(const MDX_parse_error&)
@@ -92,7 +92,7 @@ bool MDX_Value<QStringList>::save(std::string& out, const QStringList& src)
     {
         src_i_utf8 = s.toStdString();
 
-        MDX_Value<std::string>::save(out, src_i_utf8);
+        MDX_save_value(out, src_i_utf8);
         out.push_back(',');
     }
 
