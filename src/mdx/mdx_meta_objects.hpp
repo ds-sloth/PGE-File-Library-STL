@@ -39,8 +39,8 @@
 #include "meta_filedata.h"
 #include "pge_file_lib_private.h"
 
-#include "mdx/mdx_base_file.hpp"
-#include "mdx/mdx_macros.hpp"
+#include "mdx/common/mdx_file.h"
+#include "mdx/common/mdx_macros.h"
 
 MDX_SETUP_OBJECT(Bookmark,
     MDX_FIELD("BM", bookmarkName); //Bookmark name

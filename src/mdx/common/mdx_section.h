@@ -43,8 +43,8 @@
 #include <string>
 
 #include "pge_file_lib_globs.h"
-#include "mdx/mdx_base_field.hpp"
-#include "mdx/mdx_base_object.hpp"
+#include "mdx/common/mdx_field.h"
+#include "mdx/common/mdx_object.h"
 
 inline void MDX_skip_section(PGE_FileFormats_misc::TextInput& inf, std::string& cur_line, const char* section_name);
 

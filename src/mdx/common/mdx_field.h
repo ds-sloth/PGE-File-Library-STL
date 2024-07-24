@@ -29,7 +29,7 @@
 #define MDX_BASE_FIELD_HPP
 
 #include "pge_file_lib_globs.h"
-#include "mdx/mdx_exception.hpp"
+#include "mdx/common/mdx_exception.h"
 
 #include <string>
 

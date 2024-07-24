@@ -33,7 +33,7 @@
  */
 
 #include "mdx/mdx_world_file.h"
-#include "mdx/mdx_exception.hpp"
+#include "mdx/common/mdx_exception.h"
 #include "file_formats.h"
 #include "pge_file_lib_private.h"
 #include "pge_file_lib_globs.h"

@@ -29,9 +29,9 @@
 #include <limits>
 #include <cmath>
 #include <cstdarg>
-#include "mdx/mdx_base_field.hpp"
-#include "mdx/mdx_base_object.hpp"
-#include "mdx/milo_yip/itoa.h"
+#include "mdx/common/mdx_field.h"
+#include "mdx/common/mdx_object.h"
+#include "mdx/common/milo_yip/itoa.h"
 
 #include "pge_file_lib_globs.h"
 

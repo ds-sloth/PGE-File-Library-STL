@@ -29,7 +29,7 @@
 #define MDX_BASE_OBJECT_HPP
 
 #include <vector>
-#include "mdx/mdx_base_field.hpp"
+#include "mdx/common/mdx_field.h"
 
 /*! \file mdx_base_object.hpp
  *

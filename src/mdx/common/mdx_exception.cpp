@@ -27,7 +27,7 @@
 #include <cstring>
 #include <cstdio>
 
-#include "mdx/mdx_exception.hpp"
+#include "mdx/common/mdx_exception.h"
 
 const char* MDX_exception::what() const noexcept
 {

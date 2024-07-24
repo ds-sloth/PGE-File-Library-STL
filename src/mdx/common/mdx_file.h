@@ -43,8 +43,8 @@
 #include <string>
 
 #include "pge_file_lib_globs.h"
-#include "mdx/mdx_base_field.hpp"
-#include "mdx/mdx_base_section.hpp"
+#include "mdx/common/mdx_field.h"
+#include "mdx/common/mdx_section.h"
 
 template<class _load_callbacks_t, class _save_callbacks_t>
 struct MDX_File
