@@ -49,158 +49,39 @@ struct LevelEvent_layers
     PGESTRING toggle;
 };
 
-bool FileFormats::ReadSMBX64LvlFileHeader(const PGESTRING &filePath, LevelData &FileData)
+namespace PGEFL
 {
-    FileData.meta.ERROR_info.clear();
-    CreateLevelHeader(FileData);
-    FileData.meta.RecentFormat = LevelData::SMBX64;
-    FileData.meta.RecentFormatVersion = 64;
-    PGE_FileFormats_misc::TextFileInput inf;
 
-    if(!inf.open(filePath, false))
-    {
-        FileData.meta.ERROR_info = "Can't open file";
-        FileData.meta.ReadFileValid = false;
-        return false;
-    }
-    return ReadSMBX64LvlFileHeaderT(inf, FileData);
-}
-
-bool FileFormats::ReadSMBX64LvlFileHeaderRaw(PGESTRING &rawdata, const PGESTRING &filePath, LevelData &FileData)
+namespace SMBX64
 {
-    FileData.meta.ERROR_info.clear();
-    CreateLevelHeader(FileData);
-    FileData.meta.RecentFormat = LevelData::SMBX64;
-    FileData.meta.RecentFormatVersion = 64;
-    PGE_FileFormats_misc::RawTextInput inf;
-
-    if(!inf.open(&rawdata, filePath))
-    {
-        FileData.meta.ERROR_info = "Can't open file";
-        FileData.meta.ReadFileValid = false;
-        return false;
-    }
-    return ReadSMBX64LvlFileHeaderT(inf, FileData);
-}
-
-bool FileFormats::ReadSMBX64LvlFileHeaderT(PGE_FileFormats_misc::TextInput &inf, LevelData &FileData)
-{
-    PGE_FileFormats_misc::FileInfo in_1(inf.getFilePath());
-    FileData.meta.filename = in_1.basename();
-    FileData.meta.path = in_1.dirpath();
-    FileData.meta.RecentFormat = LevelData::SMBX64;
-    FileData.meta.RecentFormatVersion = 64;
-    inf.seek(0, PGE_FileFormats_misc::TextFileInput::begin);
-    SMBX64_FileBegin();
-#define nextLineH() inf.readCVSLine(line)
-
-    try
-    {
-        nextLineH();                                    //Read first line
-        SMBX64::ReadUInt(&file_format, line);           //File format number
-        FileData.meta.RecentFormatVersion = file_format;
-
-        if(file_format >= 17)
-        {
-            nextLineH();                                //Read second Line
-            SMBX64::ReadUInt(&FileData.stars, line);    //Number of stars
-        }
-        else
-            FileData.stars = 0;
-
-        if(file_format >= 60)
-        {
-            nextLineH();   //Read third line
-            SMBX64::ReadStr(&FileData.LevelName, line); //LevelTitle
-        }
-        else
-            FileData.LevelName.clear();
-
-        FileData.CurSection = 0;
-        FileData.playmusic = false;
-        FileData.meta.ReadFileValid = true;
-        return true;
-    }
-    catch(const std::exception &err)
-    {
-        if(file_format > 0)
-            FileData.meta.ERROR_info = "Detected file format: SMBX-" + fromNum(file_format) + " is invalid\n";
-        else
-            FileData.meta.ERROR_info = "It is not an SMBX level file\n";
-
-#ifdef PGE_FILES_QT
-        FileData.meta.ERROR_info += QString::fromStdString(exception_to_pretty_string(err));
-#else
-        FileData.meta.ERROR_info += exception_to_pretty_string(err);
-#endif
-        FileData.meta.ERROR_linenum = inf.getCurrentLineNumber();
-        FileData.meta.ERROR_linedata = std::move(line);
-        FileData.meta.ReadFileValid = false;
-        PGE_CutLength(FileData.meta.ERROR_linedata, 50);
-        PGE_FilterBinary(FileData.meta.ERROR_linedata);
-        return false;
-    }
-}
 
 
-
-bool FileFormats::ReadSMBX64LvlFileF(const PGESTRING &filePath, LevelData &FileData)
-{
-    PGE_FileFormats_misc::TextFileInput file;
-
-    if(!file.open(filePath, false))
-    {
-        FileData.meta.ERROR_info = "Failed to open file for read";
-        FileData.meta.ERROR_linedata.clear();
-        FileData.meta.ERROR_linenum = -1;
-        FileData.meta.ReadFileValid = false;
-        return false;
-    }
-
-    return ReadSMBX64LvlFile(file, FileData);
-}
-
-bool FileFormats::ReadSMBX64LvlFileRaw(PGESTRING &rawdata, const PGESTRING &filePath,  LevelData &FileData)
-{
-    PGE_FileFormats_misc::RawTextInput file;
-
-    if(!file.open(&rawdata, filePath))
-    {
-        FileData.meta.ERROR_info = "Failed to open raw string for read";
-        FileData.meta.ERROR_linedata.clear();
-        FileData.meta.ERROR_linenum = -1;
-        FileData.meta.ReadFileValid = false;
-        return false;
-    }
-
-    return ReadSMBX64LvlFile(file, FileData);
-}
-
-bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelData &FileData)
+bool ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelLoadCallbacks &cb)
 {
     SMBX64_FileBegin();
     PGESTRING filePath = in.getFilePath();
     //SMBX64_File( RawData );
     int i;                  //counters
-    CreateLevelData(FileData);
-    FileData.meta.RecentFormat = LevelData::SMBX64;
-    FileData.meta.RecentFormatVersion = 64;
-    FileData.LevelName.clear();
-    FileData.stars = 0;
-    FileData.CurSection = 0;
-    FileData.playmusic = false;
+
+    LevelHead head;
+    head.RecentFormat = LevelData::SMBX64;
+    head.RecentFormatVersion = 64;
+    head.LevelName.clear();
+    head.stars = 0;
+    // FileData.CurSection = 0;
+    // FileData.playmusic = false;
     //Enable strict mode for SMBX LVL file format
-    FileData.meta.smbx64strict = true;
+    // FileData.meta.smbx64strict = true;
     //Begin all ArrayID's here;
-    FileData.blocks_array_id = 1;
-    FileData.bgo_array_id = 1;
-    FileData.npc_array_id = 1;
-    FileData.doors_array_id = 1;
-    FileData.physenv_array_id = 1;
-    FileData.layers_array_id = 1;
-    FileData.events_array_id = 1;
-    FileData.layers.clear();
-    FileData.events.clear();
+    // FileData.blocks_array_id = 1;
+    // FileData.bgo_array_id = 1;
+    // FileData.npc_array_id = 1;
+    // FileData.doors_array_id = 1;
+    // FileData.physenv_array_id = 1;
+    // FileData.layers_array_id = 1;
+    // FileData.events_array_id = 1;
+    // FileData.layers.clear();
+    // FileData.events.clear();
     LevelSection section;
     int sct;
     PlayerPoint players;
@@ -214,34 +95,29 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
     LevelEvent_layers events_layers;
     LevelEvent_Sets events_sets;
 
-    //Add path data
-    if(!IsEmpty(filePath))
-    {
-        PGE_FileFormats_misc::FileInfo in_1(filePath);
-        FileData.meta.filename = in_1.basename();
-        FileData.meta.path = in_1.dirpath();
-    }
-
     try
     {
         ///////////////////////////////////////Begin file///////////////////////////////////////
         nextLine();   //Read first line
         SMBX64::ReadUInt(&file_format, line);//File format number
-        FileData.meta.RecentFormatVersion = file_format;
+        head.RecentFormatVersion = file_format;
 
         if(ge(17))
         {
             nextLine();
-            SMBX64::ReadUInt(&FileData.stars, line); //Number of stars
+            SMBX64::ReadUInt(&head.stars, line); //Number of stars
         }
         else
-            FileData.stars = 0; //-V1048
+            head.stars = 0; //-V1048
 
         if(ge(60))
         {
             nextLine();    //LevelTitle
-            SMBX64::ReadStr(&FileData.LevelName, line);
+            SMBX64::ReadStr(&head.LevelName, line);
         }
+
+        if(cb.load_head)
+            cb.load_head(cb.userdata, head);
 
         //total sections
         sct = (ge(8) ? 21 : 6);
@@ -249,7 +125,7 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
         ////////////SECTION Data//////////
         for(i = 0; i < sct; i++)
         {
-            section = CreateLvlSection();
+            section = FileFormats::CreateLvlSection();
             nextLine();
             SMBX64::ReadSIntFromFloat(&section.size_left, line);
             nextLine();
@@ -287,33 +163,26 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
                 SMBX64::ReadStr(&section.music_file, line);
             }
 
-            //Very important data! I'ts a camera position in the editor!
-            section.PositionX = section.size_left - 10; //left
-            section.PositionY = section.size_top - 10; //top
             section.id = i;
 
-            if(i < static_cast<signed>(FileData.sections.size()))
-                FileData.sections[static_cast<pge_size_t>(i)] = section; //Replace if already exists
-            else
-                FileData.sections.push_back(section); //Add Section in main array
+            if(cb.load_section)
+                cb.load_section(cb.userdata, section);
         }
 
         if(lt(8))
             for(; i < 21; i++)
             {
-                section = CreateLvlSection();
+                section = FileFormats::CreateLvlSection();
                 section.id = i;
 
-                if(i < static_cast<signed>(FileData.sections.size()))
-                    FileData.sections[static_cast<pge_size_t>(i)] = section; //Replace if already exists
-                else
-                    FileData.sections.push_back(section); //Add Section in main array
+                if(cb.load_section)
+                    cb.load_section(cb.userdata, section);
             }
 
         //Player's point config
         for(i = 0; i < 2; i++)
         {
-            players = CreateLvlPlayerPoint();
+            players = FileFormats::CreateLvlPlayerPoint();
             nextLine();
             SMBX64::ReadSIntFromFloat(&players.x, line);//Player x
             nextLine();
@@ -325,7 +194,10 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
             players.id = static_cast<unsigned int>(i) + 1u;
 
             if(players.x != 0 && players.y != 0 && players.w != 0 && players.h != 0) //Don't add into array non-exist point
-                FileData.players.push_back(players);    //Add player in array
+            {
+                if(cb.load_startpoint)
+                    cb.load_startpoint(cb.userdata, players);
+            }
         }
 
         ////////////Block Data//////////
@@ -333,7 +205,7 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
 
         while(line != "next")
         {
-            blocks = CreateLvlBlock();
+            blocks = FileFormats::CreateLvlBlock();
             SMBX64::ReadSIntFromFloat(&blocks.x, line);
             nextLine();
             SMBX64::ReadSIntFromFloat(&blocks.y, line);
@@ -348,7 +220,7 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
             SMBX64::ReadUInt(&xnpcID, line); //Containing NPC id
             {
                 //Convert NPC-ID value from SMBX1/2 to SMBX64
-                if((s_smbx64_flags & F_SMBX64_KEEP_LEGACY_NPC_IN_BLOCK_CODES) == 0)
+                if((s_smbx64_flags & FileFormats::F_SMBX64_KEEP_LEGACY_NPC_IN_BLOCK_CODES) == 0)
                 {
                     switch(xnpcID)
                     {
@@ -421,9 +293,8 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
                 SMBX64::ReadStr(&blocks.event_emptylayer, line);
             }
 
-            blocks.meta.array_id = FileData.blocks_array_id++;
-            blocks.meta.index = static_cast<unsigned int>(FileData.blocks.size()); //Apply element index
-            FileData.blocks.push_back(blocks); //AddBlock into array
+            if(cb.load_block)
+                cb.load_block(cb.userdata, blocks);
             nextLine();
         }
 
@@ -432,7 +303,7 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
 
         while(line != "next")
         {
-            bgodata = CreateLvlBgo();
+            bgodata = FileFormats::CreateLvlBgo();
             SMBX64::ReadSIntFromFloat(&bgodata.x, line);
             nextLine();
             SMBX64::ReadSIntFromFloat(&bgodata.y, line);
@@ -453,9 +324,8 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
                 bgodata.smbx64_sp = 125;
             }
 
-            bgodata.meta.array_id = FileData.bgo_array_id++;
-            bgodata.meta.index = static_cast<unsigned int>(FileData.bgo.size()); //Apply element index
-            FileData.bgo.push_back(bgodata); //Add Background object into array
+            if(cb.load_bgo)
+                cb.load_bgo(cb.userdata, bgodata);
             nextLine();
         }
 
@@ -464,7 +334,7 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
 
         while(line != "next")
         {
-            npcdata = CreateLvlNpc();
+            npcdata = FileFormats::CreateLvlNpc();
             SMBX64::ReadSIntFromFloat(&npcdata.x, line);
             nextLine();
             SMBX64::ReadSIntFromFloat(&npcdata.y, line);
@@ -607,9 +477,9 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
                 nextLine();    //Layer name to attach
                 SMBX64::ReadStr(&npcdata.attach_layer, line);
             }
-            npcdata.meta.array_id = FileData.npc_array_id++;
-            npcdata.meta.index = static_cast<unsigned>(FileData.npc.size()); //Apply element index
-            FileData.npc.push_back(npcdata); //Add NPC into array
+
+            if(cb.load_npc)
+                cb.load_npc(cb.userdata, npcdata);
             nextLine();
         }
 
@@ -621,7 +491,7 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
             || ((file_format < 10) && (!IsEmpty(line)) && (!in.eof()))
         )
         {
-            doors = CreateLvlWarp();
+            doors = FileFormats::CreateLvlWarp();
             doors.isSetIn = true;
             doors.isSetOut = true;
             SMBX64::ReadSIntFromFloat(&doors.ix, line); //Entrance x
@@ -692,9 +562,8 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
                 SMBX64::ReadCSVBool(&doors.locked, line);
             }
 
-            doors.meta.array_id = FileData.doors_array_id++;
-            doors.meta.index = static_cast<unsigned>(FileData.doors.size()); //Apply element index
-            FileData.doors.push_back(doors); //Add NPC into array
+            if(cb.load_warp)
+                cb.load_warp(cb.userdata, doors);
             nextLine();
         }
 
@@ -705,7 +574,7 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
 
             while(line != "next")
             {
-                waters = CreateLvlPhysEnv();
+                waters = FileFormats::CreateLvlPhysEnv();
                 SMBX64::ReadSIntFromFloat(&waters.x, line);
                 nextLine();
                 SMBX64::ReadSIntFromFloat(&waters.y, line);
@@ -724,9 +593,9 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
 
                 nextLine();
                 SMBX64::ReadStr(&waters.layer, line);
-                waters.meta.array_id = FileData.physenv_array_id++;
-                waters.meta.index = static_cast<unsigned>(FileData.physez.size()); //Apply element index
-                FileData.physez.push_back(waters); //Add Water area into array
+
+                if(cb.load_phys)
+                    cb.load_phys(cb.userdata, waters);
                 nextLine();
             }
         }
@@ -742,8 +611,9 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
                 nextLine();
                 SMBX64::ReadCSVBool(&layers.hidden, line); //hidden layer
                 layers.locked = false;
-                layers.meta.array_id = FileData.layers_array_id++;
-                FileData.layers.push_back(layers); //Add Water area into array
+
+                if(cb.load_layer)
+                    cb.load_layer(cb.userdata, layers);
                 nextLine();
             }
 
@@ -752,7 +622,7 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
 
             while((!IsEmpty(line)) && (!in.eof()))
             {
-                events = CreateLvlEvent();
+                events = FileFormats::CreateLvlEvent();
                 SMBX64::ReadStr(&events.name, line);//Event name
 
                 if(ge(11))
@@ -912,34 +782,33 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
 //                    }
                 }
 
-                events.meta.array_id = FileData.events_array_id++;
-                FileData.events.push_back(events);
+                if(cb.load_event)
+                    cb.load_event(cb.userdata, events);
                 nextLine();
             }
         }
 
-        LevelAddInternalEvents(FileData);
         ///////////////////////////////////////EndFile///////////////////////////////////////
-        FileData.meta.ReadFileValid = true;
         return true;
     }
-    catch(const std::exception &err)
+    catch(const PGE_FileFormats_misc::callback_interrupt& e)
     {
-        if(file_format > 0)
-            FileData.meta.ERROR_info = "Detected file format: SMBX-" + fromNum(file_format) + " is invalid\n";
-        else
-            FileData.meta.ERROR_info = "It is not an SMBX level file\n";
+        // not an error!
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        if(cb.on_error)
+        {
+            FileFormatsError error;
+            if(file_format > 0)
+                error.ERROR_info = "Detected file format: SMBX-" + fromNum(file_format) + " is invalid\n";
+            else
+                error.ERROR_info = "It is not an SMBX level file\n";
+            error.add_exc_info(e, in.getCurrentLineNumber(), std::move(line));
+            cb.on_error(cb.userdata, error);
+        }
 
-#ifdef PGE_FILES_QT
-        FileData.meta.ERROR_info += QString::fromStdString(exception_to_pretty_string(err));
-#else
-        FileData.meta.ERROR_info += exception_to_pretty_string(err);
-#endif
-        FileData.meta.ERROR_linenum  = in.getCurrentLineNumber();
-        FileData.meta.ERROR_linedata = std::move(line);
-        FileData.meta.ReadFileValid = false;
-        PGE_CutLength(FileData.meta.ERROR_linedata, 50);
-        PGE_FilterBinary(FileData.meta.ERROR_linedata);
         return false;
     }
 }
@@ -955,35 +824,7 @@ bool FileFormats::ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelDa
 //****************WRITE FILE FORMAT************************
 //*********************************************************
 
-bool FileFormats::WriteSMBX64LvlFileF(const PGESTRING &filePath, LevelData &FileData, unsigned int file_format)
-{
-    FileData.meta.ERROR_info.clear();
-    PGE_FileFormats_misc::TextFileOutput file;
-
-    if(!file.open(filePath, false, true, PGE_FileFormats_misc::TextOutput::truncate))
-    {
-        FileData.meta.ERROR_info = "Fail to open file for write";
-        return false;
-    }
-
-    return WriteSMBX64LvlFile(file, FileData, file_format);
-}
-
-bool FileFormats::WriteSMBX64LvlFileRaw(LevelData &FileData, PGESTRING &rawdata, unsigned int file_format)
-{
-    FileData.meta.ERROR_info.clear();
-    PGE_FileFormats_misc::RawTextOutput file;
-
-    if(!file.open(&rawdata, PGE_FileFormats_misc::TextOutput::truncate))
-    {
-        FileData.meta.ERROR_info = "Failed to open raw string for write";
-        return false;
-    }
-
-    return WriteSMBX64LvlFile(file, FileData, file_format);
-}
-
-bool FileFormats::WriteSMBX64LvlFile(PGE_FileFormats_misc::TextOutput &out, LevelData &FileData, unsigned int file_format)
+bool WriteSMBX64LvlFile(PGE_FileFormats_misc::TextOutput &out, LevelData &FileData, unsigned int file_format)
 {
     pge_size_t i, j;
 
@@ -997,9 +838,9 @@ bool FileFormats::WriteSMBX64LvlFile(PGE_FileFormats_misc::TextOutput &out, Leve
     }
 
     //Sort blocks array by X->Y
-    smbx64LevelSortBlocks(FileData);
+    FileFormats::smbx64LevelSortBlocks(FileData);
     //Sort BGO's array by SortPriority->X->Y
-    smbx64LevelSortBGOs(FileData);
+    FileFormats::smbx64LevelSortBGOs(FileData);
 
     //Prevent out of range: 0....64
     if(file_format > 64)
@@ -1104,7 +945,7 @@ bool FileFormats::WriteSMBX64LvlFile(PGE_FileFormats_misc::TextOutput &out, Leve
         if(npcID < 0)
         {
             npcID *= -1;
-            if((s_smbx64_flags & F_SMBX64_KEEP_LEGACY_NPC_IN_BLOCK_CODES) == 0 && npcID > 99)
+            if((s_smbx64_flags & FileFormats::F_SMBX64_KEEP_LEGACY_NPC_IN_BLOCK_CODES) == 0 && npcID > 99)
                 npcID = 99;
         }
         else if(npcID != 0)
@@ -1490,3 +1331,7 @@ bool FileFormats::WriteSMBX64LvlFile(PGE_FileFormats_misc::TextOutput &out, Leve
 
     return true;
 }
+
+} // namespace X64
+
+} // namespace PGEFL

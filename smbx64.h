@@ -40,6 +40,9 @@
 /*!
  * \brief SMBX64 Standard validation and raw data conversion functions
  */
+namespace PGEFL
+{
+
 namespace SMBX64
 {
     /*******************Readers With Exception throwers********************/
@@ -455,7 +458,9 @@ namespace SMBX64
     inline double ms_to_65(double ms)
     { return ms * (65.0/1000.0); }
 
-}
+} // namespace SMBX64
+
+} // namespace PGEFL
 
 
 #endif // SMBX64_H

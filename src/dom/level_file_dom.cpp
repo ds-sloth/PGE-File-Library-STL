@@ -32,11 +32,18 @@
  *
  */
 
-#include "mdx/mdx_level_file.h"
-#include "mdx/common/mdx_exception.h"
+#include "lvl_filedata.h"
 #include "file_formats.h"
 #include "pge_file_lib_private.h"
 #include "pge_file_lib_globs.h"
+
+#include "sax/sax.h"
+
+namespace PGEFL
+{
+
+namespace DOM
+{
 
 static void s_on_error(void* _FileData, FileFormatsError& err)
 {
@@ -58,6 +65,15 @@ static bool s_load_head(void* _FileData, LevelHead& dest)
     FileData.custom_params = dest.custom_params;
     FileData.meta.configPackId = dest.configPackId;
     FileData.music_files = dest.music_files;
+    FileData.music_overrides = dest.music_overrides;
+
+    FileData.meta.RecentFormat = dest.RecentFormat;
+    FileData.meta.RecentFormatVersion = dest.RecentFormatVersion;
+
+    if(FileData.meta.RecentFormat == LevelData::SMBX38A)
+        FileData.meta.smbx64strict = false;
+    else
+        FileData.meta.smbx64strict = true;
 
     return true;
 }
@@ -65,7 +81,7 @@ static bool s_load_head(void* _FileData, LevelHead& dest)
 static bool s_load_head_only(void* _FileData, LevelHead& dest)
 {
     s_load_head(_FileData, dest);
-    throw MDX_callback_interrupt();
+    throw PGE_FileFormats_misc::callback_interrupt();
 }
 
 static bool s_save_head(const void* _FileData, LevelHead& dest, pge_size_t index)
@@ -141,7 +157,7 @@ static bool s_load_section(void* _FileData, LevelSection& dest)
     pge_size_t sections_count = FileData.sections.size();
 
     if(dest.id < 0 || dest.id > 1000)
-        throw MDX_callback_error("Invalid section ID");
+        throw PGE_FileFormats_misc::callback_error("Invalid section ID");
 
     if(dest.id >= static_cast<int>(sections_count))
     {
@@ -398,7 +414,7 @@ static bool s_load_event(void* _FileData, LevelSMBX64Event& event)
         )//Append sections
         {
             if(sectionSet.id < 0 || sectionSet.id > 1000)
-                throw MDX_callback_error("Invalid section ID");
+                throw PGE_FileFormats_misc::callback_error("Invalid section ID");
 
             long last = static_cast<long>(padded_sets.size() - 1);
 
@@ -518,7 +534,7 @@ static bool s_save_script(const void* _FileData, LevelScript& obj, pge_size_t in
 static bool s_load_levelitem38a(void* _FileData, LevelItemSetup38A& customcfg38A)
 {
     if(customcfg38A.type < 0)
-        throw MDX_callback_error("Invalid 38A ID");
+        throw PGE_FileFormats_misc::callback_error("Invalid 38A ID");
 
     LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
     FileData.custom38A_configs.push_back(std::move(customcfg38A));
@@ -538,10 +554,9 @@ static bool s_save_levelitem38a(const void* _FileData, LevelItemSetup38A& obj, p
     return true;
 }
 
-bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
+bool OpenLevelFile(PGE_FileFormats_misc::TextInput &file, LevelData &FileData, int format)
 {
     FileFormats::CreateLevelData(FileData);
-    FileData.meta.RecentFormat = LevelData::PGEX;
 
     //Add path data
     PGESTRING filePath = file.getFilePath();
@@ -556,6 +571,11 @@ bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
     FileData.meta.modified = false;
     FileData.meta.ReadFileValid = true;
 
+    // what do these mean?
+    FileData.CurSection = 0;
+    FileData.playmusic = false;
+
+    // fill the callback table
     LevelLoadCallbacks callbacks;
 
     callbacks.on_error = s_on_error;
@@ -579,10 +599,10 @@ bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
 
     callbacks.userdata = reinterpret_cast<void*>(&FileData);
 
-    return MDX_load_level(file, callbacks);
+    return PGEFL::SAX::OpenLevelFile(file, callbacks, format);
 }
 
-bool MDX_load_level_header(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
+bool OpenLevelFileHeader(PGE_FileFormats_misc::TextInput &file, LevelData &FileData, int format)
 {
     LevelHead h;
     s_load_head(&FileData, h);
@@ -609,10 +629,10 @@ bool MDX_load_level_header(PGE_FileFormats_misc::TextInput &file, LevelData &Fil
 
     callbacks.userdata = reinterpret_cast<void*>(&FileData);
 
-    return MDX_load_level(file, callbacks);
+    return PGEFL::SAX::OpenLevelFileHeader(file, callbacks, format);
 }
 
-bool MDX_save_level(PGE_FileFormats_misc::TextOutput &file, const LevelData &FileData)
+bool SaveLevelFile(PGE_FileFormats_misc::TextOutput &file, const LevelData &FileData, int format, int version)
 {
     LevelSaveCallbacks callbacks;
 
@@ -635,5 +655,9 @@ bool MDX_save_level(PGE_FileFormats_misc::TextOutput &file, const LevelData &Fil
 
     callbacks.userdata = reinterpret_cast<const void*>(&FileData);
 
-    return MDX_save_level(file, callbacks);
+    return PGEFL::SAX::SaveLevelFile(file, callbacks, format, version);
 }
+
+} // namespace DOM
+
+} // namespace PGEFL

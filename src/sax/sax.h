@@ -24,19 +24,18 @@
  * SOFTWARE.
  */
 
-/*!
- *  \file mdx_gamesave_file.h
- *  \brief Contains data structure definitions for the MDX save loader
- */
+#include "file_formats.h"
 
-#pragma once
-#ifndef MDX_GAMESAVE_FILE_H
-#define MDX_GAMESAVE_FILE_H
+namespace PGEFL
+{
 
-#include "pge_file_lib_globs.h"
-#include "save_filedata.h"
+namespace SAX
+{
 
-bool MDX_load_gamesave(PGE_FileFormats_misc::TextInput& input, const GamesaveLoadCallbacks& callbacks);
-bool MDX_save_gamesave(PGE_FileFormats_misc::TextOutput& output, const GamesaveSaveCallbacks& callbacks);
+bool OpenLevelFile(PGE_FileFormats_misc::TextInput &file, LevelLoadCallbacks &callbacks, int format = -1);
+bool OpenLevelFileHeader(PGE_FileFormats_misc::TextInput &file, LevelLoadCallbacks &callbacks, int format = -1);
+bool SaveLevelFile(PGE_FileFormats_misc::TextOutput &file, LevelSaveCallbacks &callbacks, int format = -1, int version = -1);
 
-#endif // #ifndef MDX_GAMESAVE_FILE_H
+} // namespace SAX
+
+} // namespace PGEFL

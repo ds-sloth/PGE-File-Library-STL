@@ -25,18 +25,26 @@
  */
 
 /*!
- *  \file mdx_gamesave_file.h
- *  \brief Contains data structure definitions for the MDX save loader
+ *  \file file_rw_38a.h
+ *  \brief File read/write functions exported by the 38A parser
  */
 
 #pragma once
-#ifndef MDX_GAMESAVE_FILE_H
-#define MDX_GAMESAVE_FILE_H
+#ifndef FILE_RW_38A_H
+#define FILE_RW_38A_H
 
-#include "pge_file_lib_globs.h"
-#include "save_filedata.h"
+namespace PGEFL
+{
 
-bool MDX_load_gamesave(PGE_FileFormats_misc::TextInput& input, const GamesaveLoadCallbacks& callbacks);
-bool MDX_save_gamesave(PGE_FileFormats_misc::TextOutput& output, const GamesaveSaveCallbacks& callbacks);
+namespace SMBX38A
+{
 
-#endif // #ifndef MDX_GAMESAVE_FILE_H
+bool ReadSMBX38ALvlFileHeader(PGE_FileFormats_misc::TextInput &inf, LevelLoadCallbacks &cb);
+bool ReadSMBX38ALvlFile(PGE_FileFormats_misc::TextInput &inf, LevelLoadCallbacks &cb);
+bool WriteSMBX38ALvlFile(PGE_FileFormats_misc::TextOutput &out, LevelSaveCallbacks &cb, unsigned int format_version);
+
+} // namespace SMBX38A
+
+} // namespace PGEFL
+
+#endif // #ifndef FILE_RW_38A_H

@@ -37,10 +37,6 @@
 #include "meta_filedata.h"
 
 bool MDX_load_meta(PGE_FileFormats_misc::TextInput& input, const MetaLoadCallbacks& callbacks);
-bool MDX_load_meta(PGE_FileFormats_misc::TextInput &file, MetaData &FileData);
-bool MDX_load_meta_header(PGE_FileFormats_misc::TextInput &file, MetaData &FileData);
-
 bool MDX_save_meta(PGE_FileFormats_misc::TextOutput& output, const MetaSaveCallbacks& callbacks);
-bool MDX_save_meta(PGE_FileFormats_misc::TextOutput &file, const MetaData &FileData);
 
 #endif // #ifndef MDX_META_FILE_H

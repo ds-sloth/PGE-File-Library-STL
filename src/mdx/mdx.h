@@ -25,18 +25,17 @@
  */
 
 /*!
- *  \file mdx_gamesave_file.h
- *  \brief Contains data structure definitions for the MDX save loader
+ *  \file mdx.h
+ *  \brief Single-file header that exposes all public MDX interfaces
  */
 
 #pragma once
-#ifndef MDX_GAMESAVE_FILE_H
-#define MDX_GAMESAVE_FILE_H
+#ifndef PGEFL_MDX_H
+#define PGEFL_MDX_H
 
-#include "pge_file_lib_globs.h"
-#include "save_filedata.h"
+#include "mdx/mdx_level_file.h"
+#include "mdx/mdx_world_file.h"
+#include "mdx/mdx_gamesave_file.h"
+#include "mdx/mdx_meta_file.h"
 
-bool MDX_load_gamesave(PGE_FileFormats_misc::TextInput& input, const GamesaveLoadCallbacks& callbacks);
-bool MDX_save_gamesave(PGE_FileFormats_misc::TextOutput& output, const GamesaveSaveCallbacks& callbacks);
-
-#endif // #ifndef MDX_GAMESAVE_FILE_H
+#endif // #ifndef PGEFL_MDX_H

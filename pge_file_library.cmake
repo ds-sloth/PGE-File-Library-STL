@@ -37,13 +37,14 @@ list(APPEND PGE_FILE_LIBRARY_SRCS
     ${CMAKE_CURRENT_LIST_DIR}/src/mdx/common/mdx_section.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/mdx/common/mdx_file.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/mdx/mdx_level_file.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/mdx/mdx_level_file_rw.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/mdx/mdx_world_file.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/mdx/mdx_world_file_rw.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/mdx/mdx_gamesave_file.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/mdx/mdx_gamesave_file_rw.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/mdx/mdx_meta_file.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/mdx/mdx_meta_file_rw.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/dom/level_file_dom.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/dom/world_file_dom.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/dom/gamesave_file_dom.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/dom/meta_file_dom.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/sax/level_file_sax.cpp
 )
 
 if(PGEFL_ENABLE_RWOPS)

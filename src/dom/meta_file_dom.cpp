@@ -38,6 +38,13 @@
 #include "pge_file_lib_private.h"
 #include "pge_file_lib_globs.h"
 
+namespace PGEFL
+{
+
+namespace DOM
+
+{
+
 static void s_on_error(void* _FileData, FileFormatsError& err)
 {
     MetaData& FileData = *reinterpret_cast<MetaData*>(_FileData);
@@ -66,7 +73,7 @@ static bool s_save_bookmark(const void* _FileData, Bookmark& obj, pge_size_t ind
     return true;
 }
 
-bool MDX_load_meta(PGE_FileFormats_misc::TextInput &file, MetaData &FileData)
+bool load_meta(PGE_FileFormats_misc::TextInput &file, MetaData &FileData)
 {
     FileData = MetaData();
 
@@ -81,7 +88,7 @@ bool MDX_load_meta(PGE_FileFormats_misc::TextInput &file, MetaData &FileData)
     return MDX_load_meta(file, callbacks);
 }
 
-bool MDX_save_meta(PGE_FileFormats_misc::TextOutput &file, const MetaData &FileData)
+bool save_meta(PGE_FileFormats_misc::TextOutput &file, const MetaData &FileData)
 {
     MetaSaveCallbacks callbacks;
 
@@ -91,3 +98,7 @@ bool MDX_save_meta(PGE_FileFormats_misc::TextOutput &file, const MetaData &FileD
 
     return MDX_save_meta(file, callbacks);
 }
+
+} // namespace DOM
+
+} // namespace PGEFL

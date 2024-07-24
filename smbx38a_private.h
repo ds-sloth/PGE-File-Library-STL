@@ -36,6 +36,7 @@
 #include "pge_ff_units.h"
 
 using namespace CSVReader;
+using namespace PGEFL;
 
 extern const int SMBX38A_NpcGeneratorTypes[29];
 extern const int SMBX38A_NpcGeneratorDirections[29];

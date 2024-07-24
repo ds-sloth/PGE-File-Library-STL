@@ -47,18 +47,6 @@ class MDX_parse_error : public MDX_exception
     virtual const char* what() const noexcept;
 };
 
-// error that callbacks may raise when unpacking object
-class MDX_callback_error : public MDX_parse_error
-{
-    const char* const m_message = nullptr;
-public:
-    MDX_callback_error(const char* message) noexcept : m_message(message) {}
-    virtual const char* what() const noexcept;
-};
-
-// way that callbacks may fully terminate parse process without any error
-class MDX_callback_interrupt : public MDX_parse_error {};
-
 // misc error for MDX parsing
 class MDX_parse_error_misc : public MDX_parse_error
 {

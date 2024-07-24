@@ -24,19 +24,24 @@
  * SOFTWARE.
  */
 
-/*! \file mdx_gamesave_file_rw.cpp
+/*! \file gamesave_file_rw.cpp
  *
- *  \brief Implements MDX functions for loading a gamesave object
- *
- * This is a new implementation but supports precisely the same format as PGE-X
+ *  \brief Implements DOM functions for saving/loading a gamesave object
  *
  */
 
-#include "mdx/mdx_gamesave_file.h"
-#include "mdx/common/mdx_exception.h"
+#include "save_filedata.h"
 #include "file_formats.h"
 #include "pge_file_lib_private.h"
 #include "pge_file_lib_globs.h"
+
+#include "mdx/mdx_gamesave_file.h"
+
+namespace PGEFL
+{
+
+namespace DOM
+{
 
 static void s_on_error(void* _FileData, FileFormatsError& err)
 {
@@ -259,7 +264,7 @@ static bool s_save_userdata(const void* _FileData, saveUserData::DataSection& ob
     return true;
 }
 
-bool MDX_load_gamesave(PGE_FileFormats_misc::TextInput &file, GamesaveData &FileData)
+bool load_gamesave(PGE_FileFormats_misc::TextInput &file, GamesaveData &FileData, int version)
 {
     FileData = GamesaveData();
     FileData.lives = 3;
@@ -296,7 +301,7 @@ bool MDX_load_gamesave(PGE_FileFormats_misc::TextInput &file, GamesaveData &File
     return MDX_load_gamesave(file, callbacks);
 }
 
-bool MDX_save_gamesave(PGE_FileFormats_misc::TextOutput &file, const GamesaveData &FileData)
+bool save_gamesave(PGE_FileFormats_misc::TextOutput &file, const GamesaveData &FileData, int version)
 {
     GamesaveSaveCallbacks callbacks;
 
@@ -314,3 +319,7 @@ bool MDX_save_gamesave(PGE_FileFormats_misc::TextOutput &file, const GamesaveDat
 
     return MDX_save_gamesave(file, callbacks);
 }
+
+} // namespace DOM
+
+} // namespace PGEFL

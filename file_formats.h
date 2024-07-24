@@ -63,7 +63,8 @@ public:
     static const unsigned int c_latest_version_smbx38a = 69;
     static const unsigned int c_version_default = 0xFFFFFFFF;
 
-    static bool g_use_mdx;
+    // static bool g_use_mdx;
+    static constexpr bool g_use_mdx = true;
 
 
     /******************************non-SMBX64 Meda-data file***********************************/
