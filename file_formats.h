@@ -393,6 +393,13 @@ public:
      */
     static bool ReadExtendedLvlFileHeaderT(PGE_FileFormats_misc::TextInput &inf, LevelData &FileData);
     /*!
+     * \brief Parses PGE-X Level file header from the file
+     * \param [__in] inf Input file descriptor
+     * \param [__in] callbacks Level load callbacks (will only attempt to call the load_head and on_error callbacks)
+     * \return true if file successfully parsed, false if error occouped
+     */
+    static bool ReadExtendedLvlFileHeaderT(PGE_FileFormats_misc::TextInput &inf, const LevelLoadCallbacks &callbacks);
+    /*!
      * \brief Parses PGE-X level file data from file
      * \param [__in] filePath Full path to the file
      * \param [__out] FileData Level data structure
@@ -414,6 +421,13 @@ public:
      * \return true if file successfully parsed, false if error occouped
      */
     static bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, LevelData /*output*/ &FileData);
+    /*!
+     * \brief Parses PGE-X level file data from file input descriptor
+     * \param [__in] in File Input descriptor
+     * \param [__in] callbacks Level load callbacks
+     * \return true if file successfully parsed, false if error occouped
+     */
+    static bool ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, const LevelLoadCallbacks &callbacks);
     /*!
      * \brief Generates PGE-X Level file
      * \param [__in] filePath Target file path
