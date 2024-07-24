@@ -25,10 +25,10 @@
  */
 
 #pragma once
-#ifndef MDX_BASE_SECTION_HPP
-#define MDX_BASE_SECTION_HPP
+#ifndef MDX_BASE_SECTION_H
+#define MDX_BASE_SECTION_H
 
-/*! \file mdx_base_section.hpp
+/*! \file mdx_section.h
  *
  *  \brief Contains templates for file sections
  *
@@ -36,53 +36,18 @@
  *
  */
 
-#include <cstddef>
-#include <cstdlib>
-#include <cstring>
-
 #include <string>
 
 #include "pge_file_lib_globs.h"
 #include "mdx/common/mdx_field.h"
 #include "mdx/common/mdx_object.h"
 
-inline void MDX_skip_section(PGE_FileFormats_misc::TextInput& inf, std::string& cur_line, const char* section_name);
-
-inline bool MDX_line_is_section_end(const std::string& cur_line, const char* section_name)
-{
-    if(cur_line.size() <= 4)
-        return false;
-
-    const char* c = cur_line.c_str();
-    const char* s = section_name;
-
-    // scan to find difference between strings
-    while(true)
-    {
-        if(*c != *s || *c == '\0')
-            break;
-
-        c++;
-        s++;
-    }
-
-    // section name should be a prefix to current line
-    if(*s != '\0')
-        return false;
-
-    // current line must have a suffix of precisely "_END"
-    if(c[0] != '_' || c[1] != 'E' || c[2] != 'N' || c[3] != 'D' || c[4] != '\0')
-        return false;
-
-    // current line must not have embedded null
-    if((size_t)(&c[4] - &cur_line[0]) != cur_line.size())
-        return false;
-
-    return true;
-}
+void MDX_skip_section(PGE_FileFormats_misc::TextInput& inf, std::string& cur_line, const char* section_name);
 
 struct MDX_BaseSection
 {
+    friend struct MDX_BaseFile;
+
 protected:
 
     const char* const m_section_name = "";
@@ -91,7 +56,7 @@ protected:
     const void* const m_ref_ptr;
     bool m_combine_objects = false;
 
-    MDX_BaseSection(const char* section_name, bool combine_objects, const MDX_BaseObject& obj_loader, void* obj_ptr, const void* ref_ptr) : m_section_name(section_name), m_obj_loader(obj_loader), m_obj_ptr(obj_ptr), m_ref_ptr(ref_ptr), m_combine_objects(combine_objects) {}
+    MDX_BaseSection(struct MDX_BaseFile* parent, const char* section_name, bool combine_objects, const MDX_BaseObject& obj_loader, void* obj_ptr, const void* ref_ptr);
 
     virtual bool has_load_callback(const void* load_callbacks_table) const = 0;
     virtual bool has_save_callback(const void* save_callbacks_table) const = 0;
@@ -99,125 +64,10 @@ protected:
     virtual bool load_callback(const void* load_callbacks_table) = 0;
     virtual bool save_callback(const void* save_callbacks_table, size_t index) = 0;
 
-public:
-
     /* attempts to match the field name. if successful, returns true and leaves the file pointer following the end of the section. */
-    bool try_load(const void* cb, PGE_FileFormats_misc::TextInput& inf, std::string& cur_line)
-    {
-#ifdef PGE_FILES_QT
-        QString utf16_cur_line;
-#endif
+    bool try_load(const void* cb, PGE_FileFormats_misc::TextInput& inf, std::string& cur_line);
 
-        // check match
-        if(cur_line != m_section_name)
-            return false;
-
-        // skip if there is no callback registered
-        if(!has_load_callback(cb))
-            return false;
-
-        while(true)
-        {
-#ifndef PGE_FILES_QT
-            inf.readLine(cur_line);
-#else
-            inf.readLine(utf16_cur_line);
-            cur_line = utf16_cur_line.toStdString();
-#endif
-
-            // empty line (or EOF)
-            if(cur_line.empty())
-            {
-                if(inf.eof())
-                    throw MDX_parse_error_misc("Unterminated section");
-                else
-                {
-                    // allow it because PGE-X does
-                }
-            }
-            // ordinary line
-            else if(*(cur_line.end() - 1) == ';')
-            {
-                if(!m_combine_objects)
-                    reset();
-
-                m_obj_loader.load_object(m_obj_ptr, cur_line.c_str());
-
-                if(!m_combine_objects)
-                {
-                    if(!load_callback(cb))
-                    {
-                        MDX_skip_section(inf, cur_line, m_section_name);
-                        return true;
-                    }
-                }
-            }
-            // section end line
-            else if(MDX_line_is_section_end(cur_line, m_section_name))
-            {
-                if(m_combine_objects)
-                    load_callback(cb);
-
-                return true;
-            }
-            // unterminated line
-            else
-                throw MDX_missing_delimiter(';');
-        }
-    }
-
-    void do_save(const void* cb, PGE_FileFormats_misc::TextOutput& outf, std::string& out_buffer)
-    {
-#ifdef PGE_FILES_QT
-        QString utf16_out;
-#endif
-
-        // skip if there is no callback registered
-        if(!has_save_callback(cb))
-            return;
-
-        size_t out_buffer_size_pre = out_buffer.size();
-        bool restore = true;
-
-        out_buffer += m_section_name;
-        out_buffer += '\n';
-
-        for(size_t index = 0; save_callback(cb, index); index++)
-        {
-            if(!m_obj_loader.save_object(out_buffer, m_obj_ptr, m_ref_ptr))
-                continue;
-
-            out_buffer += '\n';
-            restore = false;
-
-            if(out_buffer.size() > 2048)
-            {
-#ifdef PGE_FILES_QT
-                utf16_out = QString::fromStdString(out_buffer);
-                outf.write(utf16_out);
-#else
-                outf.write(out_buffer);
-#endif
-                out_buffer.clear();
-            }
-        }
-
-        if(restore)
-            out_buffer.resize(out_buffer_size_pre);
-        else
-        {
-            out_buffer += m_section_name;
-            out_buffer += "_END\n";
-
-#ifdef PGE_FILES_QT
-            utf16_out = QString::fromStdString(out_buffer);
-            outf.write(utf16_out);
-#else
-            outf.write(out_buffer);
-#endif
-            out_buffer.clear();
-        }
-    }
+    void do_save(const void* cb, PGE_FileFormats_misc::TextOutput& outf, std::string& out_buffer);
 
 public:
     virtual void reset() = 0;
@@ -270,12 +120,8 @@ protected:
     }
 
 public:
-    template<class parent_t>
-    MDX_Section(parent_t* parent, const char* section_name, bool combine_objects, load_callback_ptr_t load_callback, save_callback_ptr_t save_callback)
-        : MDX_BaseSection(section_name, combine_objects, m_obj_loader, &m_obj, &m_ref), m_load_callback(load_callback), m_save_callback(save_callback)
-    {
-        parent->m_sections.push_back(this);
-    }
+    MDX_Section(MDX_BaseFile* parent, const char* section_name, bool combine_objects, load_callback_ptr_t load_callback, save_callback_ptr_t save_callback)
+        : MDX_BaseSection(parent, section_name, combine_objects, m_obj_loader, &m_obj, &m_ref), m_load_callback(load_callback), m_save_callback(save_callback) {}
 
     virtual void reset()
     {
@@ -283,26 +129,4 @@ public:
     }
 };
 
-inline void MDX_skip_section(PGE_FileFormats_misc::TextInput& inf, std::string& cur_line, const char* section_name)
-{
-#ifdef PGE_FILES_QT
-    QString utf16_cur_line;
-#endif
-
-    while(!inf.eof())
-    {
-#ifndef PGE_FILES_QT
-        inf.readLine(cur_line);
-#else
-        inf.readLine(utf16_cur_line);
-        cur_line = utf16_cur_line.toStdString();
-#endif
-
-        if(MDX_line_is_section_end(cur_line, section_name))
-            return;
-    }
-
-    throw MDX_parse_error_misc("Unterminated section");
-}
-
-#endif // #ifndef MDX_BASE_SECTION_HPP
+#endif // #ifndef MDX_BASE_SECTION_H

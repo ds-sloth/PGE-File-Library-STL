@@ -25,10 +25,10 @@
  */
 
 #pragma once
-#ifndef MDX_BASE_FILE_HPP
-#define MDX_BASE_FILE_HPP
+#ifndef MDX_BASE_FILE_H
+#define MDX_BASE_FILE_H
 
-/*! \file mdx_base_file.hpp
+/*! \file mdx_file.h
  *
  *  \brief Contains templates for file formats
  *
@@ -37,134 +37,41 @@
  */
 
 #include <vector>
-#include <cstddef>
-#include <cstring>
-
 #include <string>
+
+#include "pge_base_callbacks.h"
 
 #include "pge_file_lib_globs.h"
 #include "mdx/common/mdx_field.h"
 #include "mdx/common/mdx_section.h"
 
+struct MDX_BaseFile
+{
+protected:
+    friend struct MDX_BaseSection;
+
+    std::vector<MDX_BaseSection*> m_sections;
+
+    bool load_file(PGE_FileFormats_misc::TextInput& inf, const PGE_FileFormats_misc::LoadCallbacks& cb);
+
+    bool save_file(PGE_FileFormats_misc::TextOutput& outf, const PGE_FileFormats_misc::SaveCallbacks& cb);
+};
+
 template<class _load_callbacks_t, class _save_callbacks_t>
-struct MDX_File
+struct MDX_File : public MDX_BaseFile
 {
     using load_callbacks_t = _load_callbacks_t;
     using save_callbacks_t = _save_callbacks_t;
     template<class obj_t> using section = MDX_Section<load_callbacks_t, save_callbacks_t, obj_t>;
 
-    std::vector<MDX_BaseSection*> m_sections;
-
     bool load_file(PGE_FileFormats_misc::TextInput& inf, const load_callbacks_t& cb)
     {
-#ifdef PGE_FILES_QT
-        QString utf16_cur_line;
-#endif
-
-        std::string cur_line;
-
-        for(auto* section : m_sections)
-            section->reset();
-
-        try
-        {
-            inf.seek(0, PGE_FileFormats_misc::TextFileInput::begin);
-
-            while(!inf.eof())
-            {
-#ifndef PGE_FILES_QT
-                inf.readLine(cur_line);
-#else
-                inf.readLine(utf16_cur_line);
-                cur_line = utf16_cur_line.toStdString();
-#endif
-
-                bool handled = false;
-                for(auto* section : m_sections)
-                {
-                    if(section->try_load(&cb, inf, cur_line))
-                    {
-                        handled = true;
-                        break;
-                    }
-                }
-
-                if(!handled)
-                {
-                    // ignore line if all spaces
-                    bool all_spaces = true;
-                    for(const auto c : cur_line)
-                    {
-                        if(c != ' ')
-                            all_spaces = false;
-                    }
-                    if(all_spaces)
-                        continue;
-
-                    // otherwise, treat as unrecognized section and skip it
-                    if(cur_line.size() != strlen(cur_line.c_str()))
-                        throw MDX_parse_error_misc("Bad section name");
-                    else
-                    {
-                        std::string section_name = cur_line;
-                        MDX_skip_section(inf, cur_line, section_name.c_str());
-                    }
-                }
-            }
-        }
-        catch(const std::exception& e)
-        {
-            if(!cb.on_error)
-                return false;
-
-            FileFormatsError err;
-
-#ifndef PGE_FILES_QT
-            err.ERROR_info = "Failed to parse PGEX file (line ";
-            err.ERROR_info += std::to_string(inf.getCurrentLineNumber());
-            err.ERROR_info += ")\n";
-
-            err.add_exc_info(e, inf.getCurrentLineNumber(), std::move(cur_line));
-#else
-            err.ERROR_info = "Failed to parse PGEX file (line ";
-            err.ERROR_info += QString::number(inf.getCurrentLineNumber());
-            err.ERROR_info += ")\n";
-
-            err.add_exc_info(e, inf.getCurrentLineNumber(), std::move(utf16_cur_line));
-#endif
-
-            cb.on_error(cb.userdata, err);
-            return false;
-        }
-
-        return true;
+        return MDX_BaseFile::load_file(inf, cb);
     }
 
     bool save_file(PGE_FileFormats_misc::TextOutput& outf, const save_callbacks_t& cb)
     {
-        std::string out_buffer;
-
-        try
-        {
-            for(auto* section : m_sections)
-                section->do_save(&cb, outf, out_buffer);
-        }
-        catch(const std::exception& e)
-        {
-            if(!cb.on_error)
-                return false;
-
-            FileFormatsError err;
-
-            err.ERROR_info = "Failed to save PGEX file\n";
-            err.add_exc_info(e, 0, PGESTRING());
-
-            cb.on_error(cb.err_userdata, err);
-
-            return false;
-        }
-
-        return true;
+        return MDX_BaseFile::save_file(outf, cb);
     }
 };
 
