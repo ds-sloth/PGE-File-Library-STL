@@ -24,36 +24,56 @@
  * SOFTWARE.
  */
 
-#pragma once
-#ifndef MDX_BASE_OBJECT_H
-#define MDX_BASE_OBJECT_H
-
 #include <vector>
+#include "mdx/common/mdx_field.h"
+#include "mdx/common/mdx_object.h"
 
-/*! \file mdx_object.h
- *
- *  \brief Contains templates for objects
- *
- * This is a new implementation but supports precisely the same format as PGE-X
- *
- */
-
-struct MDX_BaseObject
+void MDX_BaseObject::load_object(void* dest, const char* line) const
 {
-    template<class obj_loader_t> friend struct MDX_Value_ObjectList;
-    template<class obj_loader_t> friend struct MDX_Value_Object;
-    friend struct MDX_BaseSection;
-    friend struct MDX_BaseField;
+    const char* cur_data = line;
+    size_t next_field = 0;
 
-protected:
-    std::vector<MDX_BaseField*> m_fields;
+    while(*cur_data != '\0')
+    {
+        size_t try_field = next_field;
+        while(true)
+        {
+            if(m_fields[try_field]->try_load(dest, cur_data))
+            {
+                next_field++;
+                if(next_field == m_fields.size())
+                    next_field = 0;
 
-    void load_object(void* dest, const char* line) const;
+                break;
+            }
 
-    bool save_object(std::string& out, const void* src, const void* ref) const;
-};
+            try_field++;
+            if(try_field == m_fields.size())
+                try_field = 0;
 
-template<class obj_t>
-struct MDX_Object;
+            // couldn't find field
+            if(try_field == next_field)
+            {
+                cur_data = MDX_skip_field(cur_data);
+                break;
+            }
+        }
+    }
+}
 
-#endif // #ifndef MDX_BASE_OBJECT_HPP
+bool MDX_BaseObject::save_object(std::string& out, const void* src, const void* ref) const
+{
+    size_t out_size_pre = out.size();
+
+    bool any_field = false;
+    for(const auto* field : m_fields)
+    {
+        bool not_only = (field->m_save_mode == MDX_BaseField::SaveMode::not_only);
+        any_field |= field->try_save(out, src, ref) && !not_only;
+    }
+
+    if(!any_field)
+        out.resize(out_size_pre);
+
+    return any_field;
+}
