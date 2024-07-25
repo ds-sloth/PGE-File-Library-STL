@@ -163,6 +163,13 @@ public:
      * @return true if file successfully opened and parsed, false if error occouped
      */
     static bool OpenLevelFileT(PGE_FileFormats_misc::TextInput &file, LevelData &FileData);
+    /**
+     * @brief Parses a level file data with auto-detection of a file type (SMBX1...64 LVL or PGE-LVLX)
+     * @param [__in] file Input file descriptor
+     * @param [__out] callbacks Callbacks to receive level data
+     * @return true if file successfully opened and parsed, false if error occouped
+     */
+    static bool OpenLevelFileT(PGE_FileFormats_misc::TextInput &file, const LevelLoadCallbacks &callbacks);
     /*!
      * \brief Parses a level file header only with auto-detection of a file type (SMBX1...64 LVL or PGE-LVLX)
      * \param [__in] filePath Full path to file which must be opened
