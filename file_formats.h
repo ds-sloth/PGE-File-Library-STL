@@ -333,6 +333,13 @@ public:
      * \return true if file successfully parsed, false if error occouped
      */
     static bool ReadSMBX38ALvlFile(PGE_FileFormats_misc::TextInput &in, LevelData /*output*/ &FileData);
+    /*!
+     * \brief Parses SMBX-38A level file data from raw data string
+     * \param [__in] in File input descriptor
+     * \param [__out] callbacks LevelLoadCallbacks Level data structure
+     * \return true if file successfully parsed, false if error occouped
+     */
+    static bool ReadSMBX38ALvlFile(PGE_FileFormats_misc::TextInput &in, const LevelLoadCallbacks &callbacks);
 #if 0 // Removed
     /*!
      * \brief Parses SMBX-38A level file data from raw data string (Old algorithm)
