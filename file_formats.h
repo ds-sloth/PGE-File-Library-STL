@@ -263,6 +263,13 @@ public:
      */
     static bool ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, LevelData /*output*/ &FileData);
     /*!
+     * \brief Parses SMBX1...64 level file data
+     * \param [__in] in Input file descriptor
+     * \param [__in] callbacks Callbacks for level load
+     * \return true if file successfully parsed, false if error occouped
+     */
+    static bool ReadSMBX64LvlFile(PGE_FileFormats_misc::TextInput &in, const LevelLoadCallbacks &callbacks);
+    /*!
      * \brief Generates SMBX1...64 Level file data and saves into file
      * \param [__in] filePath Target file path
      * \param [__in] FileData Level data structure
