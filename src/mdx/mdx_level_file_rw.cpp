@@ -200,8 +200,10 @@ static bool s_load_startpoint(void* _FileData, PlayerPoint& player)
     }
 
     PlayerPoint sz = FileFormats::CreateLvlPlayerPoint(player.id);
-    player.w = sz.w;
-    player.h = sz.h;
+    if(player.w == 0)
+        player.w = sz.w;
+    if(player.h == 0)
+        player.h = sz.h;
 
     if(found)
         FileData.players[q] = std::move(player);
