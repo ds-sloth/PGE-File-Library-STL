@@ -61,6 +61,14 @@ static bool s_load_head(void* _FileData, LevelHead& dest)
 
     FileData.music_overrides = dest.music_overrides;
 
+    FileData.meta.RecentFormat = dest.RecentFormat;
+    FileData.meta.RecentFormatVersion = dest.RecentFormatVersion;
+
+    if(FileData.meta.RecentFormat == LevelData::SMBX38A)
+        FileData.meta.smbx64strict = false;
+    else if(FileData.meta.RecentFormat == LevelData::SMBX64)
+        FileData.meta.smbx64strict = true;
+
     return true;
 }
 
