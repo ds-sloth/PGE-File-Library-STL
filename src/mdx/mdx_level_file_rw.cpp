@@ -548,6 +548,46 @@ static bool s_save_levelitem38a(const void* _FileData, LevelItemSetup38A& obj, p
     return true;
 }
 
+static bool s_load_music_override(void* _FileData, LevelData::MusicOverrider& src)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+    FileData.music_overrides.push_back(std::move(src));
+
+    return true;
+}
+
+static bool s_save_music_override(const void* _FileData, LevelData::MusicOverrider& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.music_overrides.size())
+        return false;
+
+    obj = FileData.music_overrides[index];
+
+    return true;
+}
+
+static bool s_load_junk_line(void* _FileData, PGESTRING& src)
+{
+    LevelData& FileData = *reinterpret_cast<LevelData*>(_FileData);
+    FileData.unsupported_38a_lines.push_back(std::move(src));
+
+    return true;
+}
+
+static bool s_save_junk_line(const void* _FileData, PGESTRING& obj, pge_size_t index)
+{
+    const LevelData& FileData = *reinterpret_cast<const LevelData*>(_FileData);
+
+    if(index >= FileData.unsupported_38a_lines.size())
+        return false;
+
+    obj = FileData.unsupported_38a_lines[index];
+
+    return true;
+}
+
 bool MDX_load_level(PGE_FileFormats_misc::TextInput &file, LevelData &FileData)
 {
     FileFormats::CreateLevelData(FileData);
@@ -591,6 +631,8 @@ LevelLoadCallbacks PGEFL_make_load_callbacks(LevelData& target)
     callbacks.load_arr = s_load_arr;
     callbacks.load_script = s_load_script;
     callbacks.load_levelitem38a = s_load_levelitem38a;
+    callbacks.load_music_override = s_load_music_override;
+    callbacks.load_junk_line = s_load_junk_line;
 
     callbacks.userdata = reinterpret_cast<void*>(&target);
 
@@ -652,6 +694,8 @@ LevelSaveCallbacks PGEFL_make_save_callbacks(const LevelData& target)
     callbacks.save_arr = s_save_arr;
     callbacks.save_script = s_save_script;
     callbacks.save_levelitem38a = s_save_levelitem38a;
+    callbacks.save_music_override = s_save_music_override;
+    callbacks.save_junk_line = s_save_junk_line;
 
     callbacks.userdata = reinterpret_cast<const void*>(&target);
 

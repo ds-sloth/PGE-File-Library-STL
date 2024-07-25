@@ -1176,6 +1176,8 @@ struct LevelLoadCallbacks : PGE_FileFormats_misc::LoadCallbacks
     callback<LevelArray>        load_arr = nullptr;
     callback<LevelScript>       load_script = nullptr;
     callback<LevelItemSetup38A> load_levelitem38a = nullptr;
+    callback<LevelData::MusicOverrider> load_music_override = nullptr;
+    callback<PGESTRING>         load_junk_line = nullptr;
 };
 
 struct LevelSaveCallbacks : PGE_FileFormats_misc::SaveCallbacks
@@ -1196,6 +1198,8 @@ struct LevelSaveCallbacks : PGE_FileFormats_misc::SaveCallbacks
     callback<LevelArray>        save_arr = nullptr;
     callback<LevelScript>       save_script = nullptr;
     callback<LevelItemSetup38A> save_levelitem38a = nullptr;
+    callback<LevelData::MusicOverrider> save_music_override = nullptr;
+    callback<PGESTRING>         save_junk_line = nullptr;
 };
 
 

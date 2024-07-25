@@ -1313,12 +1313,10 @@ bool FileFormats::ReadSMBX38ALvlFile(PGE_FileFormats_misc::TextInput &in, const 
 
                 cb.load_levelitem38a(cb.userdata, customcfg);
             }
-#if 0
-            // FIXME: add new callbacks "sound_override" and "junk"
-            else if(identifier == "CW")
+            else if(identifier == "CW" && cb.load_music_override)
             {
                 // CW|cdata1|cdata2|...|cdatan	:custom sound:	same as wls file format
-                dataReader.IterateDataLine([&FileData](const PGESTRING & nextFieldStr)
+                dataReader.IterateDataLine([&cb](const PGESTRING & nextFieldStr)
                 {
                     if(nextFieldStr == "CW")
                         return;
@@ -1332,17 +1330,16 @@ bool FileFormats::ReadSMBX38ALvlFile(PGE_FileFormats_misc::TextInput &in, const 
                         MakeCSVPostProcessor(&mo.fileName, PGEUrlDecodeFunc)
                     );
 
-                    FileData.sound_overrides.push_back(mo);
+                    cb.load_music_override(cb.userdata, mo);
                 });
             }
-            else
+            else if(cb.load_junk_line)
             {
                 // Unsupported line, just keep it
                 PGESTRING str;
                 dataReader.ReadRawLine(str);
-                FileData.unsupported_38a_lines.push_back(str);
+                cb.load_junk_line(cb.userdata, str);
             }
-#endif
         }//while is not EOF
     }
     catch(const PGE_FileFormats_misc::callback_interrupt& i)
