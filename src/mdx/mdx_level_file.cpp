@@ -383,7 +383,7 @@ static inline const char* MDX_LevelEvent_load_legacy_SM_SB(LevelSMBX64Event& eve
 
     const char* next = MDX_load_value(arr, field_data);
 
-    bool ignore_me = (event.sets.size() >= 1 && !event.sets[0]._pgefl_mdx_priv_legacy_parse);
+    bool ignore_me = (event.sets.size() >= 1 && !event.sets[0]._pgefl_mdx_priv_legacy_field);
 
     for(pge_size_t q = 0; q < arr.size(); q++)
     {
@@ -403,7 +403,7 @@ static inline const char* MDX_LevelEvent_load_legacy_SM_SB(LevelSMBX64Event& eve
 
         auto &s = event.sets[q];
         s.id = static_cast<long>(q);
-        s._pgefl_mdx_priv_legacy_parse = true;
+        s._pgefl_mdx_priv_legacy_field = true;
         s.*field = got;
     }
 
@@ -433,7 +433,7 @@ static const char* MDX_LevelEvent_load_legacy_SS(LevelSMBX64Event& event, const 
 
     const char* next = MDX_load_value(arr, field_data);
 
-    bool ignore_me = (event.sets.size() >= 1 && !event.sets[0]._pgefl_mdx_priv_legacy_parse);
+    bool ignore_me = (event.sets.size() >= 1 && !event.sets[0]._pgefl_mdx_priv_legacy_field);
 
     for(pge_size_t q = 0; q < arr.size(); q++)
     {
@@ -467,7 +467,7 @@ static const char* MDX_LevelEvent_load_legacy_SS(LevelSMBX64Event& event, const 
 
         auto &s = event.sets[q];
         s.id = static_cast<long>(q);
-        s._pgefl_mdx_priv_legacy_parse = true;
+        s._pgefl_mdx_priv_legacy_field = true;
 
         s.position_left   = got[0];
         s.position_top    = got[1];

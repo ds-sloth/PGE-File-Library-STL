@@ -52,10 +52,7 @@ bool FileFormats::ReadExtendedSaveFileF(const PGESTRING &filePath, GamesaveData 
         return false;
     }
 
-    if(g_use_mdx)
-        return MDX_load_gamesave(file, FileData);
-    else
-        return ReadExtendedSaveFile(file, FileData);
+    return ReadExtendedSaveFile(file, FileData);
 }
 
 bool FileFormats::ReadExtendedSaveFileRaw(PGESTRING &rawdata, const PGESTRING &filePath, GamesaveData &FileData)
@@ -72,14 +69,14 @@ bool FileFormats::ReadExtendedSaveFileRaw(PGESTRING &rawdata, const PGESTRING &f
         return false;
     }
 
-    if(g_use_mdx)
-        return MDX_load_gamesave(file, FileData);
-    else
-        return ReadExtendedSaveFile(file, FileData);
+    return ReadExtendedSaveFile(file, FileData);
 }
 
 bool FileFormats::ReadExtendedSaveFile(PGE_FileFormats_misc::TextInput &in, GamesaveData &FileData)
 {
+    if(!g_use_legacy_pgex_parser)
+        return MDX_load_gamesave(in, FileData);
+
   // indented 2 spaces to avoid large diff hunk
   try
   {
@@ -339,10 +336,7 @@ bool FileFormats::WriteExtendedSaveFileF(const PGESTRING &filePath, GamesaveData
         return false;
     }
 
-    if(g_use_mdx)
-        return MDX_save_gamesave(file, FileData);
-    else
-        return WriteExtendedSaveFile(file, FileData);
+    return WriteExtendedSaveFile(file, FileData);
 }
 
 bool FileFormats::WriteExtendedSaveFileRaw(GamesaveData &FileData, PGESTRING &rawdata)
@@ -356,14 +350,14 @@ bool FileFormats::WriteExtendedSaveFileRaw(GamesaveData &FileData, PGESTRING &ra
         return false;
     }
 
-    if(g_use_mdx)
-        return MDX_save_gamesave(file, FileData);
-    else
-        return WriteExtendedSaveFile(file, FileData);
+    return WriteExtendedSaveFile(file, FileData);
 }
 
 bool FileFormats::WriteExtendedSaveFile(PGE_FileFormats_misc::TextOutput &out, GamesaveData &FileData)
 {
+    if(!g_use_legacy_pgex_parser)
+        return MDX_save_gamesave(out, FileData);
+
     pge_size_t i;
     out << "SAVE_HEADER\n";
     out << PGEFile::value("LV", PGEFile::WriteInt(FileData.lives));

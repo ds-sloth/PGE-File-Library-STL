@@ -47,10 +47,7 @@ bool FileFormats::ReadNonSMBX64MetaDataF(const PGESTRING &filePath, MetaData &Fi
         return false;
     }
 
-    if(g_use_mdx)
-        return MDX_load_meta(file, FileData);
-    else
-        return ReadNonSMBX64MetaDataFile(file, FileData);
+    return ReadNonSMBX64MetaDataFile(file, FileData);
 }
 
 bool FileFormats::ReadNonSMBX64MetaDataRaw(PGESTRING &rawdata, const PGESTRING &filePath, MetaData &FileData)
@@ -67,14 +64,14 @@ bool FileFormats::ReadNonSMBX64MetaDataRaw(PGESTRING &rawdata, const PGESTRING &
         return false;
     }
 
-    if(g_use_mdx)
-        return MDX_load_meta(file, FileData);
-    else
-        return ReadNonSMBX64MetaDataFile(file, FileData);
+    return ReadNonSMBX64MetaDataFile(file, FileData);
 }
 
 bool FileFormats::ReadNonSMBX64MetaDataFile(PGE_FileFormats_misc::TextInput &in, MetaData &FileData)
 {
+    if(!g_use_legacy_pgex_parser)
+        return MDX_load_meta(in, FileData);
+
   // indented 2 spaces to avoid large diff hunk
   try
   {
@@ -198,10 +195,7 @@ bool FileFormats::WriteNonSMBX64MetaDataF(const PGESTRING &filePath, MetaData &m
         return false;
     }
 
-    if(g_use_mdx)
-        return MDX_save_meta(file, metaData);
-    else
-        return WriteNonSMBX64MetaData(file, metaData);
+    return WriteNonSMBX64MetaData(file, metaData);
 }
 
 bool FileFormats::WriteNonSMBX64MetaDataRaw(MetaData &metaData, PGESTRING &rawdata)
@@ -215,14 +209,14 @@ bool FileFormats::WriteNonSMBX64MetaDataRaw(MetaData &metaData, PGESTRING &rawda
         return false;
     }
 
-    if(g_use_mdx)
-        return MDX_save_meta(file, metaData);
-    else
-        return WriteNonSMBX64MetaData(file, metaData);
+    return WriteNonSMBX64MetaData(file, metaData);
 }
 
 bool FileFormats::WriteNonSMBX64MetaData(PGE_FileFormats_misc::TextOutput &out, MetaData &metaData)
 {
+    if(!g_use_legacy_pgex_parser)
+        return MDX_save_meta(out, metaData);
+
     pge_size_t i;
 
     //Bookmarks

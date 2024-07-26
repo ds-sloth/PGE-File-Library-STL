@@ -69,6 +69,9 @@ bool FileFormats::ReadExtendedLvlFileHeaderRaw(PGESTRING &rawdata, const PGESTRI
 
 bool FileFormats::ReadExtendedLvlFileHeaderT(PGE_FileFormats_misc::TextInput &inf, const LevelLoadCallbacks &cb)
 {
+    if(!g_use_legacy_pgex_parser)
+        return MDX_load_level(inf, cb);
+
   PGESTRING line;
   // indented 2 spaces to avoid large diff hunk
   try
@@ -271,6 +274,9 @@ bool FileFormats::ReadExtendedLvlFileRaw(PGESTRING &rawdata, const PGESTRING &fi
 
 bool FileFormats::ReadExtendedLvlFile(PGE_FileFormats_misc::TextInput &in, const LevelLoadCallbacks &cb)
 {
+    if(!g_use_legacy_pgex_parser)
+        return MDX_load_level(in, cb);
+
   PGESTRING line;  /*Current Line data*/
   // indented 2 spaces to avoid large diff hunk
   try
@@ -1704,6 +1710,9 @@ bool FileFormats::WriteExtendedLvlFileRaw(LevelData &FileData, PGESTRING &rawdat
 
 bool FileFormats::WriteExtendedLvlFile(PGE_FileFormats_misc::TextOutput &out, LevelData &FileData)
 {
+    if(!g_use_legacy_pgex_parser)
+        return MDX_save_level(out, FileData);
+
     pge_size_t i;
     FileData.meta.RecentFormat = LevelData::PGEX;
     //Count placed stars on this level
