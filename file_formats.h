@@ -48,6 +48,8 @@
 #   define PGEFL_DEPRECATED(func) func
 #endif
 
+#define PGEFL_CALLBACK_API
+
 /*!
  * \brief PGE File library class of static functions.
  *        Library is buildable in both Qt and STL applications
